@@ -1,0 +1,30 @@
+{
+    "Regions":[
+        {
+            "Name":"ap-south-1",
+            "Stacks":[
+                {
+                    "Name":"",
+                    "TemplatePath":""
+                },
+                {
+                    "Name":"",
+                    "TemplatePath":""
+                }
+            ]
+        },
+        {
+            "Name":"ap-southeast-1",
+            "Stacks":[
+                {
+                    "Name":"",
+                    "TemplatePath":""
+                },
+                {
+                    "Name":"",
+                    "TemplatePath":""
+                }
+            ]
+        }
+    ]
+}
