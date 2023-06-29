@@ -1,9 +1,13 @@
 package main
-import "fmt"
-import "github.com/Yashprime1/genzinfra-cloudformation/lib/dsbase"
-import "github.com/Yashprime1/genzinfra-cloudformation/lib/dsservice"
+import (
+	"fmt"
+	"github.com/Yashprime1/genzinfra-cloudformation/stacks/ireland"
+	"github.com/Yashprime1/genzinfra-cloudformation/stacks/mumbai"
+)
+
+
 func main() {
-	fmt.Println("Hello, world!")
-	fmt.Println(dsbase.Description)
-	fmt.Println(dsservice.Description)
+	fmt.Println("Generating all stack templates")
+	ireland.GenerateStacks()
+	mumbai.GenerateStacks()
 }
