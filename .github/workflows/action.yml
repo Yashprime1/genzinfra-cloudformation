@@ -16,7 +16,7 @@ jobs:
       - name: Build Templates
         run: go run main.go
       - name: install dependencies
-        run: pip3 install cfstack
+        run: pip3 install cfstack tabulate
       - name: Deploy Stacks
         run: python3 execute.py
   
