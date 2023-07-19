@@ -1,4 +1,4 @@
-package mumbai
+package ireland
 
 import (
 	"fmt"
@@ -10,30 +10,27 @@ import (
 
 func GenerateDsStacks() {
 	// Create the stacks
-	fmt.Println("Generating Mumbai-DS stack templates")
+	fmt.Println("Generating Ireland-DS stack templates")
 
 	// Assign the values to the DS stack infra requires
 
 	// Generate the stack templates
 	var defaults dsbase.DsBaseDefaults 
-	defaults.NetworkStack = "Mumbai-Network"
-	defaults.SecurityGroupStack = "Mumbai-DS-SecurityGroup"
 
 	BaseTemplate := dsbase.GenerateDsBaseStack(defaults)
 	ServiceTemplate := dsservice.GenerateDsServiceStack()
-
 
 	//Write the Json Templates
 	BaseJsonTemplate, err := BaseTemplate.JSON()
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		utils.WriteTemplatesToFile("./templates/mumbai/ds","mumbai-ds.json", BaseJsonTemplate)
+		utils.WriteTemplatesToFile("./templates/ireland/ds","ireland-ds.json", BaseJsonTemplate)
 	}
 	ServiceJsonTemplate, err := ServiceTemplate.JSON()
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		utils.WriteTemplatesToFile("./templates/mumbai/ds","mumbai-ds-service.json", ServiceJsonTemplate)
+		utils.WriteTemplatesToFile("./templates/ireland/ds","ireland-ds-service.json", ServiceJsonTemplate)
 	}
 }

@@ -17,15 +17,13 @@ func WriteTemplatesToFile(templatedirpath string,templatename string, jsontempla
 	_,err2 := os.Stat(templatepath)
 	if err2 != nil {
 		fmt.Println(err2)
-		j,err := os.Create(templatepath)
+		_,err := os.Create(templatepath)
 		if err != nil {
-			fmt.Println(err)
-		}else{
-			fmt.Println(j)
+			fmt.Println("")
 		}
 	}
 	err3 := os.WriteFile(templatepath, jsontemplate, 0755)
 	if err3 != nil {
-		fmt.Println(err3)
+		fmt.Println("")
 	}
 }

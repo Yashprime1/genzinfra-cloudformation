@@ -1,6 +1,7 @@
 package dsbase
 
 type DsBaseDefaults struct {
-	InstanceType string
+	NetworkStack string
+	SecurityGroupStack string
 }
 

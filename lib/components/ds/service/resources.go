@@ -7,6 +7,7 @@ import (
 func AddResourcesForDsServiceStack(template *cloudformation.Template){
 	template.Resources["DSEc2Instance"] =  &ec2.Instance{
 		InstanceType: cloudformation.String(cloudformation.Ref("InstanceType")),
+		ImageId: cloudformation.String("ami-057752b3f1d6c4d6c"),
 	}
 }
 
