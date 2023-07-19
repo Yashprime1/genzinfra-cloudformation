@@ -12,25 +12,25 @@
                         "AppPrivateSubnet2Cidr":"10.12.3.0/24"
                     },
                     "SkipUpdate": false,
-                    "TemplatePath": "/home/yashprime/Documents/2023/GenZInfra/cloudformation/templates/mumbai/core/mumbai-network.json"
+                    "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
                 },
                 "Mumbai-DS-SecurityGroup":{
                     "Parameters": {
                     },
                     "SkipUpdate": false,
-                    "TemplatePath": "/home/yashprime/Documents/2023/GenZInfra/cloudformation/templates/mumbai/core/mumbai-securitygroup.json"
+                    "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
                 },
                 "Mumbai-Random-SecurityGroup":{
                     "Parameters": {
                     },
                     "SkipUpdate": false,
-                    "TemplatePath": "/home/yashprime/Documents/2023/GenZInfra/cloudformation/templates/mumbai/core/mumbai-securitygroup.json"
+                    "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
                 },
                 "Mumbai-DS":{
                     "Parameters": {
                     },
                     "SkipUpdate": false,
-                    "TemplatePath": "/home/yashprime/Documents/2023/GenZInfra/cloudformation/templates/mumbai/ds/mumbai-ds.json"
+                    "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
                 }
         }
     }
