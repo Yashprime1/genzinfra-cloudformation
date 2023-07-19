@@ -9,7 +9,7 @@ func WriteTemplatesToFile(templatedirpath string,templatename string, jsontempla
 	// Write the templates to file
 	_,err := os.Stat(templatedirpath)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("")
 		os.MkdirAll(templatedirpath, 0755)
 	} 
 	
