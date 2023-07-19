@@ -13,9 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::297012935469:role/GithubAccess
+          aws-region: ap-south-1
       - uses: actions/checkout@v3
       - name: Build Templates
         run: go run main.go
