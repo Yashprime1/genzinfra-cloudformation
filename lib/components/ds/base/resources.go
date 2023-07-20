@@ -28,7 +28,7 @@ func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBa
 		HealthCheckIntervalSeconds: cloudformation.Int(30),
 		HealthCheckPath:            cloudformation.String("/"),
 		HealthCheckProtocol:        cloudformation.String("HTTP"),
-		HealthCheckTimeoutSeconds:  cloudformation.Int(5),
+		HealthCheckTimeoutSeconds:  cloudformation.Int(10),
 		HealthyThresholdCount:      cloudformation.Int(5),
 		Matcher: &elasticloadbalancingv2.TargetGroup_Matcher{
 			HttpCode: cloudformation.String("200"),
