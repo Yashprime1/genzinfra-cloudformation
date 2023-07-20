@@ -20,12 +20,6 @@
                     "SkipUpdate": false,
                     "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
                 },
-                "Mumbai-Random-SecurityGroup":{
-                    "Parameters": {
-                    },
-                    "SkipUpdate": false,
-                    "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
-                },
                 "Mumbai-DS":{
                     "Parameters": {
                     },
