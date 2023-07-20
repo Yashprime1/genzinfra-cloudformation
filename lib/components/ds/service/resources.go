@@ -97,9 +97,6 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 						Value: cloudformation.String("DS"),
 					},
 				},
-				LogConfiguration: &ecs.TaskDefinition_LogConfiguration{
-					LogDriver: "awslogs",
-				},
 				Essential: cloudformation.Bool(true),
 				MemoryReservation: cloudformation.Int(300),
 				Privileged:        cloudformation.Bool(false),
