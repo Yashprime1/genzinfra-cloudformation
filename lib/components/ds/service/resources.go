@@ -109,6 +109,13 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 						HardLimit: 65536,
 					},
 				},
+				PortMappings: []ecs.TaskDefinition_PortMapping{
+					{
+						ContainerPort: cloudformation.Int(80),
+						HostPort:      cloudformation.Int(80),
+						Protocol:      cloudformation.String("tcp"),
+					},
+				},
 			},
 		},
 	}
