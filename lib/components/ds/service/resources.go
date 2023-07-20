@@ -1,9 +1,8 @@
 package dsservice
 
 import (
-	"github.com/awslabs/goformation/v7/cloudformation/iam"
 	"github.com/awslabs/goformation/v7/cloudformation"
-	"github.com/awslabs/goformation/v7/cloudformation/ecs"
+	"github.com/awslabs/goformation/v7/cloudformation/iam"
 )
 
 func AddResourcesForDsServiceStack(template *cloudformation.Template) {
@@ -23,61 +22,60 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 			},
 		},
 	}
-	template.Resources["DsEcsTaskRolePolicy"] = &iam.Policy{
-		PolicyDocument: map[string]interface{}{
-			"Version": "2012-10-17",
-			"Statement": []map[string]interface{}{
-				{
-					"Action": "*",
-					"Effect": "Allow",
-					"Resource": []string{
-						"*",
-					},
-				},
-			},
-		},
-		Roles: []string{
-			cloudformation.Ref("DsEcsTaskRole"),
-		},
-	}
-	template.Resources["DsEcsTaskExecutionRole"] = &iam.Role{
-		AssumeRolePolicyDocument: map[string]interface{}{
-			"Version": "2012-10-17",
-			"Statement": []map[string]interface{}{
-				{
-					"Action": "sts:AssumeRole",
-					"Effect": "Allow",
-					"Principal": map[string]interface{}{
-						"Service": []string{
-							"ecs-tasks.amazonaws.com",
-						},
-					},
+	// template.Resources["DsEcsTaskRolePolicy"] = &iam.Policy{
+	// 	PolicyDocument: map[string]interface{}{
+	// 		"Version": "2012-10-17",
+	// 		"Statement": []map[string]interface{}{
+	// 			{
+	// 				"Action": "*",
+	// 				"Effect": "Allow",
+	// 				"Resource": []string{
+	// 					"*",
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// 	Roles: []string{
+	// 		cloudformation.Ref("DsEcsTaskRole"),
+	// 	},
+	// }
+	// template.Resources["DsEcsTaskExecutionRole"] = &iam.Role{
+	// 	AssumeRolePolicyDocument: map[string]interface{}{
+	// 		"Version": "2012-10-17",
+	// 		"Statement": []map[string]interface{}{
+	// 			{
+	// 				"Action": "sts:AssumeRole",
+	// 				"Effect": "Allow",
+	// 				"Principal": map[string]interface{}{
+	// 					"Service": []string{
+	// 						"ecs-tasks.amazonaws.com",
+	// 					},
+	// 				},
 
-				},
-			},
-		},
-	}
-	template.Resources["DsEcsTaskExecutionRolePolicy"] = &iam.Policy{
-		PolicyDocument: map[string]interface{}{
-			"Version": "2012-10-17",
-			"Statement": []map[string]interface{}{
-				{
-					"Action": "*",
-					"Effect": "Allow",
-					"Resource": []string{
-						"*",
-					},
-				},
+	// 			},
+	// 		},
+	// 	},
+	// }
+	// template.Resources["DsEcsTaskExecutionRolePolicy"] = &iam.Policy{
+	// 	PolicyDocument: map[string]interface{}{
+	// 		"Version": "2012-10-17",
+	// 		"Statement": []map[string]interface{}{
+	// 			{
+	// 				"Action": "*",
+	// 				"Effect": "Allow",
+	// 				"Resource": []string{
+	// 					"*",
+	// 				},
+	// 			},
 
-			},
-		},
-		Roles: []string{
-			cloudformation.Ref("DsEcsTaskExecutionRole"),
-		},
-	}
+	// 		},
+	// 	},
+	// 	Roles: []string{
+	// 		cloudformation.Ref("DsEcsTaskExecutionRole"),
+	// 	},
+	// }
 
-
-	template.Resources["DsEcsCluster"] = &ecs.Cluster{}
+	// template.Resources["DsEcsCluster"] = &ecs.Cluster{}
 	// template.Resources["DsEcsTaskDefinition"] = &ecs.TaskDefinition{
 	// 	NetworkMode:      cloudformation.String("host"),
 	// 	Family:           cloudformation.String(cloudformation.Ref("AWS::StackName")),
