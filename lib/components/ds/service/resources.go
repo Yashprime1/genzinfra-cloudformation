@@ -124,7 +124,12 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 			{
 				ContainerName:  cloudformation.String("ds"),
 				ContainerPort:  cloudformation.Int(80),
-				TargetGroupArn: cloudformation.String(cloudformation.ImportValue(cloudformation.Sub("${AWS::StackName}-DsElbTargetGroupArn"))),
+				TargetGroupArn: cloudformation.String(cloudformation.ImportValue(
+					cloudformation.Join("-", []string{
+						cloudformation.Ref("AWS::StackName"),
+						"ElbTargetGroupArn",
+					}),
+				)),
 			},
 		},
 		PlacementConstraints: []ecs.Service_PlacementConstraint{
