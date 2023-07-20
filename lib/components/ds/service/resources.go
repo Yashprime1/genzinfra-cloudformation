@@ -93,8 +93,8 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 				Image: "httpd",
 				Environment: []ecs.TaskDefinition_KeyValuePair{
 					{
-						Name:  cloudformation.String(""),
-						Value: cloudformation.String(""),
+						Name:  cloudformation.String("App Name"),
+						Value: cloudformation.String("DS"),
 					},
 				},
 				LogConfiguration: &ecs.TaskDefinition_LogConfiguration{
