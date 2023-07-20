@@ -2,6 +2,7 @@ package dsservice
 
 import (
 	"github.com/awslabs/goformation/v7/cloudformation"
+	"github.com/awslabs/goformation/v7/cloudformation/ecs"
 	"github.com/awslabs/goformation/v7/cloudformation/iam"
 )
 
@@ -51,7 +52,6 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 							"ecs-tasks.amazonaws.com",
 						},
 					},
-
 				},
 			},
 		},
@@ -67,7 +67,6 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 						"*",
 					},
 				},
-
 			},
 		},
 		Roles: []string{
