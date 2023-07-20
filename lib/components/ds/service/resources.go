@@ -98,7 +98,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 					},
 				},
 				Essential: cloudformation.Bool(true),
-				MemoryReservation: cloudformation.Int(300),
+				MemoryReservation: cloudformation.Int(256),
 				Privileged:        cloudformation.Bool(false),
 				ReadonlyRootFilesystem: cloudformation.Bool(false),
 				User:                   cloudformation.String("ds"),
