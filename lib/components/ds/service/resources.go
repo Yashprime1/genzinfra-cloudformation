@@ -36,6 +36,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 				},
 			},
 		},
+		PolicyName: cloudformation.Sub("{AWS::StackName}-DsEcsTaskRolePolicy"),
 		Roles: []string{
 			cloudformation.Ref("DsEcsTaskRole"),
 		},
@@ -69,6 +70,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 				},
 			},
 		},
+		PolicyName: cloudformation.Sub("{AWS::StackName}-DsEcsTaskExecutionRolePolicy"),
 		Roles: []string{
 			cloudformation.Ref("DsEcsTaskExecutionRole"),
 		},
