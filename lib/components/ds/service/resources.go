@@ -123,7 +123,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 		Cluster: cloudformation.String(cloudformation.Ref("DsEcsCluster")),
 		DeploymentConfiguration: &ecs.Service_DeploymentConfiguration{
 			MaximumPercent:        cloudformation.Int(100),
-			MinimumHealthyPercent: cloudformation.Int(50),
+			MinimumHealthyPercent: cloudformation.Int(0),
 		},
 		HealthCheckGracePeriodSeconds: cloudformation.Int(60),
 		LaunchType:                    cloudformation.String("EC2"),
