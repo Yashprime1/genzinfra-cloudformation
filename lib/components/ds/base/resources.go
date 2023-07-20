@@ -2,16 +2,20 @@ package dsbase
 
 import (
 	"github.com/awslabs/goformation/v7/cloudformation"
-	"github.com/awslabs/goformation/v7/cloudformation/ecs"
 	"github.com/awslabs/goformation/v7/cloudformation/elasticloadbalancingv2"
 )
 
 func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBaseDefaults) {
-	template.Resources["DsEcsCluster"] = &ecs.Cluster{}
 	template.Resources["DsElb"] = &elasticloadbalancingv2.LoadBalancer{
 		Scheme:        cloudformation.String("internet-facing"),
 		Type:          cloudformation.String("application"),
 		IpAddressType: cloudformation.String("ipv4"),
+		LoadBalancerAttributes: []elasticloadbalancingv2.LoadBalancer_LoadBalancerAttribute{
+			{
+				Key:   cloudformation.String("idle_timeout.timeout_seconds"),
+				Value: cloudformation.String("1800"),
+			},
+		},
 		SecurityGroups: []string{
 			cloudformation.ImportValue(defaults.SecurityGroupStack + "-DS2SecurityGroupId"),
 		},
@@ -20,7 +24,6 @@ func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBa
 			cloudformation.ImportValue(defaults.NetworkStack + "-AppPublicSubnet2Id"),
 		},
 	}
-
 	template.Resources["DsElbTargetGroup"] = &elasticloadbalancingv2.TargetGroup{
 		HealthCheckIntervalSeconds: cloudformation.Int(30),
 		HealthCheckPath:            cloudformation.String("/"),
@@ -34,7 +37,7 @@ func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBa
 		Protocol:                cloudformation.String("HTTP"),
 		TargetType:              cloudformation.String("ip"),
 		UnhealthyThresholdCount: cloudformation.Int(2),
-		VpcId:                   cloudformation.String(cloudformation.ImportValue(defaults.NetworkStack+"-AppVPCId")),
+		VpcId:                   cloudformation.String(cloudformation.ImportValue(defaults.NetworkStack + "-AppVPCId")),
 		TargetGroupAttributes: []elasticloadbalancingv2.TargetGroup_TargetGroupAttribute{
 			{
 				Key:   cloudformation.String("stickiness.enabled"),
@@ -46,12 +49,11 @@ func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBa
 			},
 		},
 	}
-
 	template.Resources["DsElbListener"] = &elasticloadbalancingv2.Listener{
 		DefaultActions: []elasticloadbalancingv2.Listener_Action{
 			{
 				TargetGroupArn: cloudformation.String(cloudformation.Ref("DsElbTargetGroup")),
-				Type:          "forward",
+				Type:           "forward",
 			},
 		},
 		LoadBalancerArn: cloudformation.Ref("DsElb"),
