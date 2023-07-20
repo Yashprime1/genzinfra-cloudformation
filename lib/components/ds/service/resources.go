@@ -112,27 +112,27 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 			},
 		},
 	}
-	// template.Resources["DsEcsService"] = &ecs.Service{
-	// 	Cluster: cloudformation.String(cloudformation.Ref("DsEcsCluster")),
-	// 	DeploymentConfiguration: &ecs.Service_DeploymentConfiguration{
-	// 		MaximumPercent:        cloudformation.Int(200),
-	// 		MinimumHealthyPercent: cloudformation.Int(50),
-	// 	},
-	// 	HealthCheckGracePeriodSeconds: cloudformation.Int(60),
-	// 	LaunchType:                    cloudformation.String("EC2"),
-	// 	LoadBalancers:                 []ecs.Service_LoadBalancer{
-	// 		{
-	// 			ContainerName:  cloudformation.String("ds"),
-	// 			ContainerPort:  cloudformation.Int(80),
-	// 			TargetGroupArn: cloudformation.String(cloudformation.ImportValue(cloudformation.Sub("${AWS::StackName}-DsElbTargetGroupArn"))),
-	// 		},
-	// 	},
-	// 	PlacementConstraints: []ecs.Service_PlacementConstraint{
-	// 		{
-	// 			Type: "distinctInstance",
-	// 		},
-	// 	},
-	// 	SchedulingStrategy: cloudformation.String("DAEMON"),
-	// 	TaskDefinition:     cloudformation.String(cloudformation.Ref("DsEcsTaskDefinition")),
-	// }
+	template.Resources["DsEcsService"] = &ecs.Service{
+		Cluster: cloudformation.String(cloudformation.Ref("DsEcsCluster")),
+		DeploymentConfiguration: &ecs.Service_DeploymentConfiguration{
+			MaximumPercent:        cloudformation.Int(200),
+			MinimumHealthyPercent: cloudformation.Int(50),
+		},
+		HealthCheckGracePeriodSeconds: cloudformation.Int(60),
+		LaunchType:                    cloudformation.String("EC2"),
+		LoadBalancers:                 []ecs.Service_LoadBalancer{
+			{
+				ContainerName:  cloudformation.String("ds"),
+				ContainerPort:  cloudformation.Int(80),
+				TargetGroupArn: cloudformation.String(cloudformation.ImportValue(cloudformation.Sub("${AWS::StackName}-DsElbTargetGroupArn"))),
+			},
+		},
+		PlacementConstraints: []ecs.Service_PlacementConstraint{
+			{
+				Type: "distinctInstance",
+			},
+		},
+		SchedulingStrategy: cloudformation.String("DAEMON"),
+		TaskDefinition:     cloudformation.String(cloudformation.Ref("DsEcsTaskDefinition")),
+	}
 }
