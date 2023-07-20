@@ -8,7 +8,6 @@ import (
 
 func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBaseDefaults) {
 	template.Resources["DsEcsCluster"] = &ecs.Cluster{}
-	template.Resources["DsEcsCluster2"] = &ecs.Cluster{}
 	template.Resources["DsElb"] = &elasticloadbalancingv2.LoadBalancer{
 		Scheme:        cloudformation.String("internet-facing"),
 		Type:          cloudformation.String("application"),
