@@ -36,45 +36,51 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 				},
 			},
 		},
-		PolicyName: cloudformation.Sub("{AWS::StackName}-DsEcsTaskRolePolicy"),
+		PolicyName: cloudformation.Join("-",[]string{
+										cloudformation.Ref("AWS::StackName"),
+										"DsEcsTaskRolePolicy",	
+									}),
 		Roles: []string{
 			cloudformation.Ref("DsEcsTaskRole"),
 		},
 	}
-	// template.Resources["DsEcsTaskExecutionRole"] = &iam.Role{
-	// 	AssumeRolePolicyDocument: map[string]interface{}{
-	// 		"Version": "2012-10-17",
-	// 		"Statement": []map[string]interface{}{
-	// 			{
-	// 				"Action": "sts:AssumeRole",
-	// 				"Effect": "Allow",
-	// 				"Principal": map[string]interface{}{
-	// 					"Service": []string{
-	// 						"ecs-tasks.amazonaws.com",
-	// 					},
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// }
-	// template.Resources["DsEcsTaskExecutionRolePolicy"] = &iam.Policy{
-	// 	PolicyDocument: map[string]interface{}{
-	// 		"Version": "2012-10-17",
-	// 		"Statement": []map[string]interface{}{
-	// 			{
-	// 				"Action": "*",
-	// 				"Effect": "Allow",
-	// 				"Resource": []string{
-	// 					"*",
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// 	PolicyName: cloudformation.Sub("{AWS::StackName}-DsEcsTaskExecutionRolePolicy"),
-	// 	Roles: []string{
-	// 		cloudformation.Ref("DsEcsTaskExecutionRole"),
-	// 	},
-	// }
+	template.Resources["DsEcsTaskExecutionRole"] = &iam.Role{
+		AssumeRolePolicyDocument: map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Action": "sts:AssumeRole",
+					"Effect": "Allow",
+					"Principal": map[string]interface{}{
+						"Service": []string{
+							"ecs-tasks.amazonaws.com",
+						},
+					},
+				},
+			},
+		},
+	}
+	template.Resources["DsEcsTaskExecutionRolePolicy"] = &iam.Policy{
+		PolicyDocument: map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Action": "*",
+					"Effect": "Allow",
+					"Resource": []string{
+						"*",
+					},
+				},
+			},
+		},
+		PolicyName: cloudformation.Join("-",[]string{
+			cloudformation.Ref("AWS::StackName"),
+			"DsEcsTaskExecutionRolePolicy",	
+		}),
+		Roles: []string{
+			cloudformation.Ref("DsEcsTaskExecutionRole"),
+		},
+	}
 
 	template.Resources["DsEcsCluster"] = &ecs.Cluster{}
 	// template.Resources["DsEcsTaskDefinition"] = &ecs.TaskDefinition{
