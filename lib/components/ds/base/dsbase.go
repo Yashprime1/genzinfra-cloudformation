@@ -11,6 +11,7 @@ func GenerateDsBaseStack(defaults DsBaseDefaults) *cloudformation.Template {
 	AddParametersForDsBaseStack(BaseTemplate,defaults)
 	AddResourcesForDsBaseStack(BaseTemplate,defaults)
 	AddConditionsForDsBaseStack(BaseTemplate,defaults)
+	AddOutputsForDsBaseStack(BaseTemplate)
 	return BaseTemplate
 }
 
