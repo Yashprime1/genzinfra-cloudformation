@@ -83,38 +83,38 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 	}
 
 	template.Resources["DsEcsCluster"] = &ecs.Cluster{}
-	// template.Resources["DsEcsTaskDefinition"] = &ecs.TaskDefinition{
-	// 	NetworkMode:      cloudformation.String("host"),
-	// 	Family:           cloudformation.String(cloudformation.Ref("AWS::StackName")),
-	// 	ExecutionRoleArn: cloudformation.String(cloudformation.Ref("DsEcsTaskExecutionRole")),
-	// 	ContainerDefinitions: []ecs.TaskDefinition_ContainerDefinition{
-	// 		{
-	// 			Name: "ds",
-	// 			Image: "httpd",
-	// 			Environment: []ecs.TaskDefinition_KeyValuePair{
-	// 				{
-	// 					Name:  cloudformation.String(""),
-	// 					Value: cloudformation.String(""),
-	// 				},
-	// 			},
-	// 			LogConfiguration: &ecs.TaskDefinition_LogConfiguration{
-	// 				LogDriver: "awslogs",
-	// 			},
-	// 			Essential: cloudformation.Bool(true),
-	// 			MemoryReservation: cloudformation.Int(300),
-	// 			Privileged:        cloudformation.Bool(false),
-	// 			ReadonlyRootFilesystem: cloudformation.Bool(false),
-	// 			User:                   cloudformation.String("ds"),
-	// 			Ulimits: []ecs.TaskDefinition_Ulimit{
-	// 				{
-	// 					Name:      "nofile",
-	// 					SoftLimit: 65536,
-	// 					HardLimit: 65536,
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// }
+	template.Resources["DsEcsTaskDefinition"] = &ecs.TaskDefinition{
+		NetworkMode:      cloudformation.String("host"),
+		Family:           cloudformation.String(cloudformation.Ref("AWS::StackName")),
+		ExecutionRoleArn: cloudformation.String(cloudformation.Ref("DsEcsTaskExecutionRole")),
+		ContainerDefinitions: []ecs.TaskDefinition_ContainerDefinition{
+			{
+				Name: "ds",
+				Image: "httpd",
+				Environment: []ecs.TaskDefinition_KeyValuePair{
+					{
+						Name:  cloudformation.String(""),
+						Value: cloudformation.String(""),
+					},
+				},
+				LogConfiguration: &ecs.TaskDefinition_LogConfiguration{
+					LogDriver: "awslogs",
+				},
+				Essential: cloudformation.Bool(true),
+				MemoryReservation: cloudformation.Int(300),
+				Privileged:        cloudformation.Bool(false),
+				ReadonlyRootFilesystem: cloudformation.Bool(false),
+				User:                   cloudformation.String("ds"),
+				Ulimits: []ecs.TaskDefinition_Ulimit{
+					{
+						Name:      "nofile",
+						SoftLimit: 65536,
+						HardLimit: 65536,
+					},
+				},
+			},
+		},
+	}
 	// template.Resources["DsEcsService"] = &ecs.Service{
 	// 	Cluster: cloudformation.String(cloudformation.Ref("DsEcsCluster")),
 	// 	DeploymentConfiguration: &ecs.Service_DeploymentConfiguration{
