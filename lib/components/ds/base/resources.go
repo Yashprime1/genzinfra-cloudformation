@@ -35,7 +35,7 @@ func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBa
 		},
 		Port:                    cloudformation.Int(80),
 		Protocol:                cloudformation.String("HTTP"),
-		TargetType:              cloudformation.String("ip"),
+		TargetType:              cloudformation.String("instance"),
 		UnhealthyThresholdCount: cloudformation.Int(2),
 		VpcId:                   cloudformation.String(cloudformation.ImportValue(defaults.NetworkStack + "-AppVPCId")),
 		TargetGroupAttributes: []elasticloadbalancingv2.TargetGroup_TargetGroupAttribute{
