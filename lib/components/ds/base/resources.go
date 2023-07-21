@@ -40,7 +40,7 @@ func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBa
 			"DsEc2RolePolicy",
 		}),
 		Roles: []string{
-			cloudformation.Ref("DsEc2Iamole"),
+			cloudformation.Ref("DsEc2IamRole"),
 		},
 	}
 	template.Resources["DsEc2InstanceProfile"] = &iam.InstanceProfile{
