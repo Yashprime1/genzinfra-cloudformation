@@ -70,6 +70,9 @@ func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBa
 			cloudformation.ImportValue(defaults.NetworkStack + "-AppPublicSubnet1Id"),
 			cloudformation.ImportValue(defaults.NetworkStack + "-AppPublicSubnet2Id"),
 		},
+		TargetGroupARNs: []string{
+			cloudformation.Ref("DsElbTargetGroup"),
+		},
 	}
 	template.Resources["DsElb"] = &elasticloadbalancingv2.LoadBalancer{
 		Scheme:        cloudformation.String("internet-facing"),
