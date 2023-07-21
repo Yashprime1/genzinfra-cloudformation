@@ -1,6 +1,7 @@
 package securitygroup
 import (
 	"github.com/awslabs/goformation/v7/cloudformation/ec2"
+	"github.com/awslabs/goformation/v7/cloudformation/tags"
 	"github.com/awslabs/goformation/v7/cloudformation"
 
 )
@@ -17,5 +18,11 @@ func AddResourcesForCoreSecurityGroupStack(template *cloudformation.Template,def
 			},
 		},
 		VpcId: cloudformation.String(cloudformation.ImportValue(defaults.NetworkStack+"-AppVPCId")),
+		Tags: []tags.Tag{
+			{
+				Key: "Name",
+				Value: "DS Security Group",
+			},
+		},
 	}
 }
