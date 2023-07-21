@@ -19,6 +19,17 @@
                     },
                     "SkipUpdate": false,
                     "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
+                },
+                "Mumbai-DS":{
+                    "Parameters": {
+                        "DsAmiId":"ami-072ec8f4ea4a6f2cf",
+                        "DsInstanceType":"t2.micro",
+                        "DsMaxSize":"1",
+                        "DsMinSize":"1",
+                        "DsDesiredSize":"1"
+                    },
+                    "SkipUpdate": false,
+                    "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
                 }
         }
     }
