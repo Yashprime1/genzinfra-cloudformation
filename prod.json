@@ -31,7 +31,7 @@
                     "SkipUpdate": false,
                     "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
                 },
-                "Mumbai-Ds-Service":{
+                "Mumbai-DS-Service":{
                     "Parameters": {
                     },
                     "SkipUpdate": false,
