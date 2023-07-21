@@ -2,6 +2,7 @@ package dsbase
 
 import (
 	"github.com/awslabs/goformation/v7/cloudformation"
+	"github.com/awslabs/goformation/v7/cloudformation/autoscaling"
 	"github.com/awslabs/goformation/v7/cloudformation/iam"
 )
 
@@ -49,16 +50,16 @@ func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBa
 			cloudformation.Ref("DsEc2IamRole"),
 		},
 	}
-	// template.Resources["DsLaunchConfiguration"] = &autoscaling.LaunchConfiguration{
-	// 	AssociatePublicIpAddress: cloudformation.Bool(true),
-	// 	ImageId:                  cloudformation.Ref("DsAmiId"),
-	// 	InstanceType:             cloudformation.Ref("DsInstanceType"),
-	// 	InstanceMonitoring:       cloudformation.Bool(false),
-	// 	SecurityGroups: []string{
-	// 		cloudformation.ImportValue(defaults.SecurityGroupStack + "-DS2SecurityGroupId"),
-	// 	},
-	// 	IamInstanceProfile:  cloudformation.String(cloudformation.Ref("DsEc2InstanceProfile")),
-	// }
+	template.Resources["DsLaunchConfiguration"] = &autoscaling.LaunchConfiguration{
+		AssociatePublicIpAddress: cloudformation.Bool(true),
+		ImageId:                  cloudformation.Ref("DsAmiId"),
+		InstanceType:             cloudformation.Ref("DsInstanceType"),
+		InstanceMonitoring:       cloudformation.Bool(false),
+		SecurityGroups: []string{
+			cloudformation.ImportValue(defaults.SecurityGroupStack + "-DS2SecurityGroupId"),
+		},
+		IamInstanceProfile: cloudformation.String(cloudformation.Ref("DsEc2InstanceProfile")),
+	}
 	// template.Resources["DsAsg"] = &autoscaling.AutoScalingGroup{
 	// 	DesiredCapacity:         cloudformation.String(cloudformation.Ref("DsDesiredSize")),
 	// 	LaunchConfigurationName: cloudformation.String(cloudformation.Ref("DsLaunchConfiguration")),
