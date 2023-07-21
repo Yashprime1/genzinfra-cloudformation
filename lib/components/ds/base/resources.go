@@ -22,27 +22,27 @@ func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBa
 			},
 		},
 	}
-	template.Resources["DsEc2RolePolicy"] = &iam.Policy{
-		PolicyDocument: map[string]interface{}{
-			"Version": "2012-10-17",
-			"Statement": []map[string]interface{}{
-				{
-					"Action": "*",
-					"Effect": "Allow",
-					"Resource": []string{
-						"*",
-					},
-				},
-			},
-		},
-		PolicyName: cloudformation.Join("-", []string{
-			cloudformation.Ref("AWS::StackName"),
-			"DsEc2RolePolicy",
-		}),
-		Roles: []string{
-			cloudformation.Ref("DsEc2Iamole"),
-		},
-	}
+	// template.Resources["DsEc2RolePolicy"] = &iam.Policy{
+	// 	PolicyDocument: map[string]interface{}{
+	// 		"Version": "2012-10-17",
+	// 		"Statement": []map[string]interface{}{
+	// 			{
+	// 				"Action": "*",
+	// 				"Effect": "Allow",
+	// 				"Resource": []string{
+	// 					"*",
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// 	PolicyName: cloudformation.Join("-", []string{
+	// 		cloudformation.Ref("AWS::StackName"),
+	// 		"DsEc2RolePolicy",
+	// 	}),
+	// 	Roles: []string{
+	// 		cloudformation.Ref("DsEc2Iamole"),
+	// 	},
+	// }
 	template.Resources["DsEc2InstanceProfile"] = &iam.InstanceProfile{
 		Path: cloudformation.String("/"),
 		Roles: []string{
