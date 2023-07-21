@@ -44,12 +44,12 @@ func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBa
 			cloudformation.Ref("DsEc2Iamole"),
 		},
 	}
-	template.Resources["DsEc2InstanceProfile"] = &iam.InstanceProfile{
-		Path: cloudformation.String("/"),
-		Roles: []string{
-			cloudformation.Ref("DsEc2IamRole"),
-		},
-	}
+	// template.Resources["DsEc2InstanceProfile"] = &iam.InstanceProfile{
+	// 	Path: cloudformation.String("/"),
+	// 	Roles: []string{
+	// 		cloudformation.Ref("DsEc2IamRole"),
+	// 	},
+	// }
 	// template.Resources["DsLaunchConfiguration"] = &autoscaling.LaunchConfiguration{
 	// 	AssociatePublicIpAddress: cloudformation.Bool(true),
 	// 	ImageId:                  cloudformation.Ref("DsAmiId"),
