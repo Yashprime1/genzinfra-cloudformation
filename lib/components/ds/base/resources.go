@@ -1,10 +1,9 @@
 package dsbase
 
 import (
-	"github.com/awslabs/goformation/v7/cloudformation/iam"
 	"github.com/awslabs/goformation/v7/cloudformation"
-	"github.com/awslabs/goformation/v7/cloudformation/autoscaling"
 	"github.com/awslabs/goformation/v7/cloudformation/elasticloadbalancingv2"
+	"github.com/awslabs/goformation/v7/cloudformation/iam"
 )
 
 func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBaseDefaults) {
@@ -46,7 +45,7 @@ func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBa
 		},
 	}
 	template.Resources["DsEc2InstanceProfile"] = &iam.InstanceProfile{
-		Path : cloudformation.String("/"),
+		Path: cloudformation.String("/"),
 		Roles: []string{
 			cloudformation.Ref("DsEc2IamRole"),
 		},
