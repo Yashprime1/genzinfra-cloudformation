@@ -51,26 +51,26 @@ func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBa
 			cloudformation.Ref("DsEc2IamRole"),
 		},
 	}
-	template.Resources["DsLaunchConfiguration"] = &autoscaling.LaunchConfiguration{
-		AssociatePublicIpAddress: cloudformation.Bool(true),
-		ImageId:                  cloudformation.Ref("DsAmiId"),
-		InstanceType:             cloudformation.Ref("DsInstanceType"),
-		InstanceMonitoring:       cloudformation.Bool(false),
-		SecurityGroups: []string{
-			cloudformation.ImportValue(defaults.SecurityGroupStack + "-DS2SecurityGroupId"),
-		},
-		IamInstanceProfile:  cloudformation.String(cloudformation.Ref("DsEc2InstanceProfile")),
-	}
-	template.Resources["DsAsg"] = &autoscaling.AutoScalingGroup{
-		DesiredCapacity:         cloudformation.String(cloudformation.Ref("DsDesiredSize")),
-		LaunchConfigurationName: cloudformation.String(cloudformation.Ref("DsLaunchConfiguration")),
-		MaxSize:                 cloudformation.Ref("DsMaxSize"),
-		MinSize:                 cloudformation.Ref("DsMinSize"),
-		VPCZoneIdentifier: []string{
-			cloudformation.ImportValue(defaults.NetworkStack + "-AppPublicSubnet1Id"),
-			cloudformation.ImportValue(defaults.NetworkStack + "-AppPublicSubnet2Id"),
-		},
-	}
+	// template.Resources["DsLaunchConfiguration"] = &autoscaling.LaunchConfiguration{
+	// 	AssociatePublicIpAddress: cloudformation.Bool(true),
+	// 	ImageId:                  cloudformation.Ref("DsAmiId"),
+	// 	InstanceType:             cloudformation.Ref("DsInstanceType"),
+	// 	InstanceMonitoring:       cloudformation.Bool(false),
+	// 	SecurityGroups: []string{
+	// 		cloudformation.ImportValue(defaults.SecurityGroupStack + "-DS2SecurityGroupId"),
+	// 	},
+	// 	IamInstanceProfile:  cloudformation.String(cloudformation.Ref("DsEc2InstanceProfile")),
+	// }
+	// template.Resources["DsAsg"] = &autoscaling.AutoScalingGroup{
+	// 	DesiredCapacity:         cloudformation.String(cloudformation.Ref("DsDesiredSize")),
+	// 	LaunchConfigurationName: cloudformation.String(cloudformation.Ref("DsLaunchConfiguration")),
+	// 	MaxSize:                 cloudformation.Ref("DsMaxSize"),
+	// 	MinSize:                 cloudformation.Ref("DsMinSize"),
+	// 	VPCZoneIdentifier: []string{
+	// 		cloudformation.ImportValue(defaults.NetworkStack + "-AppPublicSubnet1Id"),
+	// 		cloudformation.ImportValue(defaults.NetworkStack + "-AppPublicSubnet2Id"),
+	// 	},
+	// }
 	template.Resources["DsElb"] = &elasticloadbalancingv2.LoadBalancer{
 		Scheme:        cloudformation.String("internet-facing"),
 		Type:          cloudformation.String("application"),
