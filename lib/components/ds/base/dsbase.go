@@ -8,10 +8,10 @@ func GenerateDsBaseStack(defaults DsBaseDefaults) *cloudformation.Template {
 	// Create the DS Base Stack
 	BaseTemplate := cloudformation.NewTemplate()
 	BaseTemplate.Description = "DS Base Stack"
-	// AddParametersForDsBaseStack(BaseTemplate,defaults)
+	AddParametersForDsBaseStack(BaseTemplate,defaults)
 	AddResourcesForDsBaseStack(BaseTemplate,defaults)
-	// AddConditionsForDsBaseStack(BaseTemplate,defaults)
-	// AddOutputsForDsBaseStack(BaseTemplate)
+	AddConditionsForDsBaseStack(BaseTemplate,defaults)
+	AddOutputsForDsBaseStack(BaseTemplate)
 	return BaseTemplate
 }
 
