@@ -1,11 +1,78 @@
 package dsbase
 
 import (
+	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/awslabs/goformation/v7/cloudformation"
+	"github.com/awslabs/goformation/v7/cloudformation/autoscaling"
 	"github.com/awslabs/goformation/v7/cloudformation/elasticloadbalancingv2"
 )
 
 func AddResourcesForDsBaseStack(template *cloudformation.Template, defaults DsBaseDefaults) {
+	template.Resources["DsEc2IamRole"] = &iam.Role{
+		AssumeRolePolicyDocument: map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Action": "sts:AssumeRole",
+					"Effect": "Allow",
+					"Principal": map[string]interface{}{
+						"Service": []string{
+							"ec2.amazonaws.com",
+						},
+					},
+				},
+			},
+		},
+	}
+	template.Resources["DsEc2RolePolicy"] = &iam.Policy{
+		PolicyDocument: map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Action": "*",
+					"Effect": "Allow",
+					"Resource": []string{
+						"*",
+					},
+				},
+			},
+		},
+		PolicyName: cloudformation.Join("-", []string{
+			cloudformation.Ref("AWS::StackName"),
+			"DsEc2RolePolicy",
+		}),
+		Roles: []string{
+			cloudformation.Ref("DsEc2Iamole"),
+		},
+	}
+	template.Resources["DsEc2InstanceProfile"] = &iam.InstanceProfile{
+		Path : "/",
+		Roles: []string{
+			cloudformation.Ref("DsEc2IamRole"),
+		},
+	}
+	template.Resources["DsLaunchConfiguration"] = &autoscaling.LaunchConfiguration{
+		AssociatePublicIpAddress: cloudformation.Bool(true),
+		ImageId:                  cloudformation.Ref("DsAmiId"),
+		InstanceType:             cloudformation.Ref("DsInstanceType"),
+		InstanceMonitoring:       cloudformation.Bool(false),
+		SecurityGroups: []string{
+			cloudformation.ImportValue(defaults.SecurityGroupStack + "-DS2SecurityGroupId"),
+		},
+		IamInstanceProfile:  cloudformation.String(cloudformation.Ref("DsEc2InstanceProfile")),
+		TargetGroupARNs:     []string{cloudformation.Ref("DsTargetGroup")},
+		
+	}
+	template.Resources["DsAsg"] = &autoscaling.AutoScalingGroup{
+		DesiredCapacity:         cloudformation.String(cloudformation.Ref("DsDesiredCapacity")),
+		LaunchConfigurationName: cloudformation.String(cloudformation.Ref("DsLaunchConfiguration")),
+		MaxSize:                 cloudformation.Ref("DsMaxSize"),
+		MinSize:                 cloudformation.Ref("DsMinSize"),
+		VPCZoneIdentifier: []string{
+			cloudformation.ImportValue(defaults.NetworkStack + "-AppPublicSubnet1Id"),
+			cloudformation.ImportValue(defaults.NetworkStack + "-AppPublicSubnet2Id"),
+		},
+	}
 	template.Resources["DsElb"] = &elasticloadbalancingv2.LoadBalancer{
 		Scheme:        cloudformation.String("internet-facing"),
 		Type:          cloudformation.String("application"),
