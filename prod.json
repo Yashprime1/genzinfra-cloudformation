@@ -19,12 +19,6 @@
                     },
                     "SkipUpdate": false,
                     "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
-                },
-                "Mumbai-DS":{
-                    "Parameters": {
-                    },
-                    "SkipUpdate": false,
-                    "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
                 }
         }
     }
