@@ -55,6 +55,7 @@ func AddResourcesForCoreNetworkStack(template *cloudformation.Template, defaults
 
 	template.Resources["AppPublicRouteTable1"] = &ec2.RouteTable{
 		VpcId: cloudformation.Ref("AppVPC"),
+		
 	}
 
 	template.Resources["AppPublicRouteTable2"] = &ec2.RouteTable{
@@ -68,5 +69,16 @@ func AddResourcesForCoreNetworkStack(template *cloudformation.Template, defaults
 		InternetGatewayId: cloudformation.String(cloudformation.GetAtt("AppInternetGateway", "InternetGatewayId")),
 	}
 
-	
+	template.Resources["AppPublicRouteTable1IGRoute"] = &ec2.Route{
+		RouteTableId:         cloudformation.Ref("AppPublicRouteTable1"),
+		GatewayId:            cloudformation.String(cloudformation.GetAtt("AppInternetGateway", "InternetGatewayId")),
+		DestinationCidrBlock: cloudformation.String("0.0.0.0/0"),
+	}
+
+	template.Resources["AppPublicRouteTable2IGRoute"] = &ec2.Route{
+		RouteTableId:         cloudformation.Ref("AppPublicRouteTable2"),
+		GatewayId:            cloudformation.String(cloudformation.GetAtt("AppInternetGateway", "InternetGatewayId")),
+		DestinationCidrBlock: cloudformation.String("0.0.0.0/0"),
+	}
+
 }
