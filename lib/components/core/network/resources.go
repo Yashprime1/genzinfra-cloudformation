@@ -81,4 +81,14 @@ func AddResourcesForCoreNetworkStack(template *cloudformation.Template, defaults
 		DestinationCidrBlock: cloudformation.String("0.0.0.0/0"),
 	}
 
+	template.Resources["AppPublicSubnet1RouteTableAssociation"] = &ec2.SubnetRouteTableAssociation{
+		SubnetId:     cloudformation.Ref("AppPublicSubnet1"),
+		RouteTableId: cloudformation.Ref("AppPublicRouteTable1"),
+	}
+
+	template.Resources["AppPublicSubnet2RouteTableAssociation"] = &ec2.SubnetRouteTableAssociation{
+		SubnetId:     cloudformation.Ref("AppPublicSubnet2"),
+		RouteTableId: cloudformation.Ref("AppPublicRouteTable2"),
+	}
+
 }
