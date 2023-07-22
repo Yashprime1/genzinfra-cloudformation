@@ -16,6 +16,12 @@ func AddResourcesForCoreSecurityGroupStack(template *cloudformation.Template,def
 				ToPort: cloudformation.Int(80),
 				CidrIp: cloudformation.String("0.0.0.0/0"),
 			},
+			{
+				IpProtocol: "tcp",
+				FromPort: cloudformation.Int(22),
+				ToPort: cloudformation.Int(22),
+				CidrIp: cloudformation.String("0.0.0.0/0"),
+			},
 		},
 		VpcId: cloudformation.String(cloudformation.ImportValue(defaults.NetworkStack+"-AppVPCId")),
 		Tags: []tags.Tag{
