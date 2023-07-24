@@ -156,11 +156,6 @@
               "Name": "vmagent",
               "Privileged": false,
               "ReadonlyRootFilesystem": false,
-              "RepositoryCredentials": {
-                "CredentialsParameter": {
-                  "Fn::ImportValue": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                }
-              },
               "Ulimits": [
                 {
                   "HardLimit": 900000,
