@@ -1,0 +1,431 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "DS Service Stack",
+  "Resources": {
+    "DsEcsCluster": {
+      "Properties": {},
+      "Type": "AWS::ECS::Cluster"
+    },
+    "DsEcsService": {
+      "Properties": {
+        "Cluster": {
+          "Ref": "DsEcsCluster"
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "HealthCheckGracePeriodSeconds": 60,
+        "LaunchType": "EC2",
+        "LoadBalancers": [
+          {
+            "ContainerName": "ds",
+            "ContainerPort": 80,
+            "TargetGroupArn": {
+              "Fn::ImportValue": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "AWS::StackName"
+                    },
+                    "DsElbTargetGroupArn"
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+        "PlacementConstraints": [
+          {
+            "Type": "distinctInstance"
+          }
+        ],
+        "SchedulingStrategy": "DAEMON",
+        "TaskDefinition": {
+          "Ref": "DsEcsTaskDefinition"
+        }
+      },
+      "Type": "AWS::ECS::Service"
+    },
+    "DsEcsTaskDefinition": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Environment": [
+              {
+                "Name": "App Name",
+                "Value": "DS"
+              }
+            ],
+            "Essential": true,
+            "Image": "httpd",
+            "MemoryReservation": 256,
+            "Name": "ds",
+            "PortMappings": [
+              {
+                "ContainerPort": 80,
+                "HostPort": 80,
+                "Protocol": "tcp"
+              }
+            ],
+            "Privileged": false,
+            "ReadonlyRootFilesystem": false,
+            "Ulimits": [
+              {
+                "HardLimit": 65536,
+                "Name": "nofile",
+                "SoftLimit": 65536
+              }
+            ],
+            "User": "ds"
+          },
+          {
+            "Command": [
+              "--envflag.enable",
+              "--envflag.prefix=VM_"
+            ],
+            "DependsOn": [
+              {
+                "Condition": "SUCCESS",
+                "ContainerName": "vmagent-config-provider"
+              }
+            ],
+            "Environment": [
+              {
+                "Name": "NetworkStack",
+                "Value": "eu1"
+              },
+              {
+                "Name": "Region",
+                "Value": {
+                  "Ref": "AWS::Region"
+                }
+              },
+              {
+                "Name": "STACK_NAME",
+                "Value": {
+                  "Ref": "AWS::StackName"
+                }
+              },
+              {
+                "Name": "VM_remoteWrite_url",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "https://",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "{{resolve:secretsmanager:",
+                            {
+                              "Fn::ImportValue": "eu1-SharedResources-VMagentLast9SecretsManagerSecretName"
+                            },
+                            ":SecretString:USERNAME}}"
+                          ]
+                        ]
+                      },
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "{{resolve:secretsmanager:",
+                            {
+                              "Fn::ImportValue": "eu1-SharedResources-VMagentLast9SecretsManagerSecretName"
+                            },
+                            ":SecretString:PASSWORD}}"
+                          ]
+                        ]
+                      },
+                      "@",
+                      {
+                        "Ref": "Last9RemoteWriteHost"
+                      }
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "VM_promscrape_config",
+                "Value": "/etc/prometheus/vmagent.yaml"
+              },
+              {
+                "Name": "VM_promscrape_maxScrapeSize",
+                "Value": "256000000"
+              },
+              {
+                "Name": "VM_promscrape_suppressScrapeErrors",
+                "Value": "1"
+              },
+              {
+                "Name": "VM_remoteWrite_queues",
+                "Value": "64"
+              },
+              {
+                "Name": "VM_remoteWrite_tmpDataPath",
+                "Value": "/var/tmp/vmagent/"
+              },
+              {
+                "Name": "VM_loggerOutput",
+                "Value": "stdout"
+              },
+              {
+                "Name": "VM_loggerFormat",
+                "Value": "json"
+              },
+              {
+                "Name": "VM_remoteWrite_maxDiskUsagePerURL",
+                "Value": "10737418240"
+              }
+            ],
+            "Essential": true,
+            "Image": "eu1.registry.clevertap-internal.io/clevertap/vmagent:v1.90.0",
+            "LogConfiguration": {
+              "LogDriver": "splunk",
+              "Options": {
+                "splunk-format": "raw",
+                "splunk-index": "vmagent-stdout",
+                "splunk-source": {
+                  "Ref": "AWS::StackName"
+                },
+                "splunk-sourcetype": "format_v1",
+                "splunk-url": "https://eu1.splunk-hec.clevertap-internal.io",
+                "splunk-verify-connection": "false"
+              },
+              "SecretOptions": [
+                {
+                  "Name": "splunk-token",
+                  "ValueFrom": {
+                    "Fn::Join": [
+                      ":",
+                      [
+                        {
+                          "Fn::ImportValue": "eu1-SharedResources-SplunkTokenSecretsManagerSecret"
+                        },
+                        "splunk-token::"
+                      ]
+                    ]
+                  }
+                }
+              ]
+            },
+            "MountPoints": [
+              {
+                "ContainerPath": "/home/vmagent/logs",
+                "SourceVolume": "logs"
+              },
+              {
+                "ContainerPath": "/etc/prometheus",
+                "SourceVolume": "vmagent-config"
+              }
+            ],
+            "Memory": 256,
+            "Name": "vmagent",
+            "Privileged": false,
+            "ReadonlyRootFilesystem": false,
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+              }
+            },
+            "Ulimits": [
+              {
+                "HardLimit": 900000,
+                "Name": "nofile",
+                "SoftLimit": 900000
+              }
+            ]
+          },
+          {
+            "Command": [
+              "/bin/sh",
+              "-c",
+              "tee /etc/prometheus/vmagent.yaml << EOF\nglobal:\n  scrape_interval: 1m\n  scrape_timeout: 20s\n\nscrape_configs:\n  - job_name: \"$STACK_NAME-metrics\"\n    static_configs:\n      - targets: [ \"localhost:8080\" ]\n  - job_name: \"$STACK_NAME-vmagent\"\n    static_configs:\n      - targets: [ \"localhost:8429\" ]\nEOF"
+            ],
+            "Environment": [
+              {
+                "Name": "STACK_NAME",
+                "Value": {
+                  "Ref": "AWS::StackName"
+                }
+              },
+              {
+                "Name": "Region",
+                "Value": {
+                  "Ref": "AWS::Region"
+                }
+              },
+              {
+                "Name": "NetworkStack",
+                "Value": "eu1"
+              }
+            ],
+            "Essential": false,
+            "Image": "redhat/ubi9:9.1.0-1646.1669627755",
+            "LogConfiguration": {
+              "LogDriver": "splunk",
+              "Options": {
+                "splunk-format": "raw",
+                "splunk-index": "vmagent-stdout",
+                "splunk-source": {
+                  "Ref": "AWS::StackName"
+                },
+                "splunk-sourcetype": "format_v1",
+                "splunk-url": "https://eu1.splunk-hec.clevertap-internal.io",
+                "splunk-verify-connection": "false"
+              },
+              "SecretOptions": [
+                {
+                  "Name": "splunk-token",
+                  "ValueFrom": {
+                    "Fn::Join": [
+                      ":",
+                      [
+                        {
+                          "Fn::ImportValue": "eu1-SharedResources-SplunkTokenSecretsManagerSecret"
+                        },
+                        "splunk-token::"
+                      ]
+                    ]
+                  }
+                }
+              ]
+            },
+            "MemoryReservation": 128,
+            "MountPoints": [
+              {
+                "ContainerPath": "/etc/prometheus",
+                "SourceVolume": "vmagent-config"
+              }
+            ],
+            "Name": "vmagent-config-provider",
+            "Privileged": false,
+            "ReadonlyRootFilesystem": false,
+            "Ulimits": [
+              {
+                "HardLimit": 900000,
+                "Name": "nofile",
+                "SoftLimit": 900000
+              }
+            ]
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Ref": "DsEcsTaskExecutionRole"
+        },
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "NetworkMode": "host"
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    },
+    "DsEcsTaskExecutionRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "DsEcsTaskExecutionRolePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "*",
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "DsEcsTaskExecutionRolePolicy"
+            ]
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "DsEcsTaskExecutionRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "DsEcsTaskRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "DsEcsTaskRolePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "*",
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "DsEcsTaskRolePolicy"
+            ]
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "DsEcsTaskRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    }
+  }
+}

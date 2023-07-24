@@ -1,0 +1,263 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Core Network Stack",
+  "Outputs": {
+    "AppPrivateSubnet1Id": {
+      "Description": "App Private Subnet 1 Id",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-AppPrivateSubnet1Id"
+        }
+      },
+      "Value": {
+        "Ref": "AppPrivateSubnet1"
+      }
+    },
+    "AppPrivateSubnet2Id": {
+      "Description": "App Private Subnet 2 Id",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-AppPrivateSubnet2Id"
+        }
+      },
+      "Value": {
+        "Ref": "AppPrivateSubnet2"
+      }
+    },
+    "AppPublicSubne1tId": {
+      "Description": "App Public Subnet 1 Id",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-AppPublicSubnet1Id"
+        }
+      },
+      "Value": {
+        "Ref": "AppPublicSubnet1"
+      }
+    },
+    "AppPublicSubnet2Id": {
+      "Description": "App Public Subnet 2 Id",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-AppPublicSubnet2Id"
+        }
+      },
+      "Value": {
+        "Ref": "AppPublicSubnet2"
+      }
+    },
+    "AppVPCId": {
+      "Description": "App Vpc Id",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-AppVPCId"
+        }
+      },
+      "Value": {
+        "Ref": "AppVPC"
+      }
+    }
+  },
+  "Parameters": {
+    "AppPrivateSubnet1Cidr": {
+      "Description": "The CIDR block for the private subnet 1 for App",
+      "Type": "String"
+    },
+    "AppPrivateSubnet2Cidr": {
+      "Description": "The CIDR block for the private subnet 2 for App",
+      "Type": "String"
+    },
+    "AppPublicSubnet1Cidr": {
+      "Description": "The CIDR block for the public subnet1 for App",
+      "Type": "String"
+    },
+    "AppPublicSubnet2Cidr": {
+      "Description": "The CIDR block for the public subnet2 for App",
+      "Type": "String"
+    },
+    "AppVpcCidr": {
+      "Description": "The CIDR block for the VPC for App",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "AppInternetGateway": {
+      "Properties": {},
+      "Type": "AWS::EC2::InternetGateway"
+    },
+    "AppPrivateSubnet1": {
+      "Properties": {
+        "CidrBlock": {
+          "Ref": "AppPrivateSubnet1Cidr"
+        },
+        "VpcId": {
+          "Ref": "AppVPC"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "AppPrivateSubnet2": {
+      "Properties": {
+        "CidrBlock": {
+          "Ref": "AppPrivateSubnet2Cidr"
+        },
+        "VpcId": {
+          "Ref": "AppVPC"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "AppPublicRouteTable1": {
+      "Properties": {
+        "VpcId": {
+          "Ref": "AppVPC"
+        }
+      },
+      "Type": "AWS::EC2::RouteTable"
+    },
+    "AppPublicRouteTable1IGRoute": {
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Fn::GetAtt": [
+            "AppInternetGateway",
+            "InternetGatewayId"
+          ]
+        },
+        "RouteTableId": {
+          "Ref": "AppPublicRouteTable1"
+        }
+      },
+      "Type": "AWS::EC2::Route"
+    },
+    "AppPublicRouteTable2": {
+      "Properties": {
+        "VpcId": {
+          "Ref": "AppVPC"
+        }
+      },
+      "Type": "AWS::EC2::RouteTable"
+    },
+    "AppPublicRouteTable2IGRoute": {
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Fn::GetAtt": [
+            "AppInternetGateway",
+            "InternetGatewayId"
+          ]
+        },
+        "RouteTableId": {
+          "Ref": "AppPublicRouteTable2"
+        }
+      },
+      "Type": "AWS::EC2::Route"
+    },
+    "AppPublicSubnet1": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": {
+                "Ref": "AWS::Region"
+              }
+            }
+          ]
+        },
+        "CidrBlock": {
+          "Ref": "AppPublicSubnet1Cidr"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AppPublicSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "AppVPC"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "AppPublicSubnet1RouteTableAssociation": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AppPublicRouteTable1"
+        },
+        "SubnetId": {
+          "Ref": "AppPublicSubnet1"
+        }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    "AppPublicSubnet2": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": {
+                "Ref": "AWS::Region"
+              }
+            }
+          ]
+        },
+        "CidrBlock": {
+          "Ref": "AppPublicSubnet2Cidr"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AppPublicSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "AppVPC"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "AppPublicSubnet2RouteTableAssociation": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AppPublicRouteTable2"
+        },
+        "SubnetId": {
+          "Ref": "AppPublicSubnet2"
+        }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    "AppVPC": {
+      "Properties": {
+        "CidrBlock": {
+          "Ref": "AppVpcCidr"
+        },
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AppVPC"
+          }
+        ]
+      },
+      "Type": "AWS::EC2::VPC"
+    },
+    "AppVpcInternetGatewayAttachment": {
+      "Properties": {
+        "InternetGatewayId": {
+          "Fn::GetAtt": [
+            "AppInternetGateway",
+            "InternetGatewayId"
+          ]
+        },
+        "VpcId": {
+          "Ref": "AppVPC"
+        }
+      },
+      "Type": "AWS::EC2::VPCGatewayAttachment"
+    }
+  }
+}

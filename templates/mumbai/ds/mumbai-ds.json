@@ -1,0 +1,230 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "DS Base Stack",
+  "Outputs": {
+    "DsElbTargetGroupArn": {
+      "Description": "DS ELB Target Group Arn",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-DsElbTargetGroupArn"
+        }
+      },
+      "Value": {
+        "Ref": "DsElbTargetGroup"
+      }
+    }
+  },
+  "Parameters": {
+    "DsAmiId": {
+      "Description": "The AMI ID for the DS",
+      "Type": "String"
+    },
+    "DsDesiredSize": {
+      "Description": "The desired capacity for the DS",
+      "Type": "String"
+    },
+    "DsInstanceType": {
+      "Description": "The instance type for the DS",
+      "Type": "String"
+    },
+    "DsMaxSize": {
+      "Description": "The maximum size for the DS",
+      "Type": "String"
+    },
+    "DsMinSize": {
+      "Description": "The minimum size for the DS",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "DsAsg": {
+      "Properties": {
+        "DesiredCapacity": {
+          "Ref": "DsDesiredSize"
+        },
+        "LaunchConfigurationName": {
+          "Ref": "DsLaunchConfiguration"
+        },
+        "MaxSize": {
+          "Ref": "DsMaxSize"
+        },
+        "MinSize": {
+          "Ref": "DsMinSize"
+        },
+        "TargetGroupARNs": [
+          {
+            "Ref": "DsElbTargetGroup"
+          }
+        ],
+        "VPCZoneIdentifier": [
+          {
+            "Fn::ImportValue": "Mumbai-Network-AppPublicSubnet1Id"
+          },
+          {
+            "Fn::ImportValue": "Mumbai-Network-AppPublicSubnet2Id"
+          }
+        ]
+      },
+      "Type": "AWS::AutoScaling::AutoScalingGroup"
+    },
+    "DsEc2IamRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "DsEc2InstanceProfile": {
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "DsEc2IamRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::InstanceProfile"
+    },
+    "DsEc2RolePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "*",
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "DsEc2RolePolicy"
+            ]
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "DsEc2IamRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "DsElb": {
+      "Properties": {
+        "IpAddressType": "ipv4",
+        "LoadBalancerAttributes": [
+          {
+            "Key": "idle_timeout.timeout_seconds",
+            "Value": "1800"
+          }
+        ],
+        "Scheme": "internet-facing",
+        "SecurityGroups": [
+          {
+            "Fn::ImportValue": "Mumbai-DS-SecurityGroup-DS2SecurityGroupId"
+          }
+        ],
+        "Subnets": [
+          {
+            "Fn::ImportValue": "Mumbai-Network-AppPublicSubnet1Id"
+          },
+          {
+            "Fn::ImportValue": "Mumbai-Network-AppPublicSubnet2Id"
+          }
+        ],
+        "Type": "application"
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    },
+    "DsElbListener": {
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "DsElbTargetGroup"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "DsElb"
+        },
+        "Port": 80,
+        "Protocol": "HTTP"
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::Listener"
+    },
+    "DsElbTargetGroup": {
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/",
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckTimeoutSeconds": 10,
+        "HealthyThresholdCount": 5,
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "Port": 80,
+        "Protocol": "HTTP",
+        "TargetGroupAttributes": [
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false"
+          },
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "300"
+          }
+        ],
+        "TargetType": "instance",
+        "UnhealthyThresholdCount": 2,
+        "VpcId": {
+          "Fn::ImportValue": "Mumbai-Network-AppVPCId"
+        }
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
+    },
+    "DsLaunchConfiguration": {
+      "Properties": {
+        "AssociatePublicIpAddress": true,
+        "IamInstanceProfile": {
+          "Ref": "DsEc2InstanceProfile"
+        },
+        "ImageId": {
+          "Ref": "DsAmiId"
+        },
+        "InstanceMonitoring": false,
+        "InstanceType": {
+          "Ref": "DsInstanceType"
+        },
+        "SecurityGroups": [
+          {
+            "Fn::ImportValue": "Mumbai-DS-SecurityGroup-DS2SecurityGroupId"
+          }
+        ]
+      },
+      "Type": "AWS::AutoScaling::LaunchConfiguration"
+    }
+  }
+}
