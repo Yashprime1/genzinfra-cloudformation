@@ -108,46 +108,6 @@
                   }
                 },
                 {
-                  "Name": "VM_remoteWrite_url",
-                  "Value": {
-                    "Fn::Join": [
-                      "",
-                      [
-                        "https://",
-                        {
-                          "Fn::Join": [
-                            "",
-                            [
-                              "{{resolve:secretsmanager:",
-                              {
-                                "Fn::ImportValue": "eu1-SharedResources-VMagentLast9SecretsManagerSecretName"
-                              },
-                              ":SecretString:USERNAME}}"
-                            ]
-                          ]
-                        },
-                        ":",
-                        {
-                          "Fn::Join": [
-                            "",
-                            [
-                              "{{resolve:secretsmanager:",
-                              {
-                                "Fn::ImportValue": "eu1-SharedResources-VMagentLast9SecretsManagerSecretName"
-                              },
-                              ":SecretString:PASSWORD}}"
-                            ]
-                          ]
-                        },
-                        "@",
-                        {
-                          "Ref": "Last9RemoteWriteHost"
-                        }
-                      ]
-                    ]
-                  }
-                },
-                {
                   "Name": "VM_promscrape_config",
                   "Value": "/etc/prometheus/vmagent.yaml"
                 },
