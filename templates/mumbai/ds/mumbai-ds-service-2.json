@@ -81,91 +81,6 @@
             },
             {
               "Command": [
-                "--envflag.enable",
-                "--envflag.prefix=VM_"
-              ],
-              "DependsOn": [
-                {
-                  "Condition": "SUCCESS",
-                  "ContainerName": "vmagent-config-provider"
-                }
-              ],
-              "Environment": [
-                {
-                  "Name": "NetworkStack",
-                  "Value": "eu1"
-                },
-                {
-                  "Name": "Region",
-                  "Value": {
-                    "Ref": "AWS::Region"
-                  }
-                },
-                {
-                  "Name": "STACK_NAME",
-                  "Value": {
-                    "Ref": "AWS::StackName"
-                  }
-                },
-                {
-                  "Name": "VM_promscrape_config",
-                  "Value": "/etc/prometheus/vmagent.yaml"
-                },
-                {
-                  "Name": "VM_promscrape_maxScrapeSize",
-                  "Value": "256000000"
-                },
-                {
-                  "Name": "VM_promscrape_suppressScrapeErrors",
-                  "Value": "1"
-                },
-                {
-                  "Name": "VM_remoteWrite_queues",
-                  "Value": "64"
-                },
-                {
-                  "Name": "VM_remoteWrite_tmpDataPath",
-                  "Value": "/var/tmp/vmagent/"
-                },
-                {
-                  "Name": "VM_loggerOutput",
-                  "Value": "stdout"
-                },
-                {
-                  "Name": "VM_loggerFormat",
-                  "Value": "json"
-                },
-                {
-                  "Name": "VM_remoteWrite_maxDiskUsagePerURL",
-                  "Value": "10737418240"
-                }
-              ],
-              "Essential": true,
-              "Image": "victoriametrics/vmagent",
-              "MountPoints": [
-                {
-                  "ContainerPath": "/home/vmagent/logs",
-                  "SourceVolume": "logs"
-                },
-                {
-                  "ContainerPath": "/etc/prometheus",
-                  "SourceVolume": "vmagent-config"
-                }
-              ],
-              "Memory": 256,
-              "Name": "vmagent",
-              "Privileged": false,
-              "ReadonlyRootFilesystem": false,
-              "Ulimits": [
-                {
-                  "HardLimit": 900000,
-                  "Name": "nofile",
-                  "SoftLimit": 900000
-                }
-              ]
-            },
-            {
-              "Command": [
                 "/bin/sh",
                 "-c",
                 "tee /etc/prometheus/vmagent.yaml << EOF\nglobal:\n  scrape_interval: 1m\n  scrape_timeout: 20s\n\nscrape_configs:\n  - job_name: \"$STACK_NAME-metrics\"\n    static_configs:\n      - targets: [ \"localhost:8080\" ]\n  - job_name: \"$STACK_NAME-vmagent\"\n    static_configs:\n      - targets: [ \"localhost:8429\" ]\nEOF"
@@ -188,7 +103,7 @@
                   "Value": "eu1"
                 }
               ],
-              "Essential": false,
+              "Essential": ,
               "Image": "redhat/ubi9:9.2-696",
               "MemoryReservation": 128,
               "MountPoints": [
