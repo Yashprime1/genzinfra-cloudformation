@@ -195,35 +195,6 @@
               ],
               "Essential": false,
               "Image": "redhat/ubi9:9.1.0-1646.1669627755",
-              "LogConfiguration": {
-                "LogDriver": "splunk",
-                "Options": {
-                  "splunk-format": "raw",
-                  "splunk-index": "vmagent-stdout",
-                  "splunk-source": {
-                    "Ref": "AWS::StackName"
-                  },
-                  "splunk-sourcetype": "format_v1",
-                  "splunk-url": "https://eu1.splunk-hec.clevertap-internal.io",
-                  "splunk-verify-connection": "false"
-                },
-                "SecretOptions": [
-                  {
-                    "Name": "splunk-token",
-                    "ValueFrom": {
-                      "Fn::Join": [
-                        ":",
-                        [
-                          {
-                            "Fn::ImportValue": "eu1-SharedResources-SplunkTokenSecretsManagerSecret"
-                          },
-                          "splunk-token::"
-                        ]
-                      ]
-                    }
-                  }
-                ]
-              },
               "MemoryReservation": 128,
               "MountPoints": [
                 {
