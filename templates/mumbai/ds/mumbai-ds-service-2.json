@@ -189,7 +189,7 @@
                 }
               ],
               "Essential": false,
-              "Image": "redhat/ubi9:9.1.0-1646.1669627755",
+              "Image": "redhat/ubi9:9.2-696",
               "MemoryReservation": 128,
               "MountPoints": [
                 {
