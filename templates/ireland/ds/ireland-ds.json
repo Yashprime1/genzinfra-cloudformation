@@ -225,6 +225,54 @@
         ]
       },
       "Type": "AWS::AutoScaling::LaunchConfiguration"
+    },
+    "DsPrometheusElbListener": {
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "DsPrometheusElbTargetGroup"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "DsElb"
+        },
+        "Port": 9090,
+        "Protocol": "HTTP"
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::Listener"
+    },
+    "DsPrometheusElbTargetGroup": {
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/",
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckTimeoutSeconds": 10,
+        "HealthyThresholdCount": 5,
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "Port": 9090,
+        "Protocol": "HTTP",
+        "TargetGroupAttributes": [
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false"
+          },
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "300"
+          }
+        ],
+        "TargetType": "instance",
+        "UnhealthyThresholdCount": 2,
+        "VpcId": {
+          "Fn::ImportValue": "-AppVPCId"
+        }
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
     }
   }
 }

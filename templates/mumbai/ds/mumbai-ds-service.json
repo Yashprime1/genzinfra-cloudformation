@@ -3,7 +3,11 @@
   "Description": "DS Service Stack",
   "Resources": {
     "DsEcsCluster": {
-      "Properties": {},
+      "Properties": {
+        "ClusterName": {
+          "Ref": "AWS::StackName"
+        }
+      },
       "Type": "AWS::ECS::Cluster"
     },
     "DsEcsService": {
@@ -76,239 +80,6 @@
                 "HardLimit": 65536,
                 "Name": "nofile",
                 "SoftLimit": 65536
-              }
-            ],
-            "User": "ds"
-          },
-          {
-            "Command": [
-              "--envflag.enable",
-              "--envflag.prefix=VM_"
-            ],
-            "DependsOn": [
-              {
-                "Condition": "SUCCESS",
-                "ContainerName": "vmagent-config-provider"
-              }
-            ],
-            "Environment": [
-              {
-                "Name": "NetworkStack",
-                "Value": "eu1"
-              },
-              {
-                "Name": "Region",
-                "Value": {
-                  "Ref": "AWS::Region"
-                }
-              },
-              {
-                "Name": "STACK_NAME",
-                "Value": {
-                  "Ref": "AWS::StackName"
-                }
-              },
-              {
-                "Name": "VM_remoteWrite_url",
-                "Value": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "https://",
-                      {
-                        "Fn::Join": [
-                          "",
-                          [
-                            "{{resolve:secretsmanager:",
-                            {
-                              "Fn::ImportValue": "eu1-SharedResources-VMagentLast9SecretsManagerSecretName"
-                            },
-                            ":SecretString:USERNAME}}"
-                          ]
-                        ]
-                      },
-                      ":",
-                      {
-                        "Fn::Join": [
-                          "",
-                          [
-                            "{{resolve:secretsmanager:",
-                            {
-                              "Fn::ImportValue": "eu1-SharedResources-VMagentLast9SecretsManagerSecretName"
-                            },
-                            ":SecretString:PASSWORD}}"
-                          ]
-                        ]
-                      },
-                      "@",
-                      {
-                        "Ref": "Last9RemoteWriteHost"
-                      }
-                    ]
-                  ]
-                }
-              },
-              {
-                "Name": "VM_promscrape_config",
-                "Value": "/etc/prometheus/vmagent.yaml"
-              },
-              {
-                "Name": "VM_promscrape_maxScrapeSize",
-                "Value": "256000000"
-              },
-              {
-                "Name": "VM_promscrape_suppressScrapeErrors",
-                "Value": "1"
-              },
-              {
-                "Name": "VM_remoteWrite_queues",
-                "Value": "64"
-              },
-              {
-                "Name": "VM_remoteWrite_tmpDataPath",
-                "Value": "/var/tmp/vmagent/"
-              },
-              {
-                "Name": "VM_loggerOutput",
-                "Value": "stdout"
-              },
-              {
-                "Name": "VM_loggerFormat",
-                "Value": "json"
-              },
-              {
-                "Name": "VM_remoteWrite_maxDiskUsagePerURL",
-                "Value": "10737418240"
-              }
-            ],
-            "Essential": true,
-            "Image": "eu1.registry.clevertap-internal.io/clevertap/vmagent:v1.90.0",
-            "LogConfiguration": {
-              "LogDriver": "splunk",
-              "Options": {
-                "splunk-format": "raw",
-                "splunk-index": "vmagent-stdout",
-                "splunk-source": {
-                  "Ref": "AWS::StackName"
-                },
-                "splunk-sourcetype": "format_v1",
-                "splunk-url": "https://eu1.splunk-hec.clevertap-internal.io",
-                "splunk-verify-connection": "false"
-              },
-              "SecretOptions": [
-                {
-                  "Name": "splunk-token",
-                  "ValueFrom": {
-                    "Fn::Join": [
-                      ":",
-                      [
-                        {
-                          "Fn::ImportValue": "eu1-SharedResources-SplunkTokenSecretsManagerSecret"
-                        },
-                        "splunk-token::"
-                      ]
-                    ]
-                  }
-                }
-              ]
-            },
-            "MountPoints": [
-              {
-                "ContainerPath": "/home/vmagent/logs",
-                "SourceVolume": "logs"
-              },
-              {
-                "ContainerPath": "/etc/prometheus",
-                "SourceVolume": "vmagent-config"
-              }
-            ],
-            "Memory": 256,
-            "Name": "vmagent",
-            "Privileged": false,
-            "ReadonlyRootFilesystem": false,
-            "RepositoryCredentials": {
-              "CredentialsParameter": {
-                "Fn::ImportValue": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-              }
-            },
-            "Ulimits": [
-              {
-                "HardLimit": 900000,
-                "Name": "nofile",
-                "SoftLimit": 900000
-              }
-            ]
-          },
-          {
-            "Command": [
-              "/bin/sh",
-              "-c",
-              "tee /etc/prometheus/vmagent.yaml << EOF\nglobal:\n  scrape_interval: 1m\n  scrape_timeout: 20s\n\nscrape_configs:\n  - job_name: \"$STACK_NAME-metrics\"\n    static_configs:\n      - targets: [ \"localhost:8080\" ]\n  - job_name: \"$STACK_NAME-vmagent\"\n    static_configs:\n      - targets: [ \"localhost:8429\" ]\nEOF"
-            ],
-            "Environment": [
-              {
-                "Name": "STACK_NAME",
-                "Value": {
-                  "Ref": "AWS::StackName"
-                }
-              },
-              {
-                "Name": "Region",
-                "Value": {
-                  "Ref": "AWS::Region"
-                }
-              },
-              {
-                "Name": "NetworkStack",
-                "Value": "eu1"
-              }
-            ],
-            "Essential": false,
-            "Image": "redhat/ubi9:9.1.0-1646.1669627755",
-            "LogConfiguration": {
-              "LogDriver": "splunk",
-              "Options": {
-                "splunk-format": "raw",
-                "splunk-index": "vmagent-stdout",
-                "splunk-source": {
-                  "Ref": "AWS::StackName"
-                },
-                "splunk-sourcetype": "format_v1",
-                "splunk-url": "https://eu1.splunk-hec.clevertap-internal.io",
-                "splunk-verify-connection": "false"
-              },
-              "SecretOptions": [
-                {
-                  "Name": "splunk-token",
-                  "ValueFrom": {
-                    "Fn::Join": [
-                      ":",
-                      [
-                        {
-                          "Fn::ImportValue": "eu1-SharedResources-SplunkTokenSecretsManagerSecret"
-                        },
-                        "splunk-token::"
-                      ]
-                    ]
-                  }
-                }
-              ]
-            },
-            "MemoryReservation": 128,
-            "MountPoints": [
-              {
-                "ContainerPath": "/etc/prometheus",
-                "SourceVolume": "vmagent-config"
-              }
-            ],
-            "Name": "vmagent-config-provider",
-            "Privileged": false,
-            "ReadonlyRootFilesystem": false,
-            "Ulimits": [
-              {
-                "HardLimit": 900000,
-                "Name": "nofile",
-                "SoftLimit": 900000
               }
             ]
           }
@@ -426,6 +197,90 @@
         ]
       },
       "Type": "AWS::IAM::Policy"
+    },
+    "PrometheusEcsService": {
+      "Properties": {
+        "Cluster": {
+          "Ref": "DsEcsCluster"
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "HealthCheckGracePeriodSeconds": 60,
+        "LaunchType": "EC2",
+        "LoadBalancers": [
+          {
+            "ContainerName": "prometheus",
+            "ContainerPort": 9090,
+            "TargetGroupArn": {
+              "Fn::ImportValue": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "AWS::StackName"
+                    },
+                    "DsElbTargetGroupArn"
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+        "PlacementConstraints": [
+          {
+            "Type": "distinctInstance"
+          }
+        ],
+        "SchedulingStrategy": "DAEMON",
+        "TaskDefinition": {
+          "Ref": "PrometheusEcsTaskDefinition"
+        }
+      },
+      "Type": "AWS::ECS::Service"
+    },
+    "PrometheusEcsTaskDefinition": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Environment": [
+              {
+                "Name": "App Name",
+                "Value": "Prometheus"
+              }
+            ],
+            "Essential": true,
+            "Image": "bitnami/prometheus",
+            "MemoryReservation": 64,
+            "Name": "prometheus",
+            "PortMappings": [
+              {
+                "ContainerPort": 9090,
+                "HostPort": 9090,
+                "Protocol": "tcp"
+              }
+            ],
+            "Privileged": false,
+            "ReadonlyRootFilesystem": false,
+            "Ulimits": [
+              {
+                "HardLimit": 65536,
+                "Name": "nofile",
+                "SoftLimit": 65536
+              }
+            ]
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Ref": "DsEcsTaskExecutionRole"
+        },
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "NetworkMode": "host"
+      },
+      "Type": "AWS::ECS::TaskDefinition"
     }
   }
 }
