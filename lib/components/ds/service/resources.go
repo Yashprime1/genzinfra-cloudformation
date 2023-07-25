@@ -162,7 +162,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 						Value: cloudformation.String("Prometheus"),
 					},
 				},
-				Essential: cloudformation.Bool(false),
+				Essential: cloudformation.Bool(true),
 				MemoryReservation: cloudformation.Int(64),
 				Privileged:        cloudformation.Bool(false),
 				ReadonlyRootFilesystem: cloudformation.Bool(false),
