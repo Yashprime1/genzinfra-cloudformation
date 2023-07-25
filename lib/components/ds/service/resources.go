@@ -189,7 +189,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 			MaximumPercent:        cloudformation.Int(100),
 			MinimumHealthyPercent: cloudformation.Int(0),
 		},
-		HealthCheckGracePeriodSeconds: cloudformation.Int(60),
+		HealthCheckGracePeriodSeconds: cloudformation.Int(65),
 		LaunchType:                    cloudformation.String("EC2"),
 		LoadBalancers:                 []ecs.Service_LoadBalancer{
 			{
