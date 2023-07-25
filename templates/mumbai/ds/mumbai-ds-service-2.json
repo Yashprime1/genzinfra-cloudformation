@@ -69,6 +69,12 @@
                   "Protocol": "tcp"
                 }
               ],
+              "MountPoints": [
+                {
+                    "ContainerPath": "/etc",
+                    "SourceVolume": "vmagent-config"
+                }
+            ],
               "Privileged": false,
               "ReadonlyRootFilesystem": false,
               "Ulimits": [
