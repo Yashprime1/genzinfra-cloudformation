@@ -103,7 +103,7 @@
                   "Value": "eu1"
                 }
               ],
-              "Essential": ,
+              "Essential": true,
               "Image": "redhat/ubi9:9.2-696",
               "MemoryReservation": 128,
               "MountPoints": [
