@@ -82,7 +82,9 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 		},
 	}
 
-	template.Resources["DsEcsCluster"] = &ecs.Cluster{}
+	template.Resources["DsEcsCluster"] = &ecs.Cluster{
+		ClusterName: cloudformation.String(cloudformation.Ref("AWS::StackName")),
+	}
 	template.Resources["DsEcsTaskDefinition"] = &ecs.TaskDefinition{
 		NetworkMode:      cloudformation.String("host"),
 		Family:           cloudformation.String(cloudformation.Ref("AWS::StackName")),
@@ -101,7 +103,6 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 				MemoryReservation: cloudformation.Int(256),
 				Privileged:        cloudformation.Bool(false),
 				ReadonlyRootFilesystem: cloudformation.Bool(false),
-				User:                   cloudformation.String("ds"),
 				Ulimits: []ecs.TaskDefinition_Ulimit{
 					{
 						Name:      "nofile",

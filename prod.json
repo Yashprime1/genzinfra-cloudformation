@@ -22,7 +22,7 @@
                 },
                 "Mumbai-DS":{
                     "Parameters": {
-                        "DsAmiId":"ami-05007c08b0695d528",
+                        "DsAmiId":"ami-08346f016623c7424",
                         "DsInstanceType":"t2.micro",
                         "DsMaxSize":"1",
                         "DsMinSize":"1",
@@ -35,7 +35,7 @@
                     "Parameters": {
                     },
                     "SkipUpdate": false,
-                    "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service-2.json"
+                    "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
                 }
                 
         }
