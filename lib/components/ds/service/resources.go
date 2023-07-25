@@ -148,4 +148,67 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 		SchedulingStrategy: cloudformation.String("DAEMON"),
 		TaskDefinition:     cloudformation.String(cloudformation.Ref("DsEcsTaskDefinition")),
 	}
+	template.Resources["PrometheusEcsTaskDefinition"] = &ecs.TaskDefinition{
+		NetworkMode:      cloudformation.String("host"),
+		Family:           cloudformation.String(cloudformation.Ref("AWS::StackName")),
+		ExecutionRoleArn: cloudformation.String(cloudformation.Ref("DsEcsTaskExecutionRole")),
+		ContainerDefinitions: []ecs.TaskDefinition_ContainerDefinition{
+			{
+				Name: "prometheus",
+				Image: "bitnami/prometheus",
+				Environment: []ecs.TaskDefinition_KeyValuePair{
+					{
+						Name:  cloudformation.String("App Name"),
+						Value: cloudformation.String("Prometheus"),
+					},
+				},
+				Essential: cloudformation.Bool(false),
+				MemoryReservation: cloudformation.Int(64),
+				Privileged:        cloudformation.Bool(false),
+				ReadonlyRootFilesystem: cloudformation.Bool(false),
+				Ulimits: []ecs.TaskDefinition_Ulimit{
+					{
+						Name:      "nofile",
+						SoftLimit: 65536,
+						HardLimit: 65536,
+					},
+				},
+				PortMappings: []ecs.TaskDefinition_PortMapping{
+					{
+						ContainerPort: cloudformation.Int(9090),
+						HostPort:      cloudformation.Int(9090),
+						Protocol:      cloudformation.String("tcp"),
+					},
+				},
+			},
+		},
+	}
+	template.Resources["PrometheusEcsService"] = &ecs.Service{
+		Cluster: cloudformation.String(cloudformation.Ref("DsEcsCluster")),
+		DeploymentConfiguration: &ecs.Service_DeploymentConfiguration{
+			MaximumPercent:        cloudformation.Int(100),
+			MinimumHealthyPercent: cloudformation.Int(0),
+		},
+		HealthCheckGracePeriodSeconds: cloudformation.Int(60),
+		LaunchType:                    cloudformation.String("EC2"),
+		LoadBalancers:                 []ecs.Service_LoadBalancer{
+			{
+				ContainerName:  cloudformation.String("prometheus"),
+				ContainerPort:  cloudformation.Int(9090),
+				TargetGroupArn: cloudformation.String(cloudformation.ImportValue(
+					cloudformation.Join("-", []string{
+						cloudformation.Ref("AWS::StackName"),
+						"DsElbTargetGroupArn",
+					}),
+				)),
+			},
+		},
+		PlacementConstraints: []ecs.Service_PlacementConstraint{
+			{
+				Type: "distinctInstance",
+			},
+		},
+		SchedulingStrategy: cloudformation.String("DAEMON"),
+		TaskDefinition:     cloudformation.String(cloudformation.Ref("PrometheusEcsTaskDefinition")),
+	}
 }
