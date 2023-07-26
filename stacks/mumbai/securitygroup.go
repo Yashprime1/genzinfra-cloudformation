@@ -11,7 +11,7 @@ func GenerateSecurityGroupStack() {
 	fmt.Println("Generating Mumbai Security Group stack template")
 
 	// Generate the stack template
-	SecurityGroupTemplate := securitygroup.GenerateCoreSecurityGroupStack("Mumbai-Network")	
+	SecurityGroupTemplate := securitygroup.GenerateCoreSecurityGroupStack("X-Network")	
 	//Write the Json Templates
 	SecurityGroupJsonTemplate, err := SecurityGroupTemplate.JSON()
 	if err != nil {
