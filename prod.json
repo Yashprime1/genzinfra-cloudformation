@@ -1,6 +1,6 @@
 {
-    "BucketName": "cf-templates-1lc1oc1z0sdmq-eu-west-1", 
-    "BucketRegion": "eu-west-1", "Parallel": "true",
+    "BucketName": "yashprime", 
+    "BucketRegion": "ap-south-1", "Parallel": "true",
     "Stacks":{
         "ap-south-1":{
                 "X-Network":{
