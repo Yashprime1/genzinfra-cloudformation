@@ -18,7 +18,10 @@
                 "Origins":[
                     {
                         "DomainName" : "Mumba-DsElb-7G4NK4EJVRVM-516364490.ap-south-1.elb.amazonaws.com",
-                        "Id" : "Mumbai-DS"
+                        "Id" : "Mumbai-DS",
+                        "CustomOriginConfig" : {
+                            "OriginProtocolPolicy" : "http-only"
+                        }
                     }
                 ]
             }
