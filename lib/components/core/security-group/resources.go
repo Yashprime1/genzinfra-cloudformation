@@ -33,7 +33,7 @@ func AddResourcesForCoreSecurityGroupStack(template *cloudformation.Template,def
 		Tags: []tags.Tag{
 			{
 				Key: "Name",
-				Value: "DS Security Group",
+				Value: "DS Security Groups",
 			},
 		},
 	}
