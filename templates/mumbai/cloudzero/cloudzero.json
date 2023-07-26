@@ -6,27 +6,6 @@
     "Parameters": {
     },
     "Resources": {
-      "AppCloudfront":{
-        "Type" : "AWS::CloudFront::Distribution",
-        "Properties" : {
-            "DistributionConfig" : {
-                "DefaultCacheBehavior":{
-                    "ViewerProtocolPolicy":"allow-all",
-                    "TargetOriginId":"app"    
-                },
-                "Enabled": True,
-                "Origins":[
-                    {
-                        "DomainName" : "Mumba-DsElb-7G4NK4EJVRVM-516364490.ap-south-1.elb.amazonaws.com",
-                        "Id" : "Mumbai-DS",
-                        "CustomOriginConfig" : {
-                            "OriginProtocolPolicy" : "http-only"
-                        }
-                    }
-                ]
-            }
-          }
-      },  
       "CloudfrontLogsSqsQueue": {
         "Type": "AWS::SQS::Queue",
         "Properties": {}

@@ -20,6 +20,12 @@
                     "SkipUpdate": false,
                     "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
                 },
+                "in1-SharedResources-CloudZero":{
+                    "Parameters": {
+                    },
+                    "SkipUpdate": false,
+                    "TemplatePath": "./templates/mumbai/cloudzero/cloudzero.json"
+                },
                 "Mumbai-DS":{
                     "Parameters": {
                         "DsAmiId":"ami-01f7ac98f4c80de69",
