@@ -28,7 +28,7 @@
                 },
                 "Mumbai-DS":{
                     "Parameters": {
-                        "DsAmiId":"ami-08346f016623c7424",
+                        "DsAmiId":"ami-01f7ac98f4c80de69",
                         "DsInstanceType":"t2.micro",
                         "DsMaxSize":"1",
                         "DsMinSize":"1",
