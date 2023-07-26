@@ -23,7 +23,7 @@
                 ]
             }
           }
-      }  
+      },  
       "CloudfrontLogsSqsQueue": {
         "Type": "AWS::SQS::Queue",
         "Properties": {}
