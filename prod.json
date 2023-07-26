@@ -23,7 +23,7 @@
                 "in1-SharedResources-CloudZero":{
                     "Parameters": {
                     },
-                    "SkipUpdate": true,
+                    "SkipUpdate": false,
                     "TemplatePath": "./templates/mumbai/cloudzero/cloudzero.json"
                 },
                 "Mumbai-DS":{

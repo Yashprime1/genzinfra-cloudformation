@@ -14,7 +14,13 @@
                     "ViewerProtocolPolicy":"allow-all",
                     "TargetOriginId":"app"  
                 },
-                "Enabled": True,
+                "Enabled": True
+                "Origins":[
+                    {
+                        "DomainName" : "Mumba-DsElb-7G4NK4EJVRVM-516364490.ap-south-1.elb.amazonaws.com",
+                        "Id" : "Mumbai-DS"
+                    }
+                ]
             }
           }
       }  
@@ -55,8 +61,7 @@
       "CloudfrontLogsS3Bucket": {
         "Type": "AWS::S3::Bucket",
         "Properties": {
-          "AccessControl": "LogDeliveryWrite",
-          
+            BucketName: "cloudzero-cloudfront-logs"        
         }
       },
     }
