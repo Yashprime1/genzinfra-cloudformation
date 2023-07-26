@@ -64,7 +64,7 @@
       "CloudfrontLogsS3Bucket": {
         "Type": "AWS::S3::Bucket",
         "Properties": {
-            BucketName: "cloudfront-accesslog-bucket","        
+            BucketName: "cloudfront-accesslog-bucket"        
         }
       }
     }
