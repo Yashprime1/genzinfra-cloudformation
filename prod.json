@@ -1,6 +1,6 @@
 {
     "BucketName": "yashprime", 
-    "BucketRegion": "ap-south-1", "Parallel": "true",
+    "BucketRegion": "ap-south-1", "Parallel": "false",
     "Stacks":{
         "ap-south-1":{
                 "X-Network":{
