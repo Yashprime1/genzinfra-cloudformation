@@ -2,28 +2,6 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "DS Base Stack",
     "Outputs": {
-      "DsElbTargetGroupArn": {
-        "Description": "DS ELB Target Group Arn",
-        "Export": {
-          "Name": {
-            "Fn::Sub": "${AWS::StackName}-Service-DsElbTargetGroupArn"
-          }
-        },
-        "Value": {
-          "Ref": "DsElbTargetGroup"
-        }
-      },
-      "DsPrometheusElbTargetGroupArn": {
-        "Description": "DS ELB Target Group Arn",
-        "Export": {
-          "Name": {
-            "Fn::Sub": "${AWS::StackName}-Service-DsPrometheusElbTargetGroupArn"
-          }
-        },
-        "Value": {
-          "Ref": "DsPrometheusElbTargetGroup"
-        }
-      }
     },
     "Parameters": {
     },
