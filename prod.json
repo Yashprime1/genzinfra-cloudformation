@@ -25,7 +25,24 @@
                     },
                     "SkipUpdate": true,
                     "TemplatePath": "./templates/mumbai/cloudzero/cloudzero.json"
-                }             
+                },
+                "Mumbai-DS":{
+                    "Parameters": {
+                        "DsAmiId":"ami-08346f016623c7424",
+                        "DsInstanceType":"t2.micro",
+                        "DsMaxSize":"1",
+                        "DsMinSize":"1",
+                        "DsDesiredSize":"1"
+                    },
+                    "SkipUpdate": false,
+                    "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
+                },
+                "Mumbai-DS-Service":{
+                    "Parameters": {
+                    },
+                    "SkipUpdate": false,
+                    "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
+                }                
         }
     }
 }
