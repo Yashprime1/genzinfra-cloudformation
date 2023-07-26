@@ -4,12 +4,10 @@ import (
 	"github.com/awslabs/goformation/v7/cloudformation"
 )
 
-func GenerateCoreSecurityGroupStack(NetworkStackName string) *cloudformation.Template {
+func GenerateCoreSecurityGroupStack(defaults CoreSecurityGroupDefaults) *cloudformation.Template {
 	// Create the DS Service Stack
 	ServiceTemplate := cloudformation.NewTemplate()
-	ServiceTemplate.Description = "Core Security Group Stack"
-	defaults := CoreSecurityGroupDefaults{}
-	defaults.NetworkStack = NetworkStackName
+	ServiceTemplate.Description = defaults.SecurityGroupDescription
 	AddParametersForCoreSecurityGroupStack(ServiceTemplate)
 	AddResourcesForCoreSecurityGroupStack(ServiceTemplate, defaults)
 	AddConditionsForCoreSecurityGroupStack(ServiceTemplate)
