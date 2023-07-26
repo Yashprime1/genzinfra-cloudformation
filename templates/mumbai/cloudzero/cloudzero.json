@@ -12,7 +12,7 @@
             "DistributionConfig" : {
                 "DefaultCacheBehavior":{
                     "ViewerProtocolPolicy":"allow-all",
-                    "TargetOriginId":"app"  
+                    "TargetOriginId":"app"    
                 },
                 "Enabled": True,
                 "Origins":[
