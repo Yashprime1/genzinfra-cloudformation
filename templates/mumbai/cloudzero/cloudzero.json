@@ -63,6 +63,6 @@
         "Properties": {
             BucketName: "cloudzero-cloudfront-logs"        
         }
-      },
+      }
     }
   }
