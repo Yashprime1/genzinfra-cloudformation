@@ -6,6 +6,18 @@
     "Parameters": {
     },
     "Resources": {
+      "AppCloudfront":{
+        "Type" : "AWS::CloudFront::Distribution",
+        "Properties" : {
+            "DistributionConfig" : {
+                "DefaultCacheBehavior":{
+                    "ViewerProtocolPolicy":"allow-all",
+                    "TargetOriginId":"app"  
+                },
+                "Enabled": True,
+            }
+          }
+      }  
       "CloudfrontLogsSqsQueue": {
         "Type": "AWS::SQS::Queue",
         "Properties": {}
@@ -39,6 +51,13 @@
             ]
           }
         }
-      }
+      },
+      "CloudfrontLogsS3Bucket": {
+        "Type": "AWS::S3::Bucket",
+        "Properties": {
+          "AccessControl": "LogDeliveryWrite",
+          
+        }
+      },
     }
   }
