@@ -12,6 +12,17 @@
       "Value": {
         "Ref": "DsElbTargetGroup"
       }
+    },
+    "DsPrometheusElbTargetGroupArn": {
+      "Description": "DS ELB Target Group Arn",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-DsPrometheusElbTargetGroupArn"
+        }
+      },
+      "Value": {
+        "Ref": "DsPrometheusElbTargetGroup"
+      }
     }
   },
   "Parameters": {
@@ -252,7 +263,7 @@
         "HealthCheckTimeoutSeconds": 10,
         "HealthyThresholdCount": 5,
         "Matcher": {
-          "HttpCode": "200"
+          "HttpCode": "200-310"
         },
         "Port": 9090,
         "Protocol": "HTTP",

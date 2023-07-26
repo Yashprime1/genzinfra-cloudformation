@@ -207,7 +207,7 @@
           "MaximumPercent": 100,
           "MinimumHealthyPercent": 0
         },
-        "HealthCheckGracePeriodSeconds": 60,
+        "HealthCheckGracePeriodSeconds": 65,
         "LaunchType": "EC2",
         "LoadBalancers": [
           {
@@ -221,7 +221,7 @@
                     {
                       "Ref": "AWS::StackName"
                     },
-                    "DsElbTargetGroupArn"
+                    "DsPrometheusElbTargetGroupArn"
                   ]
                 ]
               }
@@ -247,7 +247,7 @@
             "Environment": [
               {
                 "Name": "App Name",
-                "Value": "Prometheus"
+                "Value": "prometheus"
               }
             ],
             "Essential": true,
