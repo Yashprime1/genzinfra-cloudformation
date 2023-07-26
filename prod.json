@@ -1,5 +1,5 @@
 {
-    "BucketName": "yashprime", 
+    "BucketName": "cfstack-templates", 
     "BucketRegion": "ap-south-1", "Parallel": "false",
     "Stacks":{
         "ap-south-1":{
