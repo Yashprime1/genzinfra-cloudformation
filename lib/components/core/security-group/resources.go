@@ -7,24 +7,27 @@ import (
 )
 
 func AddResourcesForCoreSecurityGroupStack(template *cloudformation.Template,defaults CoreSecurityGroupDefaults){
-
-	ingress_rules := []ec2.SecurityGroup_Ingress{}
-	for _,port := range defaults.SecurityGroupIngressPorts{
-		ingress_rules = append(ingress_rules,ec2.SecurityGroup_Ingress{
-			IpProtocol: "tcp",
-			FromPort: cloudformation.Int(port),
-			ToPort: cloudformation.Int(port),
-			CidrIp: cloudformation.String("0.0.0.0/0"),
-		})
-	}
-	template.Resources[defaults.SecurityGroupStack] =  &ec2.SecurityGroup{
-		GroupDescription: defaults.SecurityGroupDescription,
-		SecurityGroupIngress: ingress_rules,
+	template.Resources["DSSecurityGroup"] =  &ec2.SecurityGroup{
+		GroupDescription: "DS Security Group",
+		SecurityGroupIngress: []ec2.SecurityGroup_Ingress{
+			{
+				IpProtocol: "tcp",
+				FromPort: cloudformation.Int(80),
+				ToPort: cloudformation.Int(80),
+				CidrIp: cloudformation.String("0.0.0.0/0"),
+			},
+			{
+				IpProtocol: "tcp",
+				FromPort: cloudformation.Int(22),
+				ToPort: cloudformation.Int(22),
+				CidrIp: cloudformation.String("0.0.0.0/0"),
+			},
+		},
 		VpcId: cloudformation.String(cloudformation.ImportValue(defaults.NetworkStack+"-AppVPCId")),
 		Tags: []tags.Tag{
 			{
 				Key: "Name",
-				Value: defaults.SecurityGroupStack,
+				Value: "DS Security Group",
 			},
 		},
 	}

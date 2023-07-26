@@ -3,7 +3,7 @@
     "BucketRegion": "eu-west-1", "Parallel": "true",
     "Stacks":{
         "ap-south-1":{
-                "Mumbai-Network":{
+                "X-Network":{
                     "Parameters": {
                         "AppVpcCidr":"10.12.0.0/16",
                         "AppPublicSubnet1Cidr":"10.12.0.0/24",
@@ -14,13 +14,13 @@
                     "SkipUpdate": false,
                     "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
                 },
-                "Mumbai-DS-SecurityGroup":{
+                "X-SecurityGroup":{
                     "Parameters": {
                     },
                     "SkipUpdate": false,
                     "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
                 },
-                "Mumbai-DS":{
+                "X-app":{
                     "Parameters": {
                         "DsAmiId":"ami-08346f016623c7424",
                         "DsInstanceType":"t2.micro",
@@ -31,7 +31,7 @@
                     "SkipUpdate": false,
                     "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
                 },
-                "Mumbai-DS-Service":{
+                "X-app-Service":{
                     "Parameters": {
                     },
                     "SkipUpdate": false,
