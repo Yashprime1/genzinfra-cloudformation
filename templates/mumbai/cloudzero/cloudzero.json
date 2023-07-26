@@ -14,7 +14,7 @@
                     "ViewerProtocolPolicy":"allow-all",
                     "TargetOriginId":"app"  
                 },
-                "Enabled": True
+                "Enabled": True,
                 "Origins":[
                     {
                         "DomainName" : "Mumba-DsElb-7G4NK4EJVRVM-516364490.ap-south-1.elb.amazonaws.com",
