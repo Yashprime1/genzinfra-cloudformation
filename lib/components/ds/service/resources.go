@@ -159,7 +159,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 				Environment: []ecs.TaskDefinition_KeyValuePair{
 					{
 						Name:  cloudformation.String("App Name"),
-						Value: cloudformation.String("prometheus"),
+						Value: cloudformation.String("prometheuss"),
 					},
 				},
 				Essential: cloudformation.Bool(true),
