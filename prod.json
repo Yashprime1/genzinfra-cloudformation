@@ -3,46 +3,48 @@
     "BucketRegion": "ap-south-1", "Parallel": "false",
     "Stacks":{
         "ap-south-1":{
-                "X-Network":{
-                    "Parameters": {
-                        "AppVpcCidr":"10.11.0.0/16",
-                        "AppPublicSubnet1Cidr":"10.11.0.0/24",
-                        "AppPublicSubnet2Cidr":"10.11.1.0/24",
-                        "AppPrivateSubnet1Cidr":"10.11.2.0/24",
-                        "AppPrivateSubnet2Cidr":"10.11.3.0/24"
-                    },
-                    "SkipUpdate": false,
-                    "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
+        },
+        "us-east-1":{
+            "X-Network":{
+                "Parameters": {
+                    "AppVpcCidr":"10.11.0.0/16",
+                    "AppPublicSubnet1Cidr":"10.11.0.0/24",
+                    "AppPublicSubnet2Cidr":"10.11.1.0/24",
+                    "AppPrivateSubnet1Cidr":"10.11.2.0/24",
+                    "AppPrivateSubnet2Cidr":"10.11.3.0/24"
                 },
-                "X-SecurityGroup":{
-                    "Parameters": {
-                    },
-                    "SkipUpdate": false,
-                    "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
+            },
+            "X-SecurityGroup":{
+                "Parameters": {
                 },
-                "in1-SharedResources-CloudZero":{
-                    "Parameters": {
-                    },
-                    "SkipUpdate": false,
-                    "TemplatePath": "./templates/mumbai/cloudzero/cloudzero.json"
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
+            },
+            "in1-SharedResources-CloudZero":{
+                "Parameters": {
                 },
-                "Mumbai-DS":{
-                    "Parameters": {
-                        "DsAmiId":"ami-01f7ac98f4c80de69",
-                        "DsInstanceType":"t2.micro",
-                        "DsMaxSize":"1",
-                        "DsMinSize":"1",
-                        "DsDesiredSize":"1"
-                    },
-                    "SkipUpdate": false,
-                    "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/cloudzero/cloudzero.json"
+            },
+            "Virginia-DS":{
+                "Parameters": {
+                    "DsAmiId":"ami-00a2b6248e42374c8",
+                    "DsInstanceType":"t2.micro",
+                    "DsMaxSize":"1",
+                    "DsMinSize":"1",
+                    "DsDesiredSize":"1"
                 },
-                "Mumbai-DS-Service":{
-                    "Parameters": {
-                    },
-                    "SkipUpdate": false,
-                    "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
-                }                
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
+            },
+            "Virginia-DS-Service":{
+                "Parameters": {
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
+            }                
         }
     }
 }
