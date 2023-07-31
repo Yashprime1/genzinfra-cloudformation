@@ -1,0 +1,17 @@
+# Put this in a file called CODEOWNERS or .bitbucket/CODEOWNERS in the root directory
+# of your repository.
+
+@@@EngineeringManagers denzil@clevertap.com francis@clevertap.com kishlaya@clevertap.com
+
+* @@EngineeringManagers
+
+# Only cover master and develop
+CODEOWNERS.destination_branch_pattern master
+CODEOWNERS.destination_branch_pattern develop
+
+# Suppress info comment on pull request creation about added code owners.
+# Info comment will be added by default.
+CODEOWNERS.toplevel.create_pull_request_comment disable
+
+# At least one assigned member must approve
+OverallCheck(1)

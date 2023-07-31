@@ -1,0 +1,45 @@
+@Library('jenkins-pipeline-libraries')
+
+import com.wizrocket.jenkins.AWSCodeDeployDeploymentWrapper
+
+pipeline {
+
+    agent any
+
+    options {
+        ansiColor('xterm')
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '9999'))
+        disableConcurrentBuilds()
+        timeout(time: 1, unit: 'HOURS')
+    }
+    environment {
+        BUILD_IDENTITY = env.BUILD_TAG.replaceAll("%2F", "-")
+        SERVICE_CONFIGURATION_REPO = "ssh://git@git.wizrocket.net/infra/cloudformation-configuration.git"
+        SERVICE_CONFIGURATION_REPO_DIR = "${env.WORKSPACE}/source/cloudformation-configuration"
+    }
+
+    stages {
+
+        stage('\u27A1 package') {
+
+            when {
+                not {
+                    expression {
+                        return params.update_outdated_instance_only
+                    }
+                }
+            }
+
+
+            steps {
+                script {
+                    docker.withRegistry("https://062484260092.dkr.ecr.eu-west-1.amazonaws.com", "ecr:eu-west-1:jenkins_aws_secret_access_key_for_ecr") {
+                        def container = docker.build "mongodb:${env.BUILD_IDENTITY}"
+                        container.push()
+                    }
+                }
+            }
+        }
+    }
+}
