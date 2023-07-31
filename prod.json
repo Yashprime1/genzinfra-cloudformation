@@ -30,7 +30,7 @@
             },
             "Virginia-DS":{
                 "Parameters": {
-                    "DsAmiId":"ami-00a2b6248e42374c8",
+                    "DsAmiId":"ami-0cf1118c777967d86",
                     "DsInstanceType":"t2.micro",
                     "DsMaxSize":"1",
                     "DsMinSize":"1",
