@@ -85,18 +85,18 @@ func GenerateUs1MongoLinkShortnerTemplate() {
 	mongoReplicaInstance006229.AppendToTemplate(sTemplate, serviceTemplate)
 
 	mongoReplicaInstance006149 := mongo.NewMongo(defaults)
-	mongoReplicaInstance006149.EnableEc2instance = false
-	mongoReplicaInstance006149.Ec2Instance.ImageId = cloudformation.String("ami-02726fee3f464392b")
+	mongoReplicaInstance006149.EnableEc2instance = true
+	mongoReplicaInstance006149.Ec2Instance.ImageId = cloudformation.String("ami-0a9d27a9f4f5c0efc")
 	mongoReplicaInstance006149.Ec2Instance.InstanceType = cloudformation.String("r5.2xlarge")
 	mongoReplicaInstance006149.Ec2InstanceSubnet = subnetC
 	mongoReplicaInstance006149.Ec2Instance.PrivateIpAddress = cloudformation.String("10.16.6.149")
 	mongoReplicaInstance006149.XvdpEc2Volume.Size = cloudformation.Int(64)
 	mongoReplicaInstance006149.EnableMongoArtifactoryRepository = true
-	mongoReplicaInstance006149.StopServices = true
+	mongoReplicaInstance006149.StopServices = false
 	mongoReplicaInstance006149.EnableMongoRegistryCache = true
 	mongoReplicaInstance006149.EnableXvdpGp3 = true
 	mongoReplicaInstance006149.XvdpEc2Volume.Iops = cloudformation.Int(3000)
-	mongoReplicaInstance006149.MongoContainerTag = "bamboo-mongo-task-2652-mongo-9"
+	mongoReplicaInstance006149.MongoContainerTag = "bamboo-mongo-task-2652-mongo-10"
 	mongoReplicaInstance006149.AppendToTemplate(sTemplate, serviceTemplate)
 
 	wizrocket.WriteTemplate(sTemplate, "/mongo/us1/Mongo-Link-Shortener", "us1-Mongo-Link-Shortener-1.json")
