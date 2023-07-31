@@ -81,7 +81,14 @@
       "CloudfrontLogsS3Bucket": {
         "Type": "AWS::S3::Bucket",
         "Properties": {
-            "BucketName": "cloudfront-accesslog-bucket-yashprime"        
+            "BucketName": "cloudfront-accesslog-bucket-yashprime", 
+            "OwnershipControls": {
+              "Rules": [
+                    {
+                        "ObjectOwnership": "BucketOwnerPreferred"
+                    }
+                ]
+            }    
         }
       },
       "CloudfrontLogsS3BucketPolicy":{
