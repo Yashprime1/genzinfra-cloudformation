@@ -70,14 +70,14 @@ func GenerateUs1MongoLinkShortnerTemplate() {
 	mongoReplicaInstance006133.AppendToTemplate(sTemplate, serviceTemplate)
 
 	mongoReplicaInstance006229 := mongo.NewMongo(defaults)
-	mongoReplicaInstance006229.EnableEc2instance = false
+	mongoReplicaInstance006229.EnableEc2instance = true
 	mongoReplicaInstance006229.Ec2Instance.ImageId = cloudformation.String("ami-02726fee3f464392b")
 	mongoReplicaInstance006229.Ec2Instance.InstanceType = cloudformation.String("r5.2xlarge")
 	mongoReplicaInstance006229.Ec2InstanceSubnet = subnetB
 	mongoReplicaInstance006229.Ec2Instance.PrivateIpAddress = cloudformation.String("10.16.6.229") 
 	mongoReplicaInstance006229.XvdpEc2Volume.Size = cloudformation.Int(64)
 	mongoReplicaInstance006229.EnableMongoArtifactoryRepository = true
-	mongoReplicaInstance006229.StopServices = true
+	mongoReplicaInstance006229.StopServices = false
 	mongoReplicaInstance006229.EnableMongoRegistryCache = true
 	mongoReplicaInstance006229.EnableXvdpGp3 = true
 	mongoReplicaInstance006229.XvdpEc2Volume.Iops = cloudformation.Int(3000)
