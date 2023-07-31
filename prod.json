@@ -2,8 +2,6 @@
     "BucketName": "cf-templates-nvirginia", 
     "BucketRegion": "us-east-1", "Parallel": "false",
     "Stacks":{
-        "ap-south-1":{
-        },
         "us-east-1":{
             "X-Network":{
                 "Parameters": {
@@ -15,30 +13,7 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
-            },
-            "in1-SharedResources-CloudZero":{
-                "Parameters": {
-                },
-                "SkipUpdate": true,
-                "TemplatePath": "./templates/mumbai/cloudzero/cloudzero.json"
-            },
-            "Virginia-DS":{
-                "Parameters": {
-                    "DsAmiId":"ami-0cf1118c777967d86",
-                    "DsInstanceType":"t2.micro",
-                    "DsMaxSize":"1",
-                    "DsMinSize":"1",
-                    "DsDesiredSize":"1"
-                },
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
-            },
-            "Virginia-DS-Service":{
-                "Parameters": {
-                },
-                "SkipUpdate": true  ,
-                "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
-            }                
+            }
         }
     }
 }
