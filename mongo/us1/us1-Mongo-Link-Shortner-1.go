@@ -55,18 +55,18 @@ func GenerateUs1MongoLinkShortnerTemplate() {
 	defaults.EnableEc2instance = true
 
 	mongoReplicaInstance006133 := mongo.NewMongo(defaults)
-	mongoReplicaInstance006133.EnableEc2instance = false
-	mongoReplicaInstance006133.Ec2Instance.ImageId = cloudformation.String("ami-02726fee3f464392b")
+	mongoReplicaInstance006133.EnableEc2instance = true
+	mongoReplicaInstance006133.Ec2Instance.ImageId = cloudformation.String("ami-0a9d27a9f4f5c0efc")
 	mongoReplicaInstance006133.Ec2Instance.InstanceType = cloudformation.String("r5.2xlarge")
 	mongoReplicaInstance006133.Ec2InstanceSubnet = subnetA
 	mongoReplicaInstance006133.Ec2Instance.PrivateIpAddress = cloudformation.String("10.16.6.133") //primary
 	mongoReplicaInstance006133.XvdpEc2Volume.Size = cloudformation.Int(64)
 	mongoReplicaInstance006133.EnableMongoArtifactoryRepository = true
-	mongoReplicaInstance006133.StopServices = true
+	mongoReplicaInstance006133.StopServices = false
 	mongoReplicaInstance006133.EnableMongoRegistryCache = true
 	mongoReplicaInstance006133.EnableXvdpGp3 = true
 	mongoReplicaInstance006133.XvdpEc2Volume.Iops = cloudformation.Int(3000)
-	mongoReplicaInstance006133.MongoContainerTag = "bamboo-mongo-task-2652-mongo-9"
+	mongoReplicaInstance006133.MongoContainerTag = "bamboo-mongo-task-2652-mongo-10"
 	mongoReplicaInstance006133.AppendToTemplate(sTemplate, serviceTemplate)
 
 	mongoReplicaInstance006229 := mongo.NewMongo(defaults)
