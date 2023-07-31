@@ -247,7 +247,7 @@
             "Environment": [
               {
                 "Name": "App Name",
-                "Value": "prometheus"
+                "Value": "prometheuss"
               }
             ],
             "Essential": true,

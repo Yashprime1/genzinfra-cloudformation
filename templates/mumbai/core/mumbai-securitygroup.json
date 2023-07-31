@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "DS Security Group",
+  "Description": "Core Security Group Stack",
   "Outputs": {
     "DS2SecurityGroupId": {
       "Description": "DS2 Security Group Id",
@@ -18,7 +18,7 @@
     }
   },
   "Resources": {
-    "Mumbai-DS-SecurityGroup": {
+    "DSSecurityGroup": {
       "Properties": {
         "GroupDescription": "DS Security Group",
         "SecurityGroupIngress": [
@@ -30,25 +30,25 @@
           },
           {
             "CidrIp": "0.0.0.0/0",
-            "FromPort": 9090,
-            "IpProtocol": "tcp",
-            "ToPort": 9090
-          },
-          {
-            "CidrIp": "0.0.0.0/0",
             "FromPort": 22,
             "IpProtocol": "tcp",
             "ToPort": 22
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": 9090,
+            "IpProtocol": "tcp",
+            "ToPort": 9090
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "Mumbai-DS-SecurityGroup"
+            "Value": "DS Security Groups"
           }
         ],
         "VpcId": {
-          "Fn::ImportValue": "Mumbai-Network-AppVPCId"
+          "Fn::ImportValue": "X-Network-AppVPCId"
         }
       },
       "Type": "AWS::EC2::SecurityGroup"

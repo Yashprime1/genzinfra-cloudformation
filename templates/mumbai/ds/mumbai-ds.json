@@ -69,10 +69,10 @@
         ],
         "VPCZoneIdentifier": [
           {
-            "Fn::ImportValue": "Mumbai-Network-AppPublicSubnet1Id"
+            "Fn::ImportValue": "X-Network-AppPublicSubnet1Id"
           },
           {
-            "Fn::ImportValue": "Mumbai-Network-AppPublicSubnet2Id"
+            "Fn::ImportValue": "X-Network-AppPublicSubnet2Id"
           }
         ]
       },
@@ -153,15 +153,15 @@
         "Scheme": "internet-facing",
         "SecurityGroups": [
           {
-            "Fn::ImportValue": "Mumbai-DS-SecurityGroup-DS2SecurityGroupId"
+            "Fn::ImportValue": "X-SecurityGroup-DS2SecurityGroupId"
           }
         ],
         "Subnets": [
           {
-            "Fn::ImportValue": "Mumbai-Network-AppPublicSubnet1Id"
+            "Fn::ImportValue": "X-Network-AppPublicSubnet1Id"
           },
           {
-            "Fn::ImportValue": "Mumbai-Network-AppPublicSubnet2Id"
+            "Fn::ImportValue": "X-Network-AppPublicSubnet2Id"
           }
         ],
         "Type": "application"
@@ -211,7 +211,7 @@
         "TargetType": "instance",
         "UnhealthyThresholdCount": 2,
         "VpcId": {
-          "Fn::ImportValue": "Mumbai-Network-AppVPCId"
+          "Fn::ImportValue": "X-Network-AppVPCId"
         }
       },
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
@@ -231,7 +231,7 @@
         },
         "SecurityGroups": [
           {
-            "Fn::ImportValue": "Mumbai-DS-SecurityGroup-DS2SecurityGroupId"
+            "Fn::ImportValue": "X-SecurityGroup-DS2SecurityGroupId"
           }
         ]
       },
@@ -280,7 +280,7 @@
         "TargetType": "instance",
         "UnhealthyThresholdCount": 2,
         "VpcId": {
-          "Fn::ImportValue": "Mumbai-Network-AppVPCId"
+          "Fn::ImportValue": "X-Network-AppVPCId"
         }
       },
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
