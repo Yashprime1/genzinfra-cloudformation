@@ -1,6 +1,6 @@
 {
-    "BucketName": "cfstack-templates", 
-    "BucketRegion": "ap-south-1", "Parallel": "false",
+    "BucketName": "cf-templates-nvirginia", 
+    "BucketRegion": "us-east-1", "Parallel": "false",
     "Stacks":{
         "ap-south-1":{
         },
@@ -19,7 +19,7 @@
             "X-SecurityGroup":{
                 "Parameters": {
                 },
-                "SkipUpdate": false,
+                "SkipUpdate": true,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
             "in1-SharedResources-CloudZero":{
