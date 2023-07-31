@@ -62,7 +62,7 @@ func GenerateUs1MongoLinkShortnerTemplate() {
 	mongoReplicaInstance006133.Ec2Instance.PrivateIpAddress = cloudformation.String("10.16.6.133") //primary
 	mongoReplicaInstance006133.XvdpEc2Volume.Size = cloudformation.Int(64)
 	mongoReplicaInstance006133.EnableMongoArtifactoryRepository = true
-	mongoReplicaInstance006133.StopServices = false
+	mongoReplicaInstance006133.StopServices = true
 	mongoReplicaInstance006133.EnableMongoRegistryCache = true
 	mongoReplicaInstance006133.EnableXvdpGp3 = true
 	mongoReplicaInstance006133.XvdpEc2Volume.Iops = cloudformation.Int(3000)
