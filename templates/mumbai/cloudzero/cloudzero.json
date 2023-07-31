@@ -31,7 +31,18 @@
                           "OriginProtocolPolicy": "http-only"
                       }
                   }
-                ]
+                ],
+                "Logging": {
+                  "Bucket": {
+                    "Fn::GetAtt": [
+                      "CloudfrontLogsS3Bucket",
+                      "DomainName"
+                    ]
+                  },
+                  "IncludeCookies": false,
+                  "Prefix": "InAppMediaCloudFrontDistribution/"
+                }
+     
             }
           }
       },  
@@ -74,7 +85,7 @@
         "Properties": {
             BucketName: "cloudfront-accesslog-bucket-yashprime"        
         }
-      },
+      }
       "CloudfrontLogsS3BucketPolicy":{
           "Type" : "AWS::S3::BucketPolicy",
           "Properties" : {
