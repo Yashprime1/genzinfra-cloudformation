@@ -30,6 +30,12 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
+            },
+            "Virginia-DS-Service":{
+                "Parameters": {
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
             }                
         }
     }
