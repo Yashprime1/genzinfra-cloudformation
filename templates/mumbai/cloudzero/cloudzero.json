@@ -85,5 +85,24 @@
             BucketName: "cloudfront-accesslog-bucket-yashprime"        
         }
       }
+      "CloudfrontLogsS3BucketPolicy":{
+          "Type" : "AWS::S3::BucketPolicy",
+          "Properties" : {
+              "Bucket" : String,
+              "PolicyDocument" : {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                      {
+                          "Effect": "Allow",
+                          "Principal": {
+                              "Service": "cloudfront.amazonaws.com"
+                          },
+                          "Action": "s3:PutObject",
+                          "Resource": "arn:aws:s3:::cloudfront-accesslog-bucket-yashprime/*"
+                      }
+                  ]
+              }            
+            }
+      }
     }
   }
