@@ -13,7 +13,13 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
-            }
+            },
+            "X-SecurityGroup":{
+                "Parameters": {
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
+            }            
         }
     }
 }
