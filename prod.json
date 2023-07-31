@@ -28,11 +28,11 @@
             },
             "Virginia-DS":{
                 "Parameters": {
-                    "DsAmiId":"ami-0cf1118c777967d86",
+                    "DsAmiId":"ami-08fcfe56b9523f33c",
                     "DsInstanceType":"t2.micro",
                     "DsMaxSize":"1",
-                    "DsMinSize":"1",
-                    "DsDesiredSize":"1"
+                    "DsMinSize":"0",
+                    "DsDesiredSize":"0"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
