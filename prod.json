@@ -31,8 +31,8 @@
                     "DsAmiId":"ami-08fcfe56b9523f33c",
                     "DsInstanceType":"t2.micro",
                     "DsMaxSize":"1",
-                    "DsMinSize":"0",
-                    "DsDesiredSize":"0"
+                    "DsMinSize":"1",
+                    "DsDesiredSize":"1"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
