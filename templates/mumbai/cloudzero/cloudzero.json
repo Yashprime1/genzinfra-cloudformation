@@ -38,9 +38,7 @@
                       "CloudfrontLogsS3Bucket",
                       "DomainName"
                     ]
-                  },
-                  "IncludeCookies": true,
-                  "Prefix": "InAppMediaCloudFrontDistribution/"
+                  }
                 }
      
             }
