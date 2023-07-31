@@ -14,16 +14,7 @@
                     "ViewerProtocolPolicy":"allow-all",
                     "TargetOriginId":"app"    
                 },
-                "Enabled": True,
-                "Origins":[
-                    {
-                        "DomainName" : "Virgi-DsElb-OS3SSSBHUEBX-916198225.us-east-1.elb.amazonaws.com",
-                        "Id" : "Virgnia-DS",
-                        "CustomOriginConfig" : {
-                            "OriginProtocolPolicy" : "http-only"
-                        }
-                    }
-                ]
+                "Enabled": true
             }
           }
       },  
