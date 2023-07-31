@@ -1,0 +1,58 @@
+{
+  "Regions": [
+    {
+      "Name": "us-east-1",
+      "Stacks": [
+        {
+          "StackName": "x1-Mongo-Directcall-1",
+          "Action": "CREATE",
+          "TemplatePath": "../dist/mongo/x1/Mongo-Directcall-1/x1-Mongo-Directcall-1.json",
+          "Parameters": {},
+          "StackPolicy": {}
+        },
+        {
+          "StackName": "x1-Mongo-Accounts-1",
+          "Action": "CREATE",
+          "TemplatePath": "../dist/mongo/x1/x1-Mongo-Accounts-1/x1-Mongo-Accounts-1.json",
+          "Parameters": {},
+          "StackPolicy": {}
+        },
+        {
+          "StackName": "x1-Mongo-Audit-1",
+          "Action": "CREATE",
+          "TemplatePath": "../dist/mongo/x1/Mongo-Audit-1/x1-Mongo-Audit-1.json",
+          "Parameters": {},
+          "StackPolicy": {}
+        },
+        {
+          "StackName": "x1-Mongo-MetaData-1",
+          "Action": "CREATE",
+          "TemplatePath": "../dist/mongo/x1/Mongo-MetaData-1/x1-Mongo-MetaData-1.json",
+          "Parameters": {},
+          "StackPolicy": {}
+        },
+        {
+          "StackName": "x1-Mongo-Whatsapp-1",
+          "Action": "CREATE",
+          "TemplatePath": "../dist/mongo/x1/Mongo-Whatsapp/x1-Mongo-Whatsapp-1.json",
+          "Parameters": {},
+          "StackPolicy": {}
+        },
+        {
+          "StackName": "x1-Mongo-Link-Shortener-1",
+          "Action": "CREATE",
+          "TemplatePath": "../dist/mongo/x1/Mongo-Link-Shortener/x1-Mongo-Link-Shortener-1.json",
+          "Parameters": {},
+          "StackPolicy": {}
+        },
+        {
+          "StackName": "x1-Mongo-Delivery-1",
+          "Action": "CREATE",
+          "TemplatePath": "../dist/mongo/x1/x1-Mongo-Delivery/x1-Mongo-Delivery-1.json",
+          "Parameters": {},
+          "StackPolicy": {}
+        }
+      ]
+    }
+  ]
+}
