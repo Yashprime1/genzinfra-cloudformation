@@ -20,6 +20,12 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
+            "in1-SharedResources-CloudZero":{
+                "Parameters": {
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/cloudzero/cloudzero.json"
+            },
             "Virginia-DS":{
                 "Parameters": {
                     "DsAmiId":"ami-0cf1118c777967d86",
