@@ -83,7 +83,7 @@
         "Properties": {
             "BucketName": "cloudfront-accesslog-bucket-yashprime"        
         }
-      }
+      },
       "CloudfrontLogsS3BucketPolicy":{
           "Type" : "AWS::S3::BucketPolicy",
           "Properties" : {
