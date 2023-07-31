@@ -85,7 +85,7 @@ func GenerateUs1MongoLinkShortnerTemplate() {
 	mongoReplicaInstance006229.AppendToTemplate(sTemplate, serviceTemplate)
 
 	mongoReplicaInstance006149 := mongo.NewMongo(defaults)
-	mongoReplicaInstance006149.EnableEc2instance = true
+	mongoReplicaInstance006149.EnableEc2instance = false
 	mongoReplicaInstance006149.Ec2Instance.ImageId = cloudformation.String("ami-02726fee3f464392b")
 	mongoReplicaInstance006149.Ec2Instance.InstanceType = cloudformation.String("r5.2xlarge")
 	mongoReplicaInstance006149.Ec2InstanceSubnet = subnetC
