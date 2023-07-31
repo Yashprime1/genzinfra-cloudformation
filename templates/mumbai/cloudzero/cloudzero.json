@@ -12,7 +12,13 @@
             "DistributionConfig" : {
                 "DefaultCacheBehavior":{
                     "ViewerProtocolPolicy":"allow-all",
-                    "TargetOriginId":"MyELBOrigin"    
+                    "TargetOriginId":"MyELBOrigin",
+                    "ForwardedValues": {
+                      "QueryString": false,
+                      "Cookies": {
+                          "Forward": "none"
+                      }
+                  }    
                 },
                 "Enabled": true,
                 "Origins": [
