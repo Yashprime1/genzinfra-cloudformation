@@ -31,17 +31,7 @@
                           "OriginProtocolPolicy": "http-only"
                       }
                   }
-                ],
-                "Logging": {
-                  "Bucket": {
-                    "Fn::GetAtt": [
-                      "CloudfrontLogsS3Bucket",
-                      "DomainName"
-                    ]
-                  },
-                  "IncludeCookies": false,
-                  "Prefix": "InAppMediaCloudFrontDistribution/"
-                }
+                ]
             }
           }
       },  
