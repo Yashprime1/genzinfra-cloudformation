@@ -19,7 +19,18 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
-            }            
+            },
+            "Virginia-DS":{
+                "Parameters": {
+                    "DsAmiId":"ami-0cf1118c777967d86",
+                    "DsInstanceType":"t2.micro",
+                    "DsMaxSize":"1",
+                    "DsMinSize":"1",
+                    "DsDesiredSize":"1"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
+            }                
         }
     }
 }
