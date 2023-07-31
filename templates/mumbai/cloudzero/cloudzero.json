@@ -78,7 +78,9 @@
       "CloudfrontLogsS3BucketPolicy":{
           "Type" : "AWS::S3::BucketPolicy",
           "Properties" : {
-              "Bucket" : String,
+              "Bucket" : {
+                  "Ref" : "CloudfrontLogsS3Bucket"
+              },
               "PolicyDocument" : {
                   "Version": "2012-10-17",
                   "Statement": [
