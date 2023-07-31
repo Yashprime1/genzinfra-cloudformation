@@ -39,7 +39,7 @@
                       "DomainName"
                     ]
                   },
-                  "IncludeCookies": false,
+                  "IncludeCookies": true,
                   "Prefix": "InAppMediaCloudFrontDistribution/"
                 }
      
