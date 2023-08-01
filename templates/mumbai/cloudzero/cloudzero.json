@@ -90,7 +90,29 @@
                         "ObjectOwnership": "BucketOwnerPreferred"
                     }
                 ]
-            }    
+            },
+            "NotificationConfiguration":{
+              "QueueConfigurations" : [
+                {
+                  "Event" : "s3:ObjectCreated:*",
+                  "Filter" : {
+                    "S3Key" : {
+                      "Rules" : [
+                        {
+                          "Name" : "prefix",
+                          "Value" : "InAppMediaCloudFrontDistribution/"
+                        }
+                      ]
+                    }
+                  },
+                  "Queue" : {
+                    "Fn::GetAtt": [
+                      "CloudfrontLogsSqsQueue",
+                      "Arn"
+                    ]
+                  }
+                }
+            } 
         }
       },
       "CloudfrontLogsS3BucketPolicy":{
