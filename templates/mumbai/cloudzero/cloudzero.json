@@ -100,7 +100,7 @@
                       "Rules" : [
                         {
                           "Name" : "prefix",
-                          "Value" : "/ap-south-1"
+                          "Value" : InAppMediaCloudFrontDistribution/"
                         }
                       ]
                     }
