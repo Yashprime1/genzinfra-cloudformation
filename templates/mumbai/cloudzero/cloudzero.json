@@ -100,7 +100,7 @@
                       "Rules" : [
                         {
                           "Name" : "prefix",
-                          "Value" : "*/InAppMediaCloudFrontDistribution/"
+                          "Value" : "InAppMediaCloudFrontDistribution/"
                         }
                       ]
                     }
