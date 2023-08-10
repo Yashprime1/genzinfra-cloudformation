@@ -4,32 +4,40 @@
     "Parallel": "false",
     "Stacks":{
         "us-east-1":{
-            "Mumbai-Network": {
+            "X-Network":{
                 "Parameters": {
-                    "AppVpcCidr": "10.12.0.0/16",
-                    "AppPublicSubnet1Cidr": "10.12.0.0/24",
-                    "AppPublicSubnet2Cidr": "10.12.1.0/24",
-                    "AppPrivateSubnet1Cidr": "10.12.2.0/24",
-                    "AppPrivateSubnet2Cidr": "10.12.3.0/24"
+                    "AppVpcCidr":"10.11.0.0/16",
+                    "AppPublicSubnet1Cidr":"10.11.0.0/24",
+                    "AppPublicSubnet2Cidr":"10.11.1.0/24",
+                    "AppPrivateSubnet1Cidr":"10.11.2.0/24",
+                    "AppPrivateSubnet2Cidr":"10.11.3.0/24"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
             },
-            "Mumbai-DS-SecurityGroup": {
-                "Parameters": {},
+            "X-SecurityGroup":{
+                "Parameters": {
+                },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
-            "Mumbai-DS": {
-                "Parameters": {},
-                 "SkipUpdate": false,
+            "Virginia-DS":{
+                "Parameters": {
+                    "DsAmiId":"ami-08fcfe56b9523f33c",
+                    "DsInstanceType":"t2.micro",
+                    "DsMaxSize":"1",
+                    "DsMinSize":"1",
+                    "DsDesiredSize":"1"
+                },
+                "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
             },
-            "Mumbai-DS-Service": {
-                "Parameters": {},
-                 "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
-            }              
+            "Virginia-DS-Service":{
+                "Parameters": {
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
+            }     
         }
     }
 }
