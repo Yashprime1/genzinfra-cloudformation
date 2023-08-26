@@ -3,8 +3,8 @@
     "BucketRegion": "us-east-1", 
     "Parallel": "false",
     "Stacks":{
-        "us-east-1":{
-            "X-Network":{
+        "ap-south-1":{
+            "Mu-Network":{
                 "Parameters": {
                     "AppVpcCidr":"10.11.0.0/16",
                     "AppPublicSubnet1Cidr":"10.11.0.0/24",
@@ -15,13 +15,13 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
             },
-            "X-SecurityGroup":{
+            "Mu-SecurityGroup":{
                 "Parameters": {
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
-            "Virginia-DS":{
+            "Mu-DS":{
                 "Parameters": {
                     "DsAmiId":"ami-08fcfe56b9523f33c",
                     "DsInstanceType":"t2.micro",
@@ -32,7 +32,7 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
             },
-            "Virginia-DS-Service":{
+            "Mu-DS-Service":{
                 "Parameters": {
                 },
                 "SkipUpdate": false,
