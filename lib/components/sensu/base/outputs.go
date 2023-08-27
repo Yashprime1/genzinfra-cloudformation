@@ -12,4 +12,12 @@ func AddOutputsForSensuBaseStack(template *cloudformation.Template) {
 			Name: cloudformation.Sub("${AWS::StackName}-Service-SensuElbTargetGroupArn"),
 		},
 	}
+
+	template.Outputs["SensuBackendElbTargetGroupArn"] = cloudformation.Output{
+		Description: cloudformation.String("Sensu Backend ELB Target Group Arn"),
+		Value:       cloudformation.Ref("SensuBackendElbTargetGroup"),
+		Export: &cloudformation.Export{
+			Name: cloudformation.Sub("${AWS::StackName}-Service-SensuBackendElbTargetGroupArn"),
+		},
+	}
 }

@@ -171,6 +171,16 @@ func AddResourcesForSensuServiceStack(template *cloudformation.Template) {
 					}),
 				)),
 			},
+			{
+				ContainerName:  cloudformation.String("sensu"),
+				ContainerPort:  cloudformation.Int(8081),
+				TargetGroupArn: cloudformation.String(cloudformation.ImportValue(
+					cloudformation.Join("-", []string{
+						cloudformation.Ref("AWS::StackName"),
+						"SensuBackendElbTargetGroupArn",
+					}),
+				)),
+			},
 		},
 		PlacementConstraints: []ecs.Service_PlacementConstraint{
 			{
