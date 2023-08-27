@@ -118,6 +118,130 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 					},
 				},
 			},
+			{
+				Name: "sensu",
+				Image: "sensu/sensu:6.10.0",
+				Environment: []ecs.TaskDefinition_KeyValuePair{
+					{
+						Name:  cloudformation.String("SENSU_BACKEND_URL"),
+						Value: cloudformation.String("wss://http://mu-se-sensu-1t3e9xtvksave-471599435.ap-south-1.elb.amazonaws.com"),
+					},
+					{
+						Name:  cloudformation.String("SENSU_INSECURE_SKIP_TLS_VERIFY"),
+						Value: cloudformation.String("false"),
+					},
+					{
+						Name:  cloudformation.String("SENSU_LOG_LEVEL"),
+						Value: cloudformation.String("info"),
+					},
+					{
+						Name:  cloudformation.String("SENSU_STRIP_NETWORKS"),
+						Value: cloudformation.String("system"),
+					},
+					{
+						Name:  cloudformation.String("SENSU_API_HOST"),
+						Value: cloudformation.String("0.0.0.0"),
+					},
+					{
+						Name:  cloudformation.String("SENSU_CACHE_DIR"),
+						Value: cloudformation.String("/var/lib/sensu"),
+					},
+					{
+						Name:  cloudformation.String("SENSU_SUBSCRIPTIONS"),
+						Value: cloudformation.String("catalogstore"),
+					},
+					{
+						Name:  cloudformation.String("SENSU_DETECT_CLOUD_PROVIDER"),
+						Value: cloudformation.String("true"),
+					},
+					{
+						Name:  cloudformation.String("SENSU_KEEPALIVE_CRITICAL_TIMEOUT"),
+						Value: cloudformation.String("180"),
+					},
+					{
+						Name:  cloudformation.String("SENSU_KEEPALIVE_INTERNAL"),
+						Value: cloudformation.String("5"),
+					},
+					{
+						Name:  cloudformation.String("SENSU_KEEPALIVE_WARNING_TIMEOUT"),
+						Value: cloudformation.String("120"),
+					},
+					{
+						Name:  cloudformation.String("SENSU_AGENT_MANAGED_ENTITY"),
+						Value: cloudformation.String("true"),
+					},
+					{
+						Name:  cloudformation.String("SENSU_DEREGISTER"),
+						Value: cloudformation.String("true"),
+					},
+					{
+						Name:  cloudformation.String("REDIS_HOST"),
+						Value: cloudformation.String("sensu-redis.wizrocket.net"),
+					},
+					{
+						Name:  cloudformation.String("DEVOPS_GROUP_EMAIL"),
+						Value: cloudformation.String("infra@clevertap.com"),
+					},
+					{
+						Name:  cloudformation.String("DEV_GROUP_EMAIL"),
+						Value: cloudformation.String("dev@clevertap.com"),
+					},
+					{
+						Name:  cloudformation.String("SENSU_USER"),
+						Value: cloudformation.String("admin"),
+					},
+					{
+						Name:  cloudformation.String("SENSU_PASSWORD"),
+						Value: cloudformation.String("P@ssw0rd!"),
+					},
+				},
+				Essential: cloudformation.Bool(true),
+				MemoryReservation: cloudformation.Int(256),
+				Privileged:        cloudformation.Bool(false),
+				ReadonlyRootFilesystem: cloudformation.Bool(false),
+				Ulimits: []ecs.TaskDefinition_Ulimit{
+					{
+						Name:      "nofile",
+						SoftLimit: 65536,
+						HardLimit: 65536,
+					},
+				},
+				PortMappings: []ecs.TaskDefinition_PortMapping{
+					{
+						ContainerPort: cloudformation.Int(3000),
+						HostPort:      cloudformation.Int(3000),
+						Protocol:      cloudformation.String("tcp"),
+					},
+					{
+						ContainerPort: cloudformation.Int(8080),
+						HostPort:      cloudformation.Int(8080),
+						Protocol:      cloudformation.String("tcp"),
+					},
+					{
+						ContainerPort: cloudformation.Int(8081),
+						HostPort:      cloudformation.Int(8081),
+						Protocol:      cloudformation.String("tcp"),
+					},
+				},
+				MountPoints: []ecs.TaskDefinition_MountPoint{
+					{
+						ContainerPath: cloudformation.String("/var/lib/sensu"),
+						SourceVolume:  cloudformation.String("sensu-backend"),
+					},
+				},
+				Command: []string{
+					"sensu-agent",
+					"start",
+				},
+			},
+		},
+		Volumes: []ecs.TaskDefinition_Volume{
+			{
+				Name: cloudformation.String("sensu-backend"),
+				Host: &ecs.TaskDefinition_HostVolumeProperties{
+					SourcePath: cloudformation.String("/var/lib/sensu"),
+				},
+			},
 		},
 	}
 	template.Resources["DsEcsService"] = &ecs.Service{
