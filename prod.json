@@ -14,30 +14,7 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
-            },
-            "Mu-SecurityGroup":{
-                "Parameters": {
-                },
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
-            },
-            "Mu-DS":{
-                "Parameters": {
-                    "DsAmiId":"ami-08fcfe56b9523f33c",
-                    "DsInstanceType":"t2.micro",
-                    "DsMaxSize":"1",
-                    "DsMinSize":"1",
-                    "DsDesiredSize":"1"
-                },
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
-            },
-            "Mu-DS-Service":{
-                "Parameters": {
-                },
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
-            }     
+            }
         }
     }
 }
