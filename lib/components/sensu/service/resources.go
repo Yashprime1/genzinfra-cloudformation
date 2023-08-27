@@ -96,7 +96,7 @@ func AddResourcesForSensuServiceStack(template *cloudformation.Template) {
 				Environment: []ecs.TaskDefinition_KeyValuePair{
 					{
 						Name:  cloudformation.String("App Name"),
-						Value: cloudformation.String("SENSU"),
+						Value: cloudformation.String("Sensu"),
 					},
 				},
 				Essential: cloudformation.Bool(true),
