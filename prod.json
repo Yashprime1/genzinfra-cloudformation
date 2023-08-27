@@ -37,7 +37,24 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
-            }     
+            },
+            "Mu-Sensu":{
+                "Parameters": {
+                    "DsAmiId":"ami-0f6acb2d33561c559",
+                    "DsInstanceType":"t2.micro",
+                    "DsMaxSize":"1",
+                    "DsMinSize":"1",
+                    "DsDesiredSize":"1"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu.json"
+            },
+            "Mu-Sensu-Service":{
+                "Parameters": {
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu-service.json"
+            }      
         }
     }
 }
