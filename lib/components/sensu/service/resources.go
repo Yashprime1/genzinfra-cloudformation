@@ -135,7 +135,7 @@ func AddResourcesForSensuServiceStack(template *cloudformation.Template) {
 		LaunchType:                    cloudformation.String("EC2"),
 		LoadBalancers:                 []ecs.Service_LoadBalancer{
 			{
-				ContainerName:  cloudformation.String("ds"),
+				ContainerName:  cloudformation.String("sensu"),
 				ContainerPort:  cloudformation.Int(8080),
 				TargetGroupArn: cloudformation.String(cloudformation.ImportValue(
 					cloudformation.Join("-", []string{
