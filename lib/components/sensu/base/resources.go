@@ -130,6 +130,16 @@ func AddResourcesForSensuBaseStack(template *cloudformation.Template, defaults S
 	}
 
 	template.Resources["SensuBackendElbTargetGroup"] = &elasticloadbalancingv2.TargetGroup{
+		HealthCheckIntervalSeconds: cloudformation.Int(30),
+		HealthCheckPath:            cloudformation.String("/"),
+		HealthCheckProtocol:        cloudformation.String("HTTP"),
+		HealthCheckPort:        cloudformation.String("3000"),
+		HealthCheckTimeoutSeconds:  cloudformation.Int(10),
+		HealthyThresholdCount:      cloudformation.Int(5),
+		Matcher: &elasticloadbalancingv2.TargetGroup_Matcher{
+			HttpCode: cloudformation.String("200-310"),
+			
+		},
 		Port:                    cloudformation.Int(8081),
 		Protocol:                cloudformation.String("HTTP"),
 		TargetType:              cloudformation.String("instance"),
@@ -138,6 +148,10 @@ func AddResourcesForSensuBaseStack(template *cloudformation.Template, defaults S
 			{
 				Key:   cloudformation.String("stickiness.enabled"),
 				Value: cloudformation.String("false"),
+			},
+			{
+				Key:   cloudformation.String("deregistration_delay.timeout_seconds"),
+				Value: cloudformation.String("300"),
 			},
 		},
 	}
