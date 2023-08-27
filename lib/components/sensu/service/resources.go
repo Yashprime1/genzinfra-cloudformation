@@ -117,10 +117,37 @@ func AddResourcesForSensuServiceStack(template *cloudformation.Template) {
 						Protocol:      cloudformation.String("tcp"),
 					},
 					{
-						ContainerPort: cloudformation.Int(3000),
-						HostPort:      cloudformation.Int(3000),
+						ContainerPort: cloudformation.Int(8080),
+						HostPort:      cloudformation.Int(8080),
 						Protocol:      cloudformation.String("tcp"),
 					},
+					{
+						ContainerPort: cloudformation.Int(8081),
+						HostPort:      cloudformation.Int(8081),
+						Protocol:      cloudformation.String("tcp"),
+					},
+				},
+				MountPoints: []ecs.TaskDefinition_MountPoint{
+					{
+						ContainerPath: cloudformation.String("/var/lib/sensu"),
+						SourceVolume:  cloudformation.String("sensu-backend"),
+					},
+				},
+				Command: []string{
+					"sensu-backend",
+					"start",
+					"--state-dir",
+					"/var/lib/sensu/sensu-backend",
+					"--log-level",
+					"debug",
+				},
+			},
+		},
+		Volumes: []ecs.TaskDefinition_Volume{
+			{
+				Name: cloudformation.String("sensu-backend"),
+				Host: &ecs.TaskDefinition_HostVolumeProperties{
+					SourcePath: cloudformation.String("/var/lib/sensu"),
 				},
 			},
 		},
