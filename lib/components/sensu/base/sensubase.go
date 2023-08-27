@@ -7,7 +7,7 @@ import (
 func GenerateSensuBaseStack(defaults SensuBaseDefaults) *cloudformation.Template {
 	// Create the Sensu Base Stack
 	BaseTemplate := cloudformation.NewTemplate()
-	BaseTemplate.Description = "Sensu Base Stacks"
+	BaseTemplate.Description = "Sensu Base Stack"
 	AddParametersForSensuBaseStack(BaseTemplate,defaults)
 	AddResourcesForSensuBaseStack(BaseTemplate,defaults)
 	AddConditionsForSensuBaseStack(BaseTemplate,defaults)
