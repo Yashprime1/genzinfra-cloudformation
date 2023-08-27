@@ -91,8 +91,8 @@ func AddResourcesForSensuServiceStack(template *cloudformation.Template) {
 		ExecutionRoleArn: cloudformation.String(cloudformation.Ref("SensuEcsTaskExecutionRole")),
 		ContainerDefinitions: []ecs.TaskDefinition_ContainerDefinition{
 			{
-				Name: "6.10.0",
-				Image: "sensu/sensu",
+				Name: "sensu",
+				Image: "sensu/sensu:6.10.0",
 				Environment: []ecs.TaskDefinition_KeyValuePair{
 					{
 						Name:  cloudformation.String("App Name"),
