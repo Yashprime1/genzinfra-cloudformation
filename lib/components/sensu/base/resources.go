@@ -101,7 +101,7 @@ func AddResourcesForSensuBaseStack(template *cloudformation.Template, defaults S
 		Matcher: &elasticloadbalancingv2.TargetGroup_Matcher{
 			HttpCode: cloudformation.String("200"),
 		},
-		Port:                    cloudformation.Int(80),
+		Port:                    cloudformation.Int(8080),
 		Protocol:                cloudformation.String("HTTP"),
 		TargetType:              cloudformation.String("instance"),
 		UnhealthyThresholdCount: cloudformation.Int(2),
@@ -125,7 +125,7 @@ func AddResourcesForSensuBaseStack(template *cloudformation.Template, defaults S
 			},
 		},
 		LoadBalancerArn: cloudformation.Ref("SensuElb"),
-		Port:            cloudformation.Int(80),
+		Port:            cloudformation.Int(8080),
 		Protocol:        cloudformation.String("HTTP"),
 	}
 }
