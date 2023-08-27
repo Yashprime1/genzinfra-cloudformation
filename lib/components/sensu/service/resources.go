@@ -112,8 +112,8 @@ func AddResourcesForSensuServiceStack(template *cloudformation.Template) {
 				},
 				PortMappings: []ecs.TaskDefinition_PortMapping{
 					{
-						ContainerPort: cloudformation.Int(8080),
-						HostPort:      cloudformation.Int(8080),
+						ContainerPort: cloudformation.Int(3000),
+						HostPort:      cloudformation.Int(3000),
 						Protocol:      cloudformation.String("tcp"),
 					},
 					{
@@ -136,7 +136,7 @@ func AddResourcesForSensuServiceStack(template *cloudformation.Template) {
 		LoadBalancers:                 []ecs.Service_LoadBalancer{
 			{
 				ContainerName:  cloudformation.String("sensu"),
-				ContainerPort:  cloudformation.Int(8080),
+				ContainerPort:  cloudformation.Int(3000),
 				TargetGroupArn: cloudformation.String(cloudformation.ImportValue(
 					cloudformation.Join("-", []string{
 						cloudformation.Ref("AWS::StackName"),
