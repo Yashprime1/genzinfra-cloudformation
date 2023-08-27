@@ -6,7 +6,7 @@ import (
 func GenerateSensuServiceStack() *cloudformation.Template{
 	// Create the DS Service Stack
 	ServiceTemplate := cloudformation.NewTemplate()
-	ServiceTemplate.Description = "Sensu's Service Stack"
+	ServiceTemplate.Description = "Sensu Service Stack"
 	AddParametersForSensuServiceStack(ServiceTemplate)
 	AddResourcesForSensuServiceStack(ServiceTemplate)
 	AddConditionsForSensuServiceStack(ServiceTemplate)
