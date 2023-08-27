@@ -40,11 +40,11 @@
             },
             "Mu-Sensu":{
                 "Parameters": {
-                    "DsAmiId":"ami-0f6acb2d33561c559",
-                    "DsInstanceType":"t2.micro",
-                    "DsMaxSize":"1",
-                    "DsMinSize":"1",
-                    "DsDesiredSize":"1"
+                    "SensuAmiId":"ami-0f6acb2d33561c559",
+                    "SensuInstanceType":"t2.micro",
+                    "SensuMaxSize":"1",
+                    "SensuMinSize":"1",
+                    "SensuDesiredSize":"1"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu.json"
