@@ -16,8 +16,8 @@ func GenerateDsStacks() {
 
 	// Generate the stack templates
 	var defaults dsbase.DsBaseDefaults 
-	defaults.NetworkStack = "X-Network"
-	defaults.SecurityGroupStack = "X-SecurityGroup"
+	defaults.NetworkStack = "Mu-Network"
+	defaults.SecurityGroupStack = "Mu-SecurityGroup"
 
 	BaseTemplate := dsbase.GenerateDsBaseStack(defaults)
 	ServiceTemplate := dsservice.GenerateDsServiceStack()
