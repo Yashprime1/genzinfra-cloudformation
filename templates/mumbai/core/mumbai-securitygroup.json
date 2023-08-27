@@ -48,7 +48,7 @@
           }
         ],
         "VpcId": {
-          "Fn::ImportValue": "X-Network-AppVPCId"
+          "Fn::ImportValue": "Mu-Network-AppVPCId"
         }
       },
       "Type": "AWS::EC2::SecurityGroup"
