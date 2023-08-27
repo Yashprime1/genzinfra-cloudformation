@@ -1,0 +1,230 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Sensu's Base Stack",
+  "Outputs": {
+    "SensuElbTargetGroupArn": {
+      "Description": "Sensu ELB Target Group Arn",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-SensuElbTargetGroupArn"
+        }
+      },
+      "Value": {
+        "Ref": "SensuElbTargetGroup"
+      }
+    }
+  },
+  "Parameters": {
+    "SensuAmiId": {
+      "Description": "The AMI ID for the Sensu",
+      "Type": "String"
+    },
+    "SensuDesiredSize": {
+      "Description": "The desired capacity for the Sensu",
+      "Type": "String"
+    },
+    "SensuInstanceType": {
+      "Description": "The instance type for the Sensu",
+      "Type": "String"
+    },
+    "SensuMaxSize": {
+      "Description": "The maximum size for the Sensu",
+      "Type": "String"
+    },
+    "SensuMinSize": {
+      "Description": "The minimum size for the Sensu",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "SensuAsg": {
+      "Properties": {
+        "DesiredCapacity": {
+          "Ref": "SensuDesiredSize"
+        },
+        "LaunchConfigurationName": {
+          "Ref": "SensuLaunchConfiguration"
+        },
+        "MaxSize": {
+          "Ref": "SensuMaxSize"
+        },
+        "MinSize": {
+          "Ref": "SensuMinSize"
+        },
+        "TargetGroupARNs": [
+          {
+            "Ref": "SensuElbTargetGroup"
+          }
+        ],
+        "VPCZoneIdentifier": [
+          {
+            "Fn::ImportValue": "Mu-Network-AppPublicSubnet1Id"
+          },
+          {
+            "Fn::ImportValue": "Mu-Network-AppPublicSubnet2Id"
+          }
+        ]
+      },
+      "Type": "AWS::AutoScaling::AutoScalingGroup"
+    },
+    "SensuEc2IamRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "SensuEc2InstanceProfile": {
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "SensuEc2IamRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::InstanceProfile"
+    },
+    "SensuEc2RolePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "*",
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "SensuEc2RolePolicy"
+            ]
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "SensuEc2IamRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "SensuElb": {
+      "Properties": {
+        "IpAddressType": "ipv4",
+        "LoadBalancerAttributes": [
+          {
+            "Key": "idle_timeout.timeout_seconds",
+            "Value": "1800"
+          }
+        ],
+        "Scheme": "internet-facing",
+        "SecurityGroups": [
+          {
+            "Fn::ImportValue": "Mu-SecurityGroup-DS2SecurityGroupId"
+          }
+        ],
+        "Subnets": [
+          {
+            "Fn::ImportValue": "Mu-Network-AppPublicSubnet1Id"
+          },
+          {
+            "Fn::ImportValue": "Mu-Network-AppPublicSubnet2Id"
+          }
+        ],
+        "Type": "application"
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    },
+    "SensuElbListener": {
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "SensuElbTargetGroup"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "SensuElb"
+        },
+        "Port": 80,
+        "Protocol": "HTTP"
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::Listener"
+    },
+    "SensuElbTargetGroup": {
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/",
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckTimeoutSeconds": 10,
+        "HealthyThresholdCount": 5,
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "Port": 80,
+        "Protocol": "HTTP",
+        "TargetGroupAttributes": [
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false"
+          },
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "300"
+          }
+        ],
+        "TargetType": "instance",
+        "UnhealthyThresholdCount": 2,
+        "VpcId": {
+          "Fn::ImportValue": "Mu-Network-AppVPCId"
+        }
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
+    },
+    "SensuLaunchConfiguration": {
+      "Properties": {
+        "AssociatePublicIpAddress": true,
+        "IamInstanceProfile": {
+          "Ref": "SensuEc2InstanceProfile"
+        },
+        "ImageId": {
+          "Ref": "SensuAmiId"
+        },
+        "InstanceMonitoring": false,
+        "InstanceType": {
+          "Ref": "SensuInstanceType"
+        },
+        "SecurityGroups": [
+          {
+            "Fn::ImportValue": "Mu-SecurityGroup-DS2SecurityGroupId"
+          }
+        ]
+      },
+      "Type": "AWS::AutoScaling::LaunchConfiguration"
+    }
+  }
+}
