@@ -28,12 +28,12 @@ func GenerateSensuStacks() {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		utils.WriteTemplatesToFile("./templates/mumbai/ds","mumbai-sensu.json", BaseJsonTemplate)
+		utils.WriteTemplatesToFile("./templates/mumbai/sensu","mumbai-sensu.json", BaseJsonTemplate)
 	}
 	ServiceJsonTemplate, err := ServiceTemplate.JSON()
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		utils.WriteTemplatesToFile("./templates/mumbai/ds","mumbai-sensu-service.json", ServiceJsonTemplate)
+		utils.WriteTemplatesToFile("./templates/mumbai/sensu","mumbai-sensu-service.json", ServiceJsonTemplate)
 	}
 }
