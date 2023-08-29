@@ -151,6 +151,10 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 						Value: cloudformation.String("ds"),
 					},
 					{
+						Name:  cloudformation.String("SENSU_NAMESPACE"),
+						Value: cloudformation.String("production"),
+					},
+					{
 						Name:  cloudformation.String("SENSU_DETECT_CLOUD_PROVIDER"),
 						Value: cloudformation.String("true"),
 					},
