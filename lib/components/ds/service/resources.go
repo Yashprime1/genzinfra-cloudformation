@@ -148,7 +148,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 					},
 					{
 						Name:  cloudformation.String("SENSU_SUBSCRIPTIONS"),
-						Value: cloudformation.String("catalogstore"),
+						Value: cloudformation.String("ds"),
 					},
 					{
 						Name:  cloudformation.String("SENSU_DETECT_CLOUD_PROVIDER"),
@@ -173,18 +173,6 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 					{
 						Name:  cloudformation.String("SENSU_DEREGISTER"),
 						Value: cloudformation.String("true"),
-					},
-					{
-						Name:  cloudformation.String("REDIS_HOST"),
-						Value: cloudformation.String("sensu-redis.wizrocket.net"),
-					},
-					{
-						Name:  cloudformation.String("DEVOPS_GROUP_EMAIL"),
-						Value: cloudformation.String("infra@clevertap.com"),
-					},
-					{
-						Name:  cloudformation.String("DEV_GROUP_EMAIL"),
-						Value: cloudformation.String("dev@clevertap.com"),
 					},
 					{
 						Name:  cloudformation.String("SENSU_USER"),
