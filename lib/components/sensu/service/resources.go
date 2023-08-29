@@ -187,7 +187,7 @@ func AddResourcesForSensuServiceStack(template *cloudformation.Template) {
 				TargetGroupArn: cloudformation.String(cloudformation.ImportValue(
 					cloudformation.Join("-", []string{
 						cloudformation.Ref("AWS::StackName"),
-						"SensuBackendElbTargetGroupArn",
+						"SensuApiElbTargetGroupArn",
 					}),
 				)),
 			},
