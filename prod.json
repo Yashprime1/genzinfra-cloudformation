@@ -21,6 +21,34 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
+            "Mu-DS":{
+                "Parameters": {
+                    "DsAmiId":"ami-0f6acb2d33561c559",
+                    "DsInstanceType":"t2.micro",
+                    "DsMaxSize":"1",
+                    "DsMinSize":"1",
+                    "DsDesiredSize":"1"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
+            },
+            "Mu-DS-Service":{
+                "Parameters": {
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
+            },
+            "Mu-Sensu":{
+                "Parameters": {
+                    "SensuAmiId":"ami-0de63db6fd8d918a8",
+                    "SensuInstanceType":"t2.micro",
+                    "SensuMaxSize":"1",
+                    "SensuMinSize":"1",
+                    "SensuDesiredSize":"1"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu.json"
+            }  
         }
     }
 }
