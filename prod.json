@@ -107,7 +107,7 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu-service.json"
-            }      
+            }    
         }
     }
 }
