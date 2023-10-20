@@ -56,7 +56,7 @@
                 "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu-service.json"
             }      
         },
-        "eu-westr-1":{
+        "eu-west-1":{
             "Mu-Network":{
                 "Parameters": {
                     "AppVpcCidr":"10.11.0.0/16",
