@@ -25,7 +25,7 @@
                 "Parameters": {
                     "DsAmiId":"ami-09cbce0ffeee771e6",
                     "DsInstanceType":"t2.micro",
-                    "DsMaxSize":"1",
+                    "DsMaxSize":"2",
                     "DsMinSize":"1",
                     "DsDesiredSize":"1"
                 },
@@ -36,7 +36,7 @@
                 "Parameters": {
                     "SensuAmiId":"ami-0502566bbb27455c2",
                     "SensuInstanceType":"t2.micro",
-                    "SensuMaxSize":"1",
+                    "SensuMaxSize":"2",
                     "SensuMinSize":"1",
                     "SensuDesiredSize":"1"
                 },
