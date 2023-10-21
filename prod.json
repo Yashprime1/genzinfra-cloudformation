@@ -23,7 +23,7 @@
             },
             "Mu-DS":{
                 "Parameters": {
-                    "DsAmiId":"ami-0f6acb2d33561c559",
+                    "DsAmiId":"ami-09cbce0ffeee771e6",
                     "DsInstanceType":"t2.micro",
                     "DsMaxSize":"1",
                     "DsMinSize":"1",
@@ -34,7 +34,7 @@
             },
             "Mu-Sensu":{
                 "Parameters": {
-                    "SensuAmiId":"ami-0de63db6fd8d918a8",
+                    "SensuAmiId":"ami-0502566bbb27455c2",
                     "SensuInstanceType":"t2.micro",
                     "SensuMaxSize":"1",
                     "SensuMinSize":"1",
