@@ -23,7 +23,7 @@
             },
             "Mu-DS":{
                 "Parameters": {
-                    "DsAmiId":"ami-06879dd07cedf5ea6",
+                    "DsAmiId":"ami-09802d2c4a4f6f32a",
                     "DsInstanceType":"t2.micro",
                     "DsMaxSize":"1",
                     "DsMinSize":"1",
