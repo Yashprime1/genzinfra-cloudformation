@@ -124,7 +124,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 				Environment: []ecs.TaskDefinition_KeyValuePair{
 					{
 						Name:  cloudformation.String("SENSU_BACKEND_URL"),
-						Value: cloudformation.String("ws://mu-se-sensu-1t3e9xtvksave-471599435.ap-south-1.elb.amazonaws.com:8081"),
+						Value: cloudformation.String("ws://mu-sen-sensu-voab7tutj8ly-464414231.ap-south-1.elb.amazonaws.com:8081/"),
 					},
 					{
 						Name:  cloudformation.String("SENSU_INSECURE_SKIP_TLS_VERIFY"),
