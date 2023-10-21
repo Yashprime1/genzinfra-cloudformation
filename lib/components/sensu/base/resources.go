@@ -113,7 +113,7 @@ func AddResourcesForSensuBaseStack(template *cloudformation.Template, defaults S
 			},
 			{
 				Key:   cloudformation.String("deregistration_delay.timeout_seconds"),
-				Value: cloudformation.String("300"),
+				Value: cloudformation.String("60"),
 			},
 		},
 	}
@@ -153,7 +153,7 @@ func AddResourcesForSensuBaseStack(template *cloudformation.Template, defaults S
 			},
 			{
 				Key:   cloudformation.String("deregistration_delay.timeout_seconds"),
-				Value: cloudformation.String("300"),
+				Value: cloudformation.String("60"),
 			},
 		},
 	}
@@ -193,7 +193,7 @@ func AddResourcesForSensuBaseStack(template *cloudformation.Template, defaults S
 			},
 			{
 				Key:   cloudformation.String("deregistration_delay.timeout_seconds"),
-				Value: cloudformation.String("300"),
+				Value: cloudformation.String("60"),
 			},
 		},
 	}
