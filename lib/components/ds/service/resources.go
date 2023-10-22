@@ -155,6 +155,10 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 						Value: cloudformation.String("{\"maintainer\": \"Team A\",\"priority\": \"P1\"}"),
 					},
 					{
+						Name:  cloudformation.String("SENSU_LABELS"),
+						Value: cloudformation.String("{\"stack\": \"ding\"}"),
+					},
+					{
 						Name:  cloudformation.String("SENSU_NAMESPACE"),
 						Value: cloudformation.String("production"),
 					},
