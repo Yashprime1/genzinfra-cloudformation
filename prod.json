@@ -32,6 +32,12 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
             },
+            "Mu-DS-Service":{
+                "Parameters": {
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
+            },
             "Mu-Sensu":{
                 "Parameters": {
                     "SensuAmiId":"ami-0502566bbb27455c2",
@@ -42,7 +48,13 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu.json"
-            }      
+            },
+            "Mu-Sensu-Service":{
+                "Parameters": {
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu-service.json"
+            }         
         }
      }
 }
