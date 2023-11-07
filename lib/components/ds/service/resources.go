@@ -1,7 +1,6 @@
 package dsservice
 
 import (
-	"github.com/awslabs/goformation/cloudformation"
 	"github.com/awslabs/goformation/v7/cloudformation"
 	"github.com/awslabs/goformation/v7/cloudformation/ecs"
 	"github.com/awslabs/goformation/v7/cloudformation/iam"
