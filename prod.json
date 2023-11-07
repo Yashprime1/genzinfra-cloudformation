@@ -31,29 +31,6 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
-            },
-            "Mu-Sensu":{
-                "Parameters": {
-                    "SensuAmiId":"ami-0502566bbb27455c2",
-                    "SensuInstanceType":"t2.micro",
-                    "SensuMaxSize":"1",
-                    "SensuMinSize":"1",
-                    "SensuDesiredSize":"1"
-                },
-                "SkipUpdate": true,
-                "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu.json"
-            },
-            "Mu-DS-Service":{
-                "Parameters": {
-                },
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
-            },
-            "Mu-Sensu-Service":{
-                "Parameters": {
-                },
-                "SkipUpdate": true,
-                "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu-service.json"
             }         
         }
      }
