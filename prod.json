@@ -46,13 +46,13 @@
             "Mu-DS-Service":{
                 "Parameters": {
                 },
-                "SkipUpdate": true,
+                "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
             },
             "Mu-Sensu-Service":{
                 "Parameters": {
                 },
-                "SkipUpdate": true,
+                "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu-service.json"
             }         
         }
