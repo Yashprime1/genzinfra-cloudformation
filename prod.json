@@ -52,7 +52,7 @@
             "Mu-Sensu-Service":{
                 "Parameters": {
                 },
-                "SkipUpdate": false,
+                "SkipUpdate": true,
                 "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu-service.json"
             }         
         }
