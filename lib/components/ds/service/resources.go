@@ -101,7 +101,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 					},
 					{
 						Name:  cloudformation.String("TestImport"),
-						Value: cloudformation.ImportValue(cloudformation.String(cloudformation.Sub("${AWS::StackName}-Service-DsElbTargetGroupArn"))),
+						Value: cloudformation.ImportValue(cloudformation.String(cloudformation.Sub("${AWS::StackName}-DsElbTargetGroupArn"))),
 					},
 				},
 				Essential: cloudformation.Bool(true),
