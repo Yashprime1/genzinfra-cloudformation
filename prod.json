@@ -25,7 +25,7 @@
                 "Parameters": {
                     "DsAmiId":"ami-09802d2c4a4f6f32a",
                     "DsInstanceType":"t2.micro",
-                    "DsMaxSize":"2",
+                    "DsMaxSize":"1",
                     "DsMinSize":"1",
                     "DsDesiredSize":"1"
                 },
