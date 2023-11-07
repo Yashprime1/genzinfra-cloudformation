@@ -1,6 +1,7 @@
 package dsservice
 
 import (
+	"github.com/awslabs/goformation/cloudformation"
 	"github.com/awslabs/goformation/v7/cloudformation"
 	"github.com/awslabs/goformation/v7/cloudformation/ecs"
 	"github.com/awslabs/goformation/v7/cloudformation/iam"
@@ -97,6 +98,10 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 					{
 						Name:  cloudformation.String("App Name"),
 						Value: cloudformation.String("DS"),
+					},
+					{
+						Name:  cloudformation.String("TestImport"),
+						Value: cloudformation.ImportValue(cloudformation.String(cloudformation.Sub("${AWS::StackName}-Service-DsElbTargetGroupArn"))),
 					},
 				},
 				Essential: cloudformation.Bool(true),
