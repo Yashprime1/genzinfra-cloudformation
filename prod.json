@@ -40,7 +40,7 @@
                     "SensuMinSize":"1",
                     "SensuDesiredSize":"1"
                 },
-                "SkipUpdate": true,
+                "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu.json"
             },
             "Mu-DS-Service":{
@@ -52,7 +52,7 @@
             "Mu-Sensu-Service":{
                 "Parameters": {
                 },
-                "SkipUpdate": true,
+                "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu-service.json"
             }         
         }
