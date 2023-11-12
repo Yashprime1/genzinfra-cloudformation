@@ -139,7 +139,7 @@ func AddResourcesForSensuServiceStack(template *cloudformation.Template) {
 					"--state-dir",
 					"/var/lib/sensu/sensu-backend",
 					"--log-level",
-					"debug",
+					"info",
 				},
 			},
 		},
