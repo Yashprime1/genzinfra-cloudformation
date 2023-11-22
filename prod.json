@@ -29,7 +29,7 @@
                     "DsMinSize":"1",
                     "DsDesiredSize":"1"
                 },
-                "SkipUpdate": false,
+                "SkipUpdate": true,
                 "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
             },
             "Mu-Sensu":{
@@ -40,19 +40,33 @@
                     "SensuMinSize":"1",
                     "SensuDesiredSize":"1"
                 },
+                "SkipUpdate": true,
+                "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu.json"
+            },
+            "Mu-Splunk":{
+                "Parameters": {
+                    "SplunkAmiId":"ami-0502566bbb27455c2"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu.json"
+            },
+            "Mu-Application":{
+                "Parameters": {
+                    "SplunkAmiId":"ami-0502566bbb27455c2"
+                },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu.json"
             },
             "Mu-DS-Service":{
                 "Parameters": {
                 },
-                "SkipUpdate": false,
+                "SkipUpdate": true,
                 "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
             },
             "Mu-Sensu-Service":{
                 "Parameters": {
                 },
-                "SkipUpdate": false,
+                "SkipUpdate": true,
                 "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu-service.json"
             }         
         }
