@@ -168,13 +168,13 @@
                     "GroupSet": [     {
                         "Fn::ImportValue": 
                             {
-                                "Fn::Sub": "${RegionPrefix}-MongoInstanceSecurityGroupId"
+                                "Fn::Sub": "Mu-SecurityGroup-DS2SecurityGroupId"
                             }
                     }],
                     "SubnetId":  {
                         "Fn::ImportValue": 
                             {
-                                "Fn::Sub": "${RegionPrefix}-public-subnet-1-id"
+                                "Fn::Sub": "Mu-Network-AppPublicSubnet1Id"
                             }
                     }
                   } ],
