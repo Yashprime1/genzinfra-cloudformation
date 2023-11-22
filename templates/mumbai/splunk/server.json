@@ -134,7 +134,7 @@
                 "NetworkMode":"host"
             }
         },
-        "SplunkEcsService":{
+        "SplunkServerEcsService":{
             "Type":"AWS::ECS::Service",
             "Properties":{
                 "Cluster":{
