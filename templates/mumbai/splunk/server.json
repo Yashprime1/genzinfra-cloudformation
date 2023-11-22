@@ -133,6 +133,58 @@
                 ],
                 "NetworkMode":"host"
             }
+        },
+        "SplunkInstance":{
+            "Type":"AWS::EC2::Instance",
+            "Properties":{
+                "ImageId":{
+                  "Ref": "SplunkAmiId"
+                },
+                "InstanceType":"t2.micro",
+                "IamInstanceProfile": {
+                    "Ref": "SplunkInstacneIamProfile"
+                },
+                "UserData":{
+                    "Fn::Base64":{
+                        "Fn::Join":[
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "mkdir -p /etc/ecs\n",  
+                                "echo ECS_CLUSTER=SplunkEcsCluster >> /etc/ecs/ecs.config\n",
+                                "amazon-linux-extras install -y ecs\n",
+                                "systemctl enable --now --no-block ecs\n",
+                                "curl -s http://localhost:51678/v1/metadata | python -mjson.tool\n"
+                            ]
+                        ]
+                    }
+                },
+                "KeyName": {
+                    "Ref": "SplunkInstanceKeyPair"
+                },
+                "NetworkInterfaces": [ {
+                    "AssociatePublicIpAddress": "true",
+                    "DeviceIndex": "0",
+                    "GroupSet": [     {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "${RegionPrefix}-MongoInstanceSecurityGroupId"
+                            }
+                    }],
+                    "SubnetId":  {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "${RegionPrefix}-public-subnet-1-id"
+                            }
+                    }
+                  } ],
+                "Tags":[
+                    {
+                        "Key":"Name",
+                        "Value":"SplunkInstance"
+                    }
+                ]
+            }
         }
     }
 }
