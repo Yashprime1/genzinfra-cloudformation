@@ -43,13 +43,6 @@
                 "SkipUpdate": true,
                 "TemplatePath": "./templates/mumbai/sensu/mumbai-sensu.json"
             },
-            "Mu-Splunk":{
-                "Parameters": {
-                    "SplunkAmiId":"ami-087ce0e0e42171175"
-                },
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/splunk/server.json"
-            },
             "Mu-Application":{
                 "Parameters": {
                     "SplunkAmiId":"ami-0a9a35359684f2f91"
