@@ -45,14 +45,14 @@
             },
             "Mu-Splunk":{
                 "Parameters": {
-                    "SplunkAmiId":"ami-087ce0e0e42171175"
+                    "SplunkAmiId":"ami-032e2bd35b8dce79d"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/splunk/server.json"
             },
             "Mu-Application":{
                 "Parameters": {
-                    "SplunkAmiId":"ami-0a9a35359684f2f91"
+                    "SplunkAmiId":"ami-05f96cb4c4d0ad1cd"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/splunk/application.json"
