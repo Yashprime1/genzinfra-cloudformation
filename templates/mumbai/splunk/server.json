@@ -134,6 +134,40 @@
                 "NetworkMode":"host"
             }
         },
+        "SplunkEcsService":{
+            "Type":"AWS::ECS::Service",
+            "Properties":{
+                "Cluster":{
+                    "Ref":"SplunkEcsCluster"
+                },
+                "DesiredCount":1,
+                "LaunchType":"EC2",
+                "DeploymentController":{"Type" :"ECS"},
+                "DeploymentConfiguration": {
+                    "MaximumPercent": 100,
+                    "MinimumHealthyPercent": 0
+                },
+                "PlacementConstraints":[
+                    {
+                        "Type":"memberOf",
+                        "Expression":{
+                                        "Fn::Join":
+                                            [
+                                                "",
+                                                [
+                                                    "ec2InstanceId",
+                                                    "==",
+                                                    {"Ref" : "SplunkInstance"}
+                                                ]
+                                            ]
+                                    }
+                    }
+                ],
+                "TaskDefinition":{
+                    "Ref":"SplunkEcsTaskDefinition"
+                }
+            }
+        },
         "SplunkInstance":{
             "Type":"AWS::EC2::Instance",
             "Properties":{
