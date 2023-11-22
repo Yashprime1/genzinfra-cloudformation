@@ -153,7 +153,7 @@
                     "Ref":"ApplicationEcsTaskDefinition"
                 }
             }
-        }
+        },
         "ApplicationInstance":{
             "Type":"AWS::EC2::Instance",
             "Properties":{
