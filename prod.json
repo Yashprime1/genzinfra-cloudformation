@@ -54,7 +54,7 @@
                 "Parameters": {
                     "SplunkAmiId":"ami-0502566bbb27455c2"
                 },
-                "SkipUpdate": true,
+                "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/splunk/application.json"
             },
             "Mu-DS-Service":{
