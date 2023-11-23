@@ -274,7 +274,7 @@
                         "Privileged": false
                       }
                 ],
-                "executionRoleArn":{
+                "ExecutionRoleArn":{
                     "Ref":"ApplicationTaskIamRole"
                 },
                 "NetworkMode":"host"
