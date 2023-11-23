@@ -192,7 +192,7 @@
                 "ContainerDefinitions":[
                     {
                         "Name":"ApplicationEcsContainer",
-                        "Image":"httpd:latest",
+                        "Image":"yashprime07/javastacktrace",
                         "PortMappings":[
                             {
                                 "ContainerPort":80,
@@ -203,10 +203,6 @@
                             {
                                 "Name":"STACK_NAME",
                                 "Value": "Mu"
-                            },
-                            {
-                                "Name": "Splunk_Token",
-                                "Value": ""
                             }
                         ],
                         "Memory":512,
