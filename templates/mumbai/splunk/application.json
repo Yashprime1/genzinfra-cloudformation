@@ -34,7 +34,7 @@
                               "s3:ListBucket"
                             ],
                             "Effect": "Allow",
-                            "Resource": [
+                            "Resources": [
                               "arn:aws:s3:::fluentbit-yashprime",
                               "arn:aws:s3:::fluentbit-yashprime/*"
                             ],
