@@ -91,7 +91,7 @@
                 "ContainerDefinitions":[
                     {
                         "Name":"SplunkEcsContainer",
-                        "Image":"splunk/splunk:6.6.0",
+                        "Image":"yashprime07/splunk",
                         "PortMappings":[
                             {
                                 "ContainerPort":9997,
