@@ -206,7 +206,7 @@
                             }
                         ],
                         "Memory":128,
-                        "Cpu":128,
+                        "Cpu":128
                     },
                     {
                         "Name":"ApplicationEcsContainer",
