@@ -276,7 +276,7 @@
                 ],
                 "executionRoleArn":{
                     "Ref":"ApplicationTaskIamRole"
-                }
+                },
                 "NetworkMode":"host"
             }
         },
