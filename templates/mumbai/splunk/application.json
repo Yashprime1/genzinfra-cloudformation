@@ -100,6 +100,15 @@
                 "ClusterName":"ApplicationEcsCluster"
             }
         },
+        "SplunkTokenSecretsManagerSecret": {
+            "Type": "AWS::SecretsManager::Secret",
+            "Properties": {
+              "Description": {
+                "Fn::Sub": "This is a Secrets Manager secret for ${AWS::StackName}-SplunkTokenSecretsManagerSecret"
+              },
+              "SecretString": "{\"splunk-token\":\"replacesplunktoken\"}"
+            }
+          },
         "ApplicationEcsTaskDefinition":{
             "Type":"AWS::ECS::TaskDefinition",
             "Properties":{
@@ -121,7 +130,7 @@
                             },
                             {
                                 "Name": "Splunk_Token",
-                                "Value": "5C41DC65-BBED-4611-B5AB-BE44FC06B77B"
+                                "Value": ""
                             }
                         ],
                         "Memory":512,
@@ -139,7 +148,25 @@
                               "event_sourcetype": "_json",
                               "tls": "off",
                               "tls.verify": "off"
-                            }
+                            },
+                            "SecretOptions": [
+                                {
+                                    "Name": "Splunk_Token",
+                                    "ValueFrom": {
+                                        "Fn::Join": [
+                                        ":",
+                                        [
+                                            {
+                                                "Ref": {
+                                                    "SplunkTokenSecretsManagerSecret"
+                                                }
+                                            },
+                                            "splunk-token::"
+                                        ]
+                                        ]
+                                    }
+                                }
+                            ]
                           }
                     },
                     {
