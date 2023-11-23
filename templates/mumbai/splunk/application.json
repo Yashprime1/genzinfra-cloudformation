@@ -268,7 +268,7 @@
                           },
                           {
                             "Name": "FLB_LOG_LEVEL",
-                            "Value": "warn"
+                            "Value": "debug"
                           },
                           {
                             "Name": "aws_fluent_bit_init_s3_parsers",
