@@ -23,23 +23,7 @@
                             "Action": [
                                 "sts:AssumeRole"
                             ]
-                        },
-                        {
-                            "Action": [
-                              "s3:GetObject",
-                              "s3:GetObjectAcl",
-                              "s3:GetBucketLocation",
-                              "s3:ListObjects",
-                              "s3:ListObjectsV2",
-                              "s3:ListBucket"
-                            ],
-                            "Effect": "Allow",
-                            "Resources": [
-                              "arn:aws:s3:::fluentbit-yashprime",
-                              "arn:aws:s3:::fluentbit-yashprime/*"
-                            ],
-                            "Sid": "AllowFluentbitConfigurationS3Bucket"
-                          }
+                        }
                     ]
                 },
                 "Path": "/",
@@ -70,7 +54,23 @@
                                         "arn:aws:ecs:*:*:cluster/*",
                                         "*"
                                     ]
-                                 }
+                                 },
+                                    {
+                                        "Action": [
+                                        "s3:GetObject",
+                                        "s3:GetObjectAcl",
+                                        "s3:GetBucketLocation",
+                                        "s3:ListObjects",
+                                        "s3:ListObjectsV2",
+                                        "s3:ListBucket"
+                                        ],
+                                        "Effect": "Allow",
+                                        "Resource": [
+                                        "arn:aws:s3:::fluentbit-yashprime",
+                                        "arn:aws:s3:::fluentbit-yashprime/*"
+                                        ],
+                                        "Sid": "AllowFluentbitConfigurationS3Bucket"
+                                    }
                                 ]
                             }
                     }
