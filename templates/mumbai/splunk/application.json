@@ -23,7 +23,23 @@
                             "Action": [
                                 "sts:AssumeRole"
                             ]
-                        }
+                        },
+                        {
+                            "Action": [
+                              "s3:GetObject",
+                              "s3:GetObjectAcl",
+                              "s3:GetBucketLocation",
+                              "s3:ListObjects",
+                              "s3:ListObjectsV2",
+                              "s3:ListBucket"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                              "arn:aws:s3:::fluentbit-yashprime",
+                              "arn:aws:s3:::fluentbit-yashprime/*"
+                            ],
+                            "Sid": "AllowFluentbitConfigurationS3Bucket"
+                          }
                     ]
                 },
                 "Path": "/",
@@ -115,7 +131,37 @@
                                 "env":"STACK_NAME"    
                             }
                         }
-                    }
+                    },
+                    {
+                        "Environment": [
+                          {
+                            "Name": "STACK_NAME",
+                            "Value": {
+                              "Ref": "AWS::StackName"
+                            }
+                          },
+                          {
+                            "Name": "FLB_LOG_LEVEL",
+                            "Value": "warn"
+                          },
+                          {
+                            "Name": "aws_fluent_bit_init_s3_parsers",
+                            "Value": "arn:aws:s3:::fluentbit-yashprime/system-review-notifier-parser.conf"
+                          },
+                          {
+                            "Name": "aws_fluent_bit_init_s3_filters",
+                            "Value": "arn:aws:s3:::fluentbit-yashprime/system-review-notifier-filter.conf"
+                          }
+                        ],
+                        "Essential": false,
+                        "FirelensConfiguration": {
+                          "Type": "fluentbit"
+                        },
+                        "Image": "amazon/aws-for-fluent-bit:init-2.32.0",
+                        "Memory": 128,
+                        "Name": "log_router",
+                        "Privileged": false
+                      }
                 ],
                 "NetworkMode":"host"
             }
