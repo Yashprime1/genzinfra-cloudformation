@@ -103,12 +103,12 @@
         "SplunkTokenSecretsManagerSecret": {
             "Type": "AWS::SecretsManager::Secret",
             "Properties": {
-              "Description": {
+                "Description": {
                 "Fn::Sub": "This is a Secrets Manager secret for ${AWS::StackName}-SplunkTokenSecretsManagerSecret"
-              },
-              "SecretString": "{\"splunk-token\":\"replacesplunktoken\"}"
+                },
+                "SecretString": "{\"splunk-token\":\"replacesplunktoken\"}"
             }
-          },
+        },
         "ApplicationEcsTaskDefinition":{
             "Type":"AWS::ECS::TaskDefinition",
             "Properties":{
@@ -157,9 +157,7 @@
                                         ":",
                                         [
                                             {
-                                                "Ref": {
-                                                    "SplunkTokenSecretsManagerSecret"
-                                                }
+                                                "Ref": "SplunkTokenSecretsManagerSecret"
                                             },
                                             "splunk-token::"
                                         ]
