@@ -117,7 +117,7 @@
                         "Environment":[
                             {
                                 "Name":"STACK_NAME",
-                                "Value": "in1"
+                                "Value": "Mu"
                             }
                         ],
                         "Memory":512,
