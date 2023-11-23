@@ -110,7 +110,7 @@
                             "LogDriver":"splunk",
                             "Options":{
                                 "splunk-token":"bfbe35f9-82ed-47bc-b29b-2e08f38cbf9b",
-                                "splunk-url":"http://3.108.193.225:8088",
+                                "splunk-url":"http://13.233.204.76/:8088",
                                 "splunk-source":"mywebsite",
                                 "env":"STACK_NAME"    
                             }
