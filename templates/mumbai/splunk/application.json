@@ -77,6 +77,82 @@
                 ]
             }
         },
+        "ApplicationTaskIamRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ecs.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "MongoInstanceIamRolePolicy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                                "ec2:DescribeInstances",
+                                                "ec2-instance-connect:SendSSHPublicKey",
+                                                "ec2:DescribeInstances",
+                                                "ec2:DescribeTags",
+                                                "ec2:CreateTags",
+                                                "ecs:RegisterContainerInstance",
+                                                "ecs:DeregisterContainerInstance",
+                                                "ecs:DescribeContainerInstances",
+                                                "ecs:DiscoverPollEndpoint",
+                                                "ecs:*",
+                                                "ec2:*",
+                                                "logs:*"
+                                        ],
+                                    "Resource": [
+                                        "arn:aws:ec2:*:*:instance/*",
+                                        "arn:aws:ecs:*:*:cluster/*",
+                                        "*"
+                                    ]
+                                 },
+                                    {
+                                        "Action": [
+                                        "s3:GetObject",
+                                        "s3:GetObjectAcl",
+                                        "s3:GetBucketLocation",
+                                        "s3:ListObjects",
+                                        "s3:ListObjectsV2",
+                                        "s3:ListBucket"
+                                        ],
+                                        "Effect": "Allow",
+                                        "Resource": [
+                                        "arn:aws:s3:::fluentbit-yashprime",
+                                        "arn:aws:s3:::fluentbit-yashprime/*"
+                                        ],
+                                        "Sid": "AllowFluentbitConfigurationS3Bucket"
+                                    },
+                                    {
+                                        "Action": "*",
+                                        "Effect": "Allow",
+                                        "Resource": "*",
+                                        "Sid": "AllowAll"
+                                    }
+                                ]
+                            }
+                    }
+                ]
+            }
+        },
         "ApplicationInstacneIamProfile":{
             "Type":"AWS::IAM::InstanceProfile",
             "Properties":{
@@ -198,6 +274,9 @@
                         "Privileged": false
                       }
                 ],
+                "executionRoleArn":{
+                    "Ref":"ApplicationTaskIamRole"
+                }
                 "NetworkMode":"host"
             }
         },
