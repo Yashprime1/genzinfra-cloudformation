@@ -213,8 +213,8 @@
                         "Image":"yashprime07/javastacktrace",
                         "PortMappings":[
                             {
-                                "ContainerPort":80,
-                                "HostPort":80
+                                "ContainerPort":8080,
+                                "HostPort":8080
                             }
                         ],
                         "Environment":[
