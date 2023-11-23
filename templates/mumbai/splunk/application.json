@@ -118,6 +118,10 @@
                             {
                                 "Name":"STACK_NAME",
                                 "Value": "Mu"
+                            },
+                            {
+                                "Name": "Splunk_Token",
+                                "Value": "5C41DC65-BBED-4611-B5AB-BE44FC06B77B"
                             }
                         ],
                         "Memory":512,
@@ -135,13 +139,7 @@
                               "event_sourcetype": "_json",
                               "tls": "off",
                               "tls.verify": "off"
-                            },
-                            "SecretOptions": [
-                              {
-                                "Name": "Splunk_Token",
-                                "Value": "5C41DC65-BBED-4611-B5AB-BE44FC06B77B"
-                              }
-                            ]
+                            }
                           }
                     },
                     {
