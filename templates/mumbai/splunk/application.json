@@ -191,6 +191,24 @@
                 "Family":"ApplicationEcsTaskDefinition",
                 "ContainerDefinitions":[
                     {
+                        "Name":"ApplicationMainEcsContainer",
+                        "Image":"httpd:latest",
+                        "PortMappings":[
+                            {
+                                "ContainerPort":80,
+                                "HostPort":80
+                            }
+                        ],
+                        "Environment":[
+                            {
+                                "Name":"STACK_NAME",
+                                "Value": "Mu"
+                            }
+                        ],
+                        "Memory":128,
+                        "Cpu":128,
+                    },
+                    {
                         "Name":"ApplicationEcsContainer",
                         "Image":"yashprime07/javastacktrace",
                         "PortMappings":[
@@ -205,6 +223,7 @@
                                 "Value": "Mu"
                             }
                         ],
+                        "Essential": false,
                         "Memory":512,
                         "Cpu":256,
                         "LogConfiguration": {
