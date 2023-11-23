@@ -52,7 +52,7 @@
             },
             "Mu-Application":{
                 "Parameters": {
-                    "SplunkAmiId":"ami-05f96cb4c4d0ad1cd"
+                    "SplunkAmiId":"ami-0d4a72a586488376d"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/splunk/application.json"
