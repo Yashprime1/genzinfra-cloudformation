@@ -123,16 +123,12 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 				},
 			},
 			{
-				Name: "ds",
+				Name: "Mongo",
 				Image: "mongo:latest",
 				Environment: []ecs.TaskDefinition_KeyValuePair{
 					{
 						Name:  cloudformation.String("App Name"),
 						Value: cloudformation.String("Mongo"),
-					},
-					{
-						Name:  cloudformation.String("TestImport"),
-						Value: cloudformation.String(cloudformation.ImportValue(cloudformation.Sub("${AWS::StackName}-DsElbTargetGroupArn"))),
 					},
 				},
 				Essential: cloudformation.Bool(true),
