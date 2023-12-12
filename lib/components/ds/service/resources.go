@@ -160,7 +160,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 				Environment: []ecs.TaskDefinition_KeyValuePair{
 					{
 						Name:  cloudformation.String("App Name"),
-						Value: cloudformation.String("MongoExporter"),
+						Value: cloudformation.String("MongoExporterService"),
 					},
 				},
 				Command: []string{
