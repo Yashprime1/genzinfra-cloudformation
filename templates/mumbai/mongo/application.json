@@ -1,7 +1,7 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
-        "SplunkAmiId": {
+        "MongoAmiId": {
           "Description": "The AMI ID for the Splunk",
           "Type": "String"
         }
