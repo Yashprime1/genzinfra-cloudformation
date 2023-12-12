@@ -131,7 +131,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 						Value: cloudformation.String("Mongo"),
 					},
 				},
-				Essential: cloudformation.Bool(true),
+				Essential: cloudformation.Bool(false),
 				MemoryReservation: cloudformation.Int(256),
 				Privileged:        cloudformation.Bool(false),
 				ReadonlyRootFilesystem: cloudformation.Bool(false),
@@ -141,6 +141,10 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 						SoftLimit: 65536,
 						HardLimit: 65536,
 					},
+				},
+				Command: []string{
+					"--replSet",
+					"rs0",
 				},
 				PortMappings: []ecs.TaskDefinition_PortMapping{
 					{
@@ -163,7 +167,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 					"---mongodb.uri",
 					"http://myUserAdmin:abc123@localhost:17001/admin?ssl=false",
 				},
-				Essential: cloudformation.Bool(true),
+				Essential: cloudformation.Bool(false),
 				MemoryReservation: cloudformation.Int(256),
 				Privileged:        cloudformation.Bool(false),
 				ReadonlyRootFilesystem: cloudformation.Bool(false),
