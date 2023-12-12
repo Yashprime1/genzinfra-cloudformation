@@ -123,6 +123,38 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 				},
 			},
 			{
+				Name: "ds",
+				Image: "mongo:latest",
+				Environment: []ecs.TaskDefinition_KeyValuePair{
+					{
+						Name:  cloudformation.String("App Name"),
+						Value: cloudformation.String("Mongo"),
+					},
+					{
+						Name:  cloudformation.String("TestImport"),
+						Value: cloudformation.String(cloudformation.ImportValue(cloudformation.Sub("${AWS::StackName}-DsElbTargetGroupArn"))),
+					},
+				},
+				Essential: cloudformation.Bool(true),
+				MemoryReservation: cloudformation.Int(256),
+				Privileged:        cloudformation.Bool(false),
+				ReadonlyRootFilesystem: cloudformation.Bool(false),
+				Ulimits: []ecs.TaskDefinition_Ulimit{
+					{
+						Name:      "nofile",
+						SoftLimit: 65536,
+						HardLimit: 65536,
+					},
+				},
+				PortMappings: []ecs.TaskDefinition_PortMapping{
+					{
+						ContainerPort: cloudformation.Int(27017),
+						HostPort:      cloudformation.Int(27017),
+						Protocol:      cloudformation.String("tcp"),
+					},
+				},
+			},
+			{
 				Name: "sensu",
 				Image: "sensu/sensu:6.10.0",
 				Environment: []ecs.TaskDefinition_KeyValuePair{

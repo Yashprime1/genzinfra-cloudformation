@@ -82,33 +82,6 @@
                 "SoftLimit": 65536
               }
             ]
-          },
-          {
-            "Environment": [
-              {
-                "Name": "App Name",
-                "Value": "Mongo"
-              }
-            ],
-            "Essential": true,
-            "Image": "mongo",
-            "MemoryReservation": 256,
-            "PortMappings": [
-              {
-                "ContainerPort": 27017,
-                "HostPort": 27017,
-                "Protocol": "tcp"
-              }
-            ],
-            "Privileged": false,
-            "ReadonlyRootFilesystem": false,
-            "Ulimits": [
-              {
-                "HardLimit": 65536,
-                "Name": "nofile",
-                "SoftLimit": 65536
-              }
-            ]
           }
         ],
         "ExecutionRoleArn": {
