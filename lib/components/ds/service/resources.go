@@ -151,81 +151,17 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 				},
 			},
 			{
-				Name: "sensu",
-				Image: "sensu/sensu:6.10.0",
+				Name: "MongoExporter",
+				Image: "percona/mongodb_exporter:0.40.0",
 				Environment: []ecs.TaskDefinition_KeyValuePair{
 					{
-						Name:  cloudformation.String("SENSU_BACKEND_URL"),
-						Value: cloudformation.String("ws://mu-sen-sensu-cclheb4cwpfv-1120384094.ap-south-1.elb.amazonaws.com:8081/"),
+						Name:  cloudformation.String("App Name"),
+						Value: cloudformation.String("MongoExporter"),
 					},
-					{
-						Name:  cloudformation.String("SENSU_INSECURE_SKIP_TLS_VERIFY"),
-						Value: cloudformation.String("false"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_LOG_LEVEL"),
-						Value: cloudformation.String("info"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_STRIP_NETWORKS"),
-						Value: cloudformation.String("system"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_API_HOST"),
-						Value: cloudformation.String("0.0.0.0"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_CACHE_DIR"),
-						Value: cloudformation.String("/var/lib/sensu"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_SUBSCRIPTIONS"),
-						Value: cloudformation.String("ds"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_ANNOTATIONS"),
-						Value: cloudformation.String("{\"maintainer\": \"Team A\",\"priority\": \"P1\"}"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_LABELS"),
-						Value: cloudformation.String("{\"stack\": \"ding\"}"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_NAMESPACE"),
-						Value: cloudformation.String("production"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_DETECT_CLOUD_PROVIDER"),
-						Value: cloudformation.String("true"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_KEEPALIVE_CRITICAL_TIMEOUT"),
-						Value: cloudformation.String("180"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_KEEPALIVE_INTERNAL"),
-						Value: cloudformation.String("5"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_KEEPALIVE_WARNING_TIMEOUT"),
-						Value: cloudformation.String("120"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_AGENT_MANAGED_ENTITY"),
-						Value: cloudformation.String("true"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_DEREGISTER"),
-						Value: cloudformation.String("true"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_USER"),
-						Value: cloudformation.String("admin"),
-					},
-					{
-						Name:  cloudformation.String("SENSU_PASSWORD"),
-						Value: cloudformation.String("P@ssw0rd!"),
-					},
+				},
+				Command: []string{
+					"---mongodb.uri",
+					"http://myUserAdmin:abc123@localhost:17001/admin?ssl=false",
 				},
 				Essential: cloudformation.Bool(true),
 				MemoryReservation: cloudformation.Int(256),
@@ -240,32 +176,17 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 				},
 				PortMappings: []ecs.TaskDefinition_PortMapping{
 					{
-						ContainerPort: cloudformation.Int(3000),
-						HostPort:      cloudformation.Int(3000),
+						ContainerPort: cloudformation.Int(9216),
+						HostPort:      cloudformation.Int(9216),
 						Protocol:      cloudformation.String("tcp"),
 					},
 					{
-						ContainerPort: cloudformation.Int(8080),
-						HostPort:      cloudformation.Int(8080),
-						Protocol:      cloudformation.String("tcp"),
-					},
-					{
-						ContainerPort: cloudformation.Int(8081),
-						HostPort:      cloudformation.Int(8081),
+						ContainerPort: cloudformation.Int(17001),
+						HostPort:      cloudformation.Int(17001),
 						Protocol:      cloudformation.String("tcp"),
 					},
 				},
-				MountPoints: []ecs.TaskDefinition_MountPoint{
-					{
-						ContainerPath: cloudformation.String("/var/lib/sensu"),
-						SourceVolume:  cloudformation.String("sensu-backend"),
-					},
-				},
-				Command: []string{
-					"sensu-agent",
-					"start",
-				},
-			},
+			}
 		},
 		Volumes: []ecs.TaskDefinition_Volume{
 			{
