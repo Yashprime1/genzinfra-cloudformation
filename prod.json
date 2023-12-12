@@ -6,11 +6,11 @@
         "ap-south-1":{
             "Mu-Network":{
                 "Parameters": {
-                    "AppVpcCidr":"10.11.0.0/16",
-                    "AppPublicSubnet1Cidr":"10.11.0.0/24",
-                    "AppPublicSubnet2Cidr":"10.11.1.0/24",
-                    "AppPrivateSubnet1Cidr":"10.11.2.0/24",
-                    "AppPrivateSubnet2Cidr":"10.11.3.0/24"
+                    "AppVpcCidr":"10.12.0.0/16",
+                    "AppPublicSubnet1Cidr":"10.12.0.0/24",
+                    "AppPublicSubnet2Cidr":"10.12.1.0/24",
+                    "AppPrivateSubnet1Cidr":"10.12.2.0/24",
+                    "AppPrivateSubnet2Cidr":"10.12.3.0/24"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
@@ -21,15 +21,24 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
-            "Mu-Mongo":{
+            "Mu-DS":{
                 "Parameters": {
-                    "MongoAmiId":"ami-0e159fc62d940d348"
+                    "DsAmiId":"ami-09802d2c4a4f6f32a",
+                    "DsInstanceType":"t2.micro",
+                    "DsMaxSize":"2",
+                    "DsMinSize":"1",
+                    "DsDesiredSize":"1"
                 },
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/mongo/application.json"
-            }
-          }
-    
+                "SkipUpdate": true,
+                "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
+            },
+            "Mu-DS-Service":{
+                "Parameters": {
+                },
+                "SkipUpdate": true,
+                "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
+            }     
+        }
      }
 }
 
