@@ -186,7 +186,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 						Protocol:      cloudformation.String("tcp"),
 					},
 				},
-			}
+			},
 		},
 		Volumes: []ecs.TaskDefinition_Volume{
 			{
