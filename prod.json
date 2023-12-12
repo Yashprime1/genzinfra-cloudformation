@@ -21,7 +21,15 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             }
-          }
+          },
+            "Mu-Mongo":{
+                "Parameters": {
+                    "MongoAmiId":"ami-0e159fc62d940d348"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/mongo/application.json"
+            }
+    
      }
 }
 
