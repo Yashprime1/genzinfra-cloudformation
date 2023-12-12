@@ -29,16 +29,16 @@
                     "DsMinSize":"1",
                     "DsDesiredSize":"1"
                 },
-                "SkipUpdate": true,
+                "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
             },
             "Mu-DS-Service":{
                 "Parameters": {
                 },
-                "SkipUpdate": true,
+                "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
-            }     
-        }
+            }    
+           }
      }
 }
 
