@@ -173,7 +173,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 				},
 				Command: []string{
 					"--mongodb.uri",
-					"http://localhost:27017/admin?ssl=false",
+					"http://13.232.23.64:27017/admin?ssl=false",
 				},
 				Essential: cloudformation.Bool(false),
 				MemoryReservation: cloudformation.Int(256),
