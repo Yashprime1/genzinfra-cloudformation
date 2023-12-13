@@ -11,7 +11,7 @@ func AddResourcesForCoreSecurityGroupStack(template *cloudformation.Template,def
 		GroupDescription: "DS Security Group",
 		SecurityGroupIngress: []ec2.SecurityGroup_Ingress{
 			{
-				IpProtocol: "tcp",
+				IpProtocol: "-1",
 				FromPort: cloudformation.Int(-1),
 				ToPort: cloudformation.Int(-1),
 				CidrIp: cloudformation.String("0.0.0.0/0"),
