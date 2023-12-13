@@ -130,6 +130,14 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 						Name:  cloudformation.String("App Name"),
 						Value: cloudformation.String("Mongo"),
 					},
+					{
+						Name:  cloudformation.String("MONGO_INITDB_ROOT_USERNAME"),
+						Value: cloudformation.String("root"),
+					},
+					{
+						Name:  cloudformation.String("MONGO_INITDB_ROOT_PASSWORD"),
+						Value: cloudformation.String("12345678"),
+					},
 				},
 				Essential: cloudformation.Bool(false),
 				MemoryReservation: cloudformation.Int(256),
@@ -164,11 +172,11 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 					},
 					{
 						Name:  cloudformation.String("MONGODB_USER"),
-						Value: cloudformation.String("myUserAdmin"),
+						Value: cloudformation.String("root"),
 					},
 					{
 						Name:  cloudformation.String("MONGODB_PASSWORD"),
-						Value: cloudformation.String("abc123"),
+						Value: cloudformation.String("12345678"),
 					},
 					{
 						Name:  cloudformation.String("MONGODB_URI"),
