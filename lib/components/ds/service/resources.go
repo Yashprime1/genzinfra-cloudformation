@@ -170,10 +170,14 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 						Name:  cloudformation.String("MONGODB_PASSWORD"),
 						Value: cloudformation.String("abc123"),
 					},
+					{
+						Name:  cloudformation.String("MONGODB_URI"),
+						Value: cloudformation.String("mongodb://myExporterUser:1234@127.0.0.1:27017/admin"),
+					},
 				},
 				Command: []string{
 					"--mongodb.uri",
-					"http://13.232.23.64:27017/admin?ssl=false",
+					"http:/:27017/admin?ssl=false",
 				},
 				Essential: cloudformation.Bool(false),
 				MemoryReservation: cloudformation.Int(256),
