@@ -172,7 +172,7 @@ func AddResourcesForDsServiceStack(template *cloudformation.Template) {
 					},
 					{
 						Name:  cloudformation.String("MONGODB_URI"),
-						Value: cloudformation.String("mongodb://myExporterUser:1234@127.0.0.1:27017/admin"),
+						Value: cloudformation.String("mongodb://myExporterUser:1234@localhost:27017/admin"),
 					},
 				},
 				Command: []string{
