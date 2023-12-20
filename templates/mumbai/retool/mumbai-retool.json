@@ -24,7 +24,7 @@
           "LoadBalancers": [
             {
               "ContainerName": "ds",
-              "ContainerPort": 80,
+              "ContainerPort": 3000,
               "TargetGroupArn": {
                 "Fn::ImportValue": {
                   "Fn::Join": [
@@ -68,8 +68,8 @@
               "Name": "ds",
               "PortMappings": [
                 {
-                  "ContainerPort": 80,
-                  "HostPort": 80,
+                  "ContainerPort": 3000,
+                  "HostPort": 3000,
                   "Protocol": "tcp"
                 }
               ],
