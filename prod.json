@@ -21,7 +21,7 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
-            "Mu-DS":{
+            "Mu-Retool":{
                 "Parameters": {
                     "DsAmiId":"ami-09802d2c4a4f6f32a",
                     "DsInstanceType":"t2.micro",
@@ -30,13 +30,13 @@
                     "DsDesiredSize":"1"
                 },
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/ds/mumbai-ds.json"
+                "TemplatePath": "./templates/mumbai/retool/mumbai-retool.json"
             },
-            "Mu-DS-Service":{
+            "Mu-Retool-Service":{
                 "Parameters": {
                 },
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/ds/mumbai-ds-service.json"
+                "TemplatePath": "./templates/mumbai/retool/mumbai-retool-service.json"
             }    
            }
      }

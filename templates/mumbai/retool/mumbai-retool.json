@@ -1,0 +1,202 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "DS Service Stack",
+    "Resources": {
+      "DsEcsCluster": {
+        "Properties": {
+          "ClusterName": {
+            "Ref": "AWS::StackName"
+          }
+        },
+        "Type": "AWS::ECS::Cluster"
+      },
+      "DsEcsService": {
+        "Properties": {
+          "Cluster": {
+            "Ref": "DsEcsCluster"
+          },
+          "DeploymentConfiguration": {
+            "MaximumPercent": 100,
+            "MinimumHealthyPercent": 0
+          },
+          "HealthCheckGracePeriodSeconds": 60,
+          "LaunchType": "EC2",
+          "LoadBalancers": [
+            {
+              "ContainerName": "ds",
+              "ContainerPort": 80,
+              "TargetGroupArn": {
+                "Fn::ImportValue": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      {
+                        "Ref": "AWS::StackName"
+                      },
+                      "DsElbTargetGroupArn"
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "PlacementConstraints": [
+            {
+              "Type": "distinctInstance"
+            }
+          ],
+          "SchedulingStrategy": "DAEMON",
+          "TaskDefinition": {
+            "Ref": "DsEcsTaskDefinition"
+          }
+        },
+        "Type": "AWS::ECS::Service"
+      },
+      "DsEcsTaskDefinition": {
+        "Properties": {
+          "ContainerDefinitions": [
+            {
+              "Environment": [
+                {
+                  "Name": "App Name",
+                  "Value": "DS"
+                }
+              ],
+              "Essential": true,
+              "Image": "httpd",
+              "MemoryReservation": 256,
+              "Name": "ds",
+              "PortMappings": [
+                {
+                  "ContainerPort": 80,
+                  "HostPort": 80,
+                  "Protocol": "tcp"
+                }
+              ],
+              "Privileged": false,
+              "ReadonlyRootFilesystem": false,
+              "Ulimits": [
+                {
+                  "HardLimit": 65536,
+                  "Name": "nofile",
+                  "SoftLimit": 65536
+                }
+              ]
+            }
+          ],
+          "ExecutionRoleArn": {
+            "Ref": "DsEcsTaskExecutionRole"
+          },
+          "Family": {
+            "Ref": "AWS::StackName"
+          },
+          "NetworkMode": "host"
+        },
+        "Type": "AWS::ECS::TaskDefinition"
+      },
+      "DsEcsTaskExecutionRole": {
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Statement": [
+              {
+                "Action": "sts:AssumeRole",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "ecs-tasks.amazonaws.com"
+                  ]
+                }
+              }
+            ],
+            "Version": "2012-10-17"
+          }
+        },
+        "Type": "AWS::IAM::Role"
+      },
+      "DsEcsTaskExecutionRolePolicy": {
+        "Properties": {
+          "PolicyDocument": {
+            "Statement": [
+              {
+                "Action": "*",
+                "Effect": "Allow",
+                "Resource": [
+                  "*"
+                ]
+              }
+            ],
+            "Version": "2012-10-17"
+          },
+          "PolicyName": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "DsEcsTaskExecutionRolePolicy"
+              ]
+            ]
+          },
+          "Roles": [
+            {
+              "Ref": "DsEcsTaskExecutionRole"
+            }
+          ]
+        },
+        "Type": "AWS::IAM::Policy"
+      },
+      "DsEcsTaskRole": {
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Statement": [
+              {
+                "Action": "sts:AssumeRole",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "ecs-tasks.amazonaws.com"
+                  ]
+                }
+              }
+            ],
+            "Version": "2012-10-17"
+          }
+        },
+        "Type": "AWS::IAM::Role"
+      },
+      "DsEcsTaskRolePolicy": {
+        "Properties": {
+          "PolicyDocument": {
+            "Statement": [
+              {
+                "Action": "*",
+                "Effect": "Allow",
+                "Resource": [
+                  "*"
+                ]
+              }
+            ],
+            "Version": "2012-10-17"
+          },
+          "PolicyName": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "DsEcsTaskRolePolicy"
+              ]
+            ]
+          },
+          "Roles": [
+            {
+              "Ref": "DsEcsTaskRole"
+            }
+          ]
+        },
+        "Type": "AWS::IAM::Policy"
+      }
+    }
+  }
