@@ -1,202 +1,289 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "DS Service Stack",
+    "Description": "DS Base Stack",
+    "Outputs": {
+      "DsElbTargetGroupArn": {
+        "Description": "DS ELB Target Group Arn",
+        "Export": {
+          "Name": {
+            "Fn::Sub": "${AWS::StackName}-Service-DsElbTargetGroupArn"
+          }
+        },
+        "Value": {
+          "Ref": "DsElbTargetGroup"
+        }
+      },
+      "DsPrometheusElbTargetGroupArn": {
+        "Description": "DS ELB Target Group Arn",
+        "Export": {
+          "Name": {
+            "Fn::Sub": "${AWS::StackName}-Service-DsPrometheusElbTargetGroupArn"
+          }
+        },
+        "Value": {
+          "Ref": "DsPrometheusElbTargetGroup"
+        }
+      }
+    },
+    "Parameters": {
+      "DsAmiId": {
+        "Description": "The AMI ID for the DS",
+        "Type": "String"
+      },
+      "DsDesiredSize": {
+        "Description": "The desired capacity for the DS",
+        "Type": "String"
+      },
+      "DsInstanceType": {
+        "Description": "The instance type for the DS",
+        "Type": "String"
+      },
+      "DsMaxSize": {
+        "Description": "The maximum size for the DS",
+        "Type": "String"
+      },
+      "DsMinSize": {
+        "Description": "The minimum size for the DS",
+        "Type": "String"
+      }
+    },
     "Resources": {
-      "DsEcsCluster": {
+      "DsAsg": {
         "Properties": {
-          "ClusterName": {
-            "Ref": "AWS::StackName"
+          "DesiredCapacity": {
+            "Ref": "DsDesiredSize"
+          },
+          "LaunchConfigurationName": {
+            "Ref": "DsLaunchConfiguration"
+          },
+          "MaxSize": {
+            "Ref": "DsMaxSize"
+          },
+          "MinSize": {
+            "Ref": "DsMinSize"
+          },
+          "TargetGroupARNs": [
+            {
+              "Ref": "DsElbTargetGroup"
+            }
+          ],
+          "VPCZoneIdentifier": [
+            {
+              "Fn::ImportValue": "Mu-Network-AppPublicSubnet1Id"
+            },
+            {
+              "Fn::ImportValue": "Mu-Network-AppPublicSubnet2Id"
+            }
+          ]
+        },
+        "Type": "AWS::AutoScaling::AutoScalingGroup"
+      },
+      "DsEc2IamRole": {
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Statement": [
+              {
+                "Action": "sts:AssumeRole",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "ec2.amazonaws.com"
+                  ]
+                }
+              }
+            ],
+            "Version": "2012-10-17"
           }
         },
-        "Type": "AWS::ECS::Cluster"
+        "Type": "AWS::IAM::Role"
       },
-      "DsEcsService": {
+      "DsEc2InstanceProfile": {
         "Properties": {
-          "Cluster": {
-            "Ref": "DsEcsCluster"
-          },
-          "DeploymentConfiguration": {
-            "MaximumPercent": 100,
-            "MinimumHealthyPercent": 0
-          },
-          "HealthCheckGracePeriodSeconds": 60,
-          "LaunchType": "EC2",
-          "LoadBalancers": [
+          "Path": "/",
+          "Roles": [
             {
-              "ContainerName": "ds",
-              "ContainerPort": 3000,
+              "Ref": "DsEc2IamRole"
+            }
+          ]
+        },
+        "Type": "AWS::IAM::InstanceProfile"
+      },
+      "DsEc2RolePolicy": {
+        "Properties": {
+          "PolicyDocument": {
+            "Statement": [
+              {
+                "Action": "*",
+                "Effect": "Allow",
+                "Resource": [
+                  "*"
+                ]
+              }
+            ],
+            "Version": "2012-10-17"
+          },
+          "PolicyName": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "DsEc2RolePolicy"
+              ]
+            ]
+          },
+          "Roles": [
+            {
+              "Ref": "DsEc2IamRole"
+            }
+          ]
+        },
+        "Type": "AWS::IAM::Policy"
+      },
+      "DsElb": {
+        "Properties": {
+          "IpAddressType": "ipv4",
+          "LoadBalancerAttributes": [
+            {
+              "Key": "idle_timeout.timeout_seconds",
+              "Value": "1800"
+            }
+          ],
+          "Scheme": "internet-facing",
+          "SecurityGroups": [
+            {
+              "Fn::ImportValue": "Mu-SecurityGroup-DS2SecurityGroupId"
+            }
+          ],
+          "Subnets": [
+            {
+              "Fn::ImportValue": "Mu-Network-AppPublicSubnet1Id"
+            },
+            {
+              "Fn::ImportValue": "Mu-Network-AppPublicSubnet2Id"
+            }
+          ],
+          "Type": "application"
+        },
+        "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer"
+      },
+      "DsElbListener": {
+        "Properties": {
+          "DefaultActions": [
+            {
               "TargetGroupArn": {
-                "Fn::ImportValue": {
-                  "Fn::Join": [
-                    "-",
-                    [
-                      {
-                        "Ref": "AWS::StackName"
-                      },
-                      "DsElbTargetGroupArn"
-                    ]
-                  ]
-                }
-              }
+                "Ref": "DsElbTargetGroup"
+              },
+              "Type": "forward"
             }
           ],
-          "PlacementConstraints": [
+          "LoadBalancerArn": {
+            "Ref": "DsElb"
+          },
+          "Port": 3000,
+          "Protocol": "HTTP"
+        },
+        "Type": "AWS::ElasticLoadBalancingV2::Listener"
+      },
+      "DsElbTargetGroup": {
+        "Properties": {
+          "HealthCheckIntervalSeconds": 30,
+          "HealthCheckPath": "/",
+          "HealthCheckProtocol": "HTTP",
+          "HealthCheckTimeoutSeconds": 10,
+          "HealthyThresholdCount": 5,
+          "Matcher": {
+            "HttpCode": "200"
+          },
+          "Port": 3000,
+          "Protocol": "HTTP",
+          "TargetGroupAttributes": [
             {
-              "Type": "distinctInstance"
+              "Key": "stickiness.enabled",
+              "Value": "false"
+            },
+            {
+              "Key": "deregistration_delay.timeout_seconds",
+              "Value": "300"
             }
           ],
-          "SchedulingStrategy": "DAEMON",
-          "TaskDefinition": {
-            "Ref": "DsEcsTaskDefinition"
+          "TargetType": "instance",
+          "UnhealthyThresholdCount": 2,
+          "VpcId": {
+            "Fn::ImportValue": "Mu-Network-AppVPCId"
           }
         },
-        "Type": "AWS::ECS::Service"
+        "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
       },
-      "DsEcsTaskDefinition": {
+      "DsLaunchConfiguration": {
         "Properties": {
-          "ContainerDefinitions": [
+          "AssociatePublicIpAddress": true,
+          "IamInstanceProfile": {
+            "Ref": "DsEc2InstanceProfile"
+          },
+          "ImageId": {
+            "Ref": "DsAmiId"
+          },
+          "InstanceMonitoring": false,
+          "InstanceType": {
+            "Ref": "DsInstanceType"
+          },
+          "SecurityGroups": [
             {
-              "Environment": [
-                {
-                  "Name": "App Name",
-                  "Value": "DS"
-                }
-              ],
-              "Essential": true,
-              "Image": "httpd",
-              "MemoryReservation": 256,
-              "Name": "ds",
-              "PortMappings": [
-                {
-                  "ContainerPort": 3000,
-                  "HostPort": 3000,
-                  "Protocol": "tcp"
-                }
-              ],
-              "Privileged": false,
-              "ReadonlyRootFilesystem": false,
-              "Ulimits": [
-                {
-                  "HardLimit": 65536,
-                  "Name": "nofile",
-                  "SoftLimit": 65536
-                }
-              ]
-            }
-          ],
-          "ExecutionRoleArn": {
-            "Ref": "DsEcsTaskExecutionRole"
-          },
-          "Family": {
-            "Ref": "AWS::StackName"
-          },
-          "NetworkMode": "host"
-        },
-        "Type": "AWS::ECS::TaskDefinition"
-      },
-      "DsEcsTaskExecutionRole": {
-        "Properties": {
-          "AssumeRolePolicyDocument": {
-            "Statement": [
-              {
-                "Action": "sts:AssumeRole",
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": [
-                    "ecs-tasks.amazonaws.com"
-                  ]
-                }
-              }
-            ],
-            "Version": "2012-10-17"
-          }
-        },
-        "Type": "AWS::IAM::Role"
-      },
-      "DsEcsTaskExecutionRolePolicy": {
-        "Properties": {
-          "PolicyDocument": {
-            "Statement": [
-              {
-                "Action": "*",
-                "Effect": "Allow",
-                "Resource": [
-                  "*"
-                ]
-              }
-            ],
-            "Version": "2012-10-17"
-          },
-          "PolicyName": {
-            "Fn::Join": [
-              "-",
-              [
-                {
-                  "Ref": "AWS::StackName"
-                },
-                "DsEcsTaskExecutionRolePolicy"
-              ]
-            ]
-          },
-          "Roles": [
-            {
-              "Ref": "DsEcsTaskExecutionRole"
+              "Fn::ImportValue": "Mu-SecurityGroup-DS2SecurityGroupId"
             }
           ]
         },
-        "Type": "AWS::IAM::Policy"
+        "Type": "AWS::AutoScaling::LaunchConfiguration"
       },
-      "DsEcsTaskRole": {
+      "DsPrometheusElbListener": {
         "Properties": {
-          "AssumeRolePolicyDocument": {
-            "Statement": [
-              {
-                "Action": "sts:AssumeRole",
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": [
-                    "ecs-tasks.amazonaws.com"
-                  ]
-                }
-              }
-            ],
-            "Version": "2012-10-17"
+          "DefaultActions": [
+            {
+              "TargetGroupArn": {
+                "Ref": "DsPrometheusElbTargetGroup"
+              },
+              "Type": "forward"
+            }
+          ],
+          "LoadBalancerArn": {
+            "Ref": "DsElb"
+          },
+          "Port": 9090,
+          "Protocol": "HTTP"
+        },
+        "Type": "AWS::ElasticLoadBalancingV2::Listener"
+      },
+      "DsPrometheusElbTargetGroup": {
+        "Properties": {
+          "HealthCheckIntervalSeconds": 30,
+          "HealthCheckPath": "/",
+          "HealthCheckProtocol": "HTTP",
+          "HealthCheckTimeoutSeconds": 10,
+          "HealthyThresholdCount": 5,
+          "Matcher": {
+            "HttpCode": "200-310"
+          },
+          "Port": 9090,
+          "Protocol": "HTTP",
+          "TargetGroupAttributes": [
+            {
+              "Key": "stickiness.enabled",
+              "Value": "false"
+            },
+            {
+              "Key": "deregistration_delay.timeout_seconds",
+              "Value": "300"
+            }
+          ],
+          "TargetType": "instance",
+          "UnhealthyThresholdCount": 2,
+          "VpcId": {
+            "Fn::ImportValue": "Mu-Network-AppVPCId"
           }
         },
-        "Type": "AWS::IAM::Role"
-      },
-      "DsEcsTaskRolePolicy": {
-        "Properties": {
-          "PolicyDocument": {
-            "Statement": [
-              {
-                "Action": "*",
-                "Effect": "Allow",
-                "Resource": [
-                  "*"
-                ]
-              }
-            ],
-            "Version": "2012-10-17"
-          },
-          "PolicyName": {
-            "Fn::Join": [
-              "-",
-              [
-                {
-                  "Ref": "AWS::StackName"
-                },
-                "DsEcsTaskRolePolicy"
-              ]
-            ]
-          },
-          "Roles": [
-            {
-              "Ref": "DsEcsTaskRole"
-            }
-          ]
-        },
-        "Type": "AWS::IAM::Policy"
+        "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
       }
     }
   }
