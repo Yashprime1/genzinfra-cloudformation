@@ -99,6 +99,14 @@
           "Family": {
             "Ref": "AWS::StackName"
           },
+          "Volumes": [
+            {
+              "Host": {
+                "SourcePath": "/home/retool"
+              },
+              "Name": "retool-home"
+            }
+          ],
           "NetworkMode": "host"
         },
         "Type": "AWS::ECS::TaskDefinition"
