@@ -23,7 +23,7 @@
           "LaunchType": "EC2",
           "LoadBalancers": [
             {
-              "ContainerName": "ds",
+              "ContainerName": "retool-jobs-runner",
               "ContainerPort": 3000,
               "TargetGroupArn": {
                 "Fn::ImportValue": {
