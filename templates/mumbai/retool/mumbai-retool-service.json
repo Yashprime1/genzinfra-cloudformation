@@ -84,6 +84,12 @@
               "Essential": true,
               "Image": "tryretool/backend:3.14.19",
               "MemoryReservation": 256,
+              "PortMappings" : [
+                {
+                    "ContainerPort" : 3000,
+                    "HostPort" : 3000
+                }                  
+              ],
               "MountPoints": [
                 {
                   "ContainerPath": "/home/retool",
