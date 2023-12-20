@@ -19,7 +19,7 @@
             "MaximumPercent": 100,
             "MinimumHealthyPercent": 0
           },
-          "HealthCheckGracePeriodSeconds": 60,
+          "HealthCheckGracePeriodSeconds": 30,
           "LaunchType": "EC2",
           "LoadBalancers": [
             {
