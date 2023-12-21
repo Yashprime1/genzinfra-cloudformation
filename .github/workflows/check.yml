@@ -1,10 +1,9 @@
 name: verify-all-checks-are-succeeded
 run-name: ${{ github.head_ref || github.ref_name }}-${{ github.run_number }} 
 on:
-  check_suite:
-    types:
-      - completed
-jobs: 
+  check_run:  
+    types:  [completed]
+jobs:  
   enforce-all-checks:
     runs-on: ubuntu-latest
     permissions:
@@ -20,6 +19,6 @@ jobs:
         uses: poseidon/wait-for-status-checks@v0.3.0
         with:
           token: ${{ steps.generate_token.outputs.token }}
-          interval: 30s
-          timeout: 300s
+          interval: 10s
+          timeout: 20s
   
