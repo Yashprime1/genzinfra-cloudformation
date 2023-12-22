@@ -12,13 +12,13 @@
                     "AppPrivateSubnet1Cidr":"10.12.2.0/24",
                     "AppPrivateSubnet2Cidr":"10.12.3.0/24"
                 },
-                "SkipUpdate": true,
+                "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
             },
             "Mu-SecurityGroup":{
                 "Parameters": {
                 },
-                "SkipUpdate": true,
+                "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             }  
            }
