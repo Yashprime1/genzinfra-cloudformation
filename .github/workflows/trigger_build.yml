@@ -1,4 +1,4 @@
-name: verify-all-checks-are-succeeded
+name: trigger_status
 run-name: ${{ github.head_ref || github.ref_name }}-${{ github.run_number }} 
 on:
   pull_request:
