@@ -8,7 +8,7 @@ jobs:
   enforce-all-checks:
     runs-on: ubuntu-latest
     permissions:
-      checks: read
+      checks: write
     steps:
       - name: Generate token
         id: generate_token
