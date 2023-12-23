@@ -1,11 +1,11 @@
-name: check1
+name: check2
 run-name: ${{ github.head_ref || github.ref_name }}-${{ github.run_number }} 
 on:
   pull_request:
     types:
       [opened, synchronize, reopened]
 jobs: 
-check1:
+  check2:
     runs-on: ubuntu-latest
     steps:
       - name: Generate token

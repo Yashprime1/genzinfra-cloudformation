@@ -1,4 +1,4 @@
-name: check1
+name: combinedstatus
 run-name: ${{ github.head_ref || github.ref_name }}-${{ github.run_number }} 
 on:
   pull_request:
