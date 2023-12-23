@@ -19,7 +19,7 @@ jobs:
           status=-1
           while [ $status == -1 ]
           do
-            result=$(curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ steps.generate_token.outputs.token }}" -H "X-GitHub-Api-Version: 2022-11-28" \
+            result=$(curl  -vvv -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ steps.generate_token.outputs.token }}" -H "X-GitHub-Api-Version: 2022-11-28" \
               https://api.github.com/repos/Yashprime1/genzinfra-cloudformation/commits/${{ github.sha }}/status | jq '.state')
             if [ "$result" == "success" ]; then
               exit 0
