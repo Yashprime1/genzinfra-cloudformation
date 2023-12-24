@@ -46,8 +46,8 @@ jobs:
           git config --global user.email "yashdeep@clevertap.com"
           git config --global user.name "Yashdeep Shetty"
           branch=${{ github.head_ref || github.ref_name }}
-          git log
+          git log --oneline
           echo $branch,${{ inputs.updated_status }},${{ inputs.commit_sha }},${{ inputs.tag_name }}
           git checkout $branch
-          git tag -m "${{ inputs.updated_status }}" ${{ inputs.tag_name }} ${{ inputs.commit_sha }}
-          git push origin "${{ inputs.tag_name }}"
+          git tag -a ${{ inputs.tag_name }} ${{ inputs.commit_sha }} -m "${{ inputs.updated_status }}"  
+          git push origin ${{ inputs.tag_name }}
