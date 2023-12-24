@@ -47,7 +47,8 @@ jobs:
           git config --global user.name "Yashdeep Shetty"
           
           branch=${{ github.head_ref || github.ref_name }}
-          
+          git checkout $branch
+
           git log --oneline
           echo "Branch: $branch"
           echo "Commit SHA: ${{ inputs.commit_sha }}"
