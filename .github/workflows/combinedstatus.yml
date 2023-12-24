@@ -29,4 +29,5 @@ jobs:
             elif [ "$conclusions" == "$status2" ]; then
               exit 1
             fi
+            sleep 30
           done
