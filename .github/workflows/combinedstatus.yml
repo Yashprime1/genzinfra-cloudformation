@@ -24,7 +24,7 @@ jobs:
           then
             echo "In If $state"
             exit 0
-          elif [[ "$state" = "failure"  ]];
+          elif [ "$state" = "failure"  ];
           then
             echo "In else"
             exit 1
