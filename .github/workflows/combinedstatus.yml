@@ -23,5 +23,6 @@ jobs:
           then
             exit 0
           elif [[ "$state" == "failure"  ]]
+          then
             exit 1
           fi       
