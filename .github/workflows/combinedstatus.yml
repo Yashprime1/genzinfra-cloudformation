@@ -20,6 +20,7 @@ jobs:
           https://api.github.com/repos/Yashprime1/genzinfra-cloudformation/commits/${{ github.sha }}/status)
           state=$(echo $statuses | jq ".state")
           if [[ "$state" == "success"  ]]
+          echo $statuses
           then
             exit 0
           elif [[ "$state" == "failure"  ]]
