@@ -22,8 +22,10 @@ jobs:
           if [[ "$state" == "success"  ]]
           echo $statuses
           then
+            echo "In If"
             exit 0
           elif [[ "$state" == "failure"  ]]
           then
+            echo "In else"
             exit 1
           fi       
