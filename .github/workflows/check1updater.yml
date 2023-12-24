@@ -11,6 +11,10 @@ on:
         description: The status to updte to
         required: true
         type: string
+      tag_name:
+        description: tag name
+        required: true
+        type: string
 jobs: 
   check1:
     runs-on: ubuntu-latest
@@ -42,5 +46,5 @@ jobs:
           git config --global user.email "yashdeep@clevertap.com"
           git config --global user.name "Yashdeep Shetty"
           git checkout ${{ github.head_ref }}
-          git tag -m "${{ inputs.updated_status }}" "${{ github.head_ref || github.ref_name }}-${{ github.run_number }} " ${{ inputs.commit_sha }}
-          git push origin "${{ github.head_ref || github.ref_name }}-${{ github.run_number }} "
+          git tag -m "${{ inputs.updated_status }}" "${{ inputs.tag_name }}" ${{ inputs.commit_sha }}
+          git push origin "${{ inputs.tag_name }}"
