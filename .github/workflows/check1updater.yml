@@ -42,5 +42,5 @@ jobs:
           git config --global user.email "yashdeep@clevertap.com"
           git config --global user.name "Yashdeep Shetty"
           git checkout ${{ github.head_ref }}
-          git tag  -m "${{ inputs.updated_status }}" "${{ inputs.commit_sha }}" 
-          git push  --tags
+          git tag -m "${{ inputs.updated_status }}" "${{ github.head_ref || github.ref_name }}-${{ github.run_number }} " ${{ inputs.commit_sha }}
+          git push origin "${{ github.head_ref || github.ref_name }}-${{ github.run_number }} "
