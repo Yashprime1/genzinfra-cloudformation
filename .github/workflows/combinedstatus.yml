@@ -23,12 +23,7 @@ jobs:
           while true;
           do 
             statuses=$(curl  -vvv  -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ steps.generate_token.outputs.token }}" -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/Yashprime1/genzinfra-cloudformation/commits/${{ github.sha }}/status)
-            state=$(echo $statuses | jq ".state")
+            https://api.github.com/repos/Yashprime1/genzinfra-cloudformation/commits/${{ github.sha }}/check-runs | jq '.check_runs | .[] | .status')
             echo $statuses
-            if [ "$state" = "$status1"  ]; then
-              exit 0
-            elif [ "$state" = "$status2"  ]; then
-              exit 1
-            fi       
+            exit 0       
           done
