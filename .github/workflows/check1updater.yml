@@ -38,6 +38,8 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
       - name: Push Tags
         run: |
+          git config --global user.email "yashdeep@clevertap.com"
+          git config --global user.name "Yashdeep Shetty"
           cd cloudformation
           git tag  ${{ inputs.commit_sha }} -m ${{ inputs.updated_status }}
           git push --tags origin
