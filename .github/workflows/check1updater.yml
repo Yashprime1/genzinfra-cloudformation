@@ -45,6 +45,9 @@ jobs:
           cd cloudformation
           git config --global user.email "yashdeep@clevertap.com"
           git config --global user.name "Yashdeep Shetty"
-          git checkout ${{ github.head_ref || github.ref_name }}
-          git tag -m "${{ inputs.updated_status }}" "${{ inputs.tag_name }}" ${{ inputs.commit_sha }}
+          branch=${{ github.head_ref || github.ref_name }}
+          git log
+          echo $branch,${{ inputs.updated_status }},${{ inputs.commit_sha }},${{ inputs.tag_name }}
+          git checkout $branch
+          git tag -m "${{ inputs.updated_status }}" ${{ inputs.tag_name }} ${{ inputs.commit_sha }}
           git push origin "${{ inputs.tag_name }}"
