@@ -1,11 +1,11 @@
-name: check1
+name: combinedstatus
 run-name: ${{ github.head_ref || github.ref_name }}-${{ github.run_number }} 
 on:
   pull_request:
     types:
       [opened, synchronize, reopened]
 jobs: 
-check1:
+  combinedcheckstatus:
     runs-on: ubuntu-latest
     steps:
       - name: Generate token
@@ -16,16 +16,17 @@ check1:
           private_key: ${{ secrets.CLEVERTAP_PLATFORM_BOT_PRIVATE_ACCESS_KEY }}
       - name: Get Combined Check status
         run: |
-          status=-1
-          while [ $status == -1 ]
-          do
-            result=$(curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ steps.generate_token.outputs.token }}" -H "X-GitHub-Api-Version: 2022-11-28" \
-              https://api.github.com/repos/Yashprime1/genzinfra-cloudformation/commits/${{ github.sha }}/status | jq '.state')
-            if [ "$result" == "success" ]; then
+          status1="success"
+          status2="failure"
+          status3="pending"
+          conclusions=""
+          while true;
+          do 
+            conclusions=$(curl  -vvv  -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ steps.generate_token.outputs.token }}" -H "X-GitHub-Api-Version: 2022-11-28" \
+                          https://api.github.com/repos/Yashprime1/genzinfra-cloudformation/commits/${{ github.sha }}/check-suites | jq '.check_suites | .[0].conclusion' )
+            if [ "$conclusions" == "$status1" ]; then
               exit 0
-            fi
-            if [ "$result" == "failure" ]; then 
+            elif [ "$conclusions" == "$status2" ]; then
               exit 1
             fi
           done
-          
