@@ -1,9 +1,9 @@
 name: check2
 run-name: ${{ github.head_ref || github.ref_name }}-${{ github.run_number }} 
 on:
-  workflow_run:
+  pull_request:
     types:
-      [completed]
+      [opened, synchronize, reopened]
 jobs: 
   check2:
     runs-on: ubuntu-latest
