@@ -43,12 +43,15 @@ jobs:
       - name: Push Tags
         run: |
           cd cloudformation
+  
           git config --global user.email "yashdeep@clevertap.com"
           git config --global user.name "Yashdeep Shetty"
-          
-          branch=${{ github.head_ref || github.ref_name }}
-          git checkout $branch
 
+          git fetch origin        
+          branch=${{ github.head_ref || github.ref_name }}
+          git log --oneline
+          git checkout $branch
+          git pull --rebase
           git log --oneline
           echo "Branch: $branch"
           echo "Commit SHA: ${{ inputs.commit_sha }}"
