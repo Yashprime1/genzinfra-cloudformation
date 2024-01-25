@@ -24,7 +24,7 @@
             "Mu-Msk":{
                 "Parameters": {
                 },
-                "SkipUpdate": true,
+                "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/msk/msk.json"
             }    
         }
