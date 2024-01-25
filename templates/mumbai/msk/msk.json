@@ -1,0 +1,26 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources":{
+        "MeteringMskCluster": {
+            "Type": "AWS::MSK::Cluster",
+            "Properties": {
+              "BrokerNodeGroupInfo": {
+                "ClientSubnets": [
+                  {
+                    "Fn::ImportValue": "Mu-Network-AppPublicSubnet1Id"
+                  },
+                  {
+                    "Fn::ImportValue": "Mu-Network-AppPublicSubnet2Id"
+                  }
+                ],
+                "InstanceType": "kafka.m5.large"
+              },
+              "ClusterName": {
+                "Fn::Sub": "${AWS::StackName}-MeteringMskCluster"
+              },
+              "KafkaVersion": "2.2.1",
+              "NumberOfBrokerNodes": 2
+            }
+          }
+    }
+}
