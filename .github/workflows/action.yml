@@ -6,8 +6,7 @@ name: Build and Deploy Pipeline
 on:
   push:
     branches: [ master ]
-  pull_request:
-    types: [opened,synchronize,reopened]
+
 permissions:
   id-token: write
   contents: read
