@@ -20,8 +20,14 @@
                 },
                 "SkipUpdate": true,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
-            }  
-           }
+            },
+            "Mu-Msk":{
+                "Parameters": {
+                },
+                "SkipUpdate": true,
+                "TemplatePath": "./templates/mumbai/msk/msk.json"
+            }    
+        }
      }
 }
 
