@@ -191,41 +191,64 @@
                 "Family":"ApplicationEcsTaskDefinition",
                 "ContainerDefinitions":[
                     {
-                        "Name":"ApplicationMainEcsContainer",
-                        "Image":"httpd:latest",
-                        "PortMappings":[
-                            {
-                                "ContainerPort":80,
-                                "HostPort":80
-                            }
+                        "Environment": [
+                          {
+                            "Name": "SENSU_BACKEND_STATE_DIR",
+                            "Value": "/var/lib/sensu/sensu-backend"
+                          },
+                          {
+                            "Name": "SENSU_BACKEND_LOG_LEVEL",
+                            "Value": "warn"
+                          },
+                          {
+                            "Name" : "SENSU_BACKEND_CLUSTER_ADMIN_USERNAME",
+                            "Value" : "admin"
+                          },
+                          {
+                            "Name" : "SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD",
+                            "Value" : "admin"
+                          }
                         ],
-                        "Environment":[
-                            {
-                                "Name":"STACK_NAME",
-                                "Value": "Mu"
-                            }
+                        "Essential": true,
+                        "Image": "sensu/sensu:latest",
+                        "PortMappings": [
+                          {
+                            "ContainerPort": 3000,
+                            "HostPort": 3000,
+                            "Protocol": "tcp"
+                          },
+                          {
+                            "ContainerPort": 8080,
+                            "HostPort": 8080,
+                            "Protocol": "tcp"
+                          },
+                          {
+                            "ContainerPort": 8081,
+                            "HostPort": 8081,
+                            "Protocol": "tcp"
+                          }
                         ],
-                        "Memory":128,
-                        "Cpu":128
-                    },
-                    {
-                        "Name":"ApplicationEcsContainer",
-                        "Image":"yashprime07/javastacktrace",
-                        "PortMappings":[
-                            {
-                                "ContainerPort":8080,
-                                "HostPort":8080
-                            }
+                        "MemoryReservation": "256",
+                        "Name": "Sensu",
+                        "Privileged": false,
+                        "ReadonlyRootFilesystem": false,
+                        "Ulimits": [
+                          {
+                            "HardLimit": 983362,
+                            "Name": "nofile",
+                            "SoftLimit": 983362
+                          },
+                          {
+                            "HardLimit": 983362,
+                            "Name": "nproc",
+                            "SoftLimit": 983362
+                          },
+                          {
+                            "HardLimit": 983362,
+                            "Name": "sigpending",
+                            "SoftLimit": 983362
+                          }
                         ],
-                        "Environment":[
-                            {
-                                "Name":"STACK_NAME",
-                                "Value": "Mu"
-                            }
-                        ],
-                        "Essential": false,
-                        "Memory":512,
-                        "Cpu":256,
                         "LogConfiguration": {
                             "LogDriver": "awsfirelens",
                             "Options": {
@@ -235,7 +258,7 @@
                               "Splunk_Send_Raw": "Off",
                               "event_host": "${HOSTNAME}",
                               "event_index": "review-notifier",
-                              "event_source": "review-notifier-stdout",
+                              "event_source": "sensu-backend-stdout",
                               "event_sourcetype": "_json",
                               "tls": "off",
                               "tls.verify": "off"
@@ -256,8 +279,82 @@
                                     }
                                 }
                             ]
+                          },
+                        "EntryPoint": [
+                          "sh",
+                          "-c",
+                          "sensu-backend start"
+                        ]
+                      },
+                      {
+                        "Essential": true,
+                        "Image": "cloudflared/cloudflare:latest",
+                        "Name": {
+                          "Fn::Join": [
+                            "-",
+                            [
+                              {
+                                "Ref": "AWS::StackName"
+                              },
+                              "Cloudflare-WebUi"
+                            ]
+                          ]
+                        },
+                        "Environment": [
+                          {
+                            "Name": "TUNNEL_LOGLEVEL",
+                            "Value": "debug"
                           }
-                    },
+                        ],
+                        "ReadonlyRootFilesystem": false,
+                        "Ulimits": [
+                          {
+                            "HardLimit": 900000,
+                            "Name": "nofile",
+                            "SoftLimit": 900000
+                          }
+                        ],
+                        "LogConfiguration": {
+                            "LogDriver": "awsfirelens",
+                            "Options": {
+                              "Host": "3.109.139.154",
+                              "Name": "splunk",
+                              "Port": "8088",
+                              "Splunk_Send_Raw": "Off",
+                              "event_host": "${HOSTNAME}",
+                              "event_index": "review-notifier",
+                              "event_source": "sensu-cloudflare-stdout",
+                              "event_sourcetype": "_json",
+                              "tls": "off",
+                              "tls.verify": "off"
+                            },
+                            "SecretOptions": [
+                                {
+                                    "Name": "Splunk_Token",
+                                    "ValueFrom": {
+                                        "Fn::Join": [
+                                        ":",
+                                        [
+                                            {
+                                                "Ref": "SplunkTokenSecretsManagerSecret"
+                                            },
+                                            "splunk-token::"
+                                        ]
+                                        ]
+                                    }
+                                }
+                            ]
+                          },
+                        "MemoryReservation": "256",
+                        "EntryPoint": [
+                          "cloudflared",
+                          "tunnel",
+                          "--url",
+                          "http://localhost:3000",
+                          "--no-autoupdate",
+                          "run"
+                        ]
+                      },
                     {
                         "Environment": [
                           {
@@ -272,11 +369,11 @@
                           },
                           {
                             "Name": "aws_fluent_bit_init_s3_parsers",
-                            "Value": "arn:aws:s3:::fluentbit-yashprime/system-review-notifier-parser.conf"
+                            "Value": "arn:aws:s3:::fluentbit-yashprime/sensu-backend-parser.conf"
                           },
                           {
                             "Name": "aws_fluent_bit_init_s3_filters",
-                            "Value": "arn:aws:s3:::fluentbit-yashprime/system-review-notifier-filter.conf"
+                            "Value": "arn:aws:s3:::fluentbit-yashprime/sensu-backend-filter.conf"
                           }
                         ],
                         "Essential": false,
