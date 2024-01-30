@@ -229,7 +229,7 @@
                         "LogConfiguration": {
                             "LogDriver": "awsfirelens",
                             "Options": {
-                              "Host": "13.234.18.8",
+                              "Host": "3.109.139.154",
                               "Name": "splunk",
                               "Port": "8088",
                               "Splunk_Send_Raw": "Off",
