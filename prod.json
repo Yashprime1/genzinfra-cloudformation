@@ -15,6 +15,12 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
             },
+            "Mu-SecurityGroup":{
+                "Parameters": {
+                },
+                "SkipUpdate":  false,
+                "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
+            },
             "Mu-Splunk":{
                 "Parameters": {
                     "SplunkAmiId":"ami-032e2bd35b8dce79d"
