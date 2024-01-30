@@ -6,11 +6,11 @@
         "ap-south-1":{
             "Mu-Network":{
                 "Parameters": {
-                    "AppVpcCidr":"10.12.0.0/16",
-                    "AppPublicSubnet1Cidr":"10.12.0.0/24",
-                    "AppPublicSubnet2Cidr":"10.12.1.0/24",
-                    "AppPrivateSubnet1Cidr":"10.12.2.0/24",
-                    "AppPrivateSubnet2Cidr":"10.12.3.0/24"
+                    "AppVpcCidr":"10.11.0.0/16",
+                    "AppPublicSubnet1Cidr":"10.11.0.0/24",
+                    "AppPublicSubnet2Cidr":"10.11.1.0/24",
+                    "AppPrivateSubnet1Cidr":"10.11.2.0/24",
+                    "AppPrivateSubnet2Cidr":"10.11.3.0/24"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
