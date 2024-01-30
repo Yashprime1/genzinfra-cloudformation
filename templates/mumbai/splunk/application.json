@@ -288,7 +288,7 @@
                       },
                       {
                         "Essential": true,
-                        "Image": "cloudflared/cloudflare:latest",
+                        "Image": "cloudflare/cloudflared:latest",
                         "Name": {
                           "Fn::Join": [
                             "-",
