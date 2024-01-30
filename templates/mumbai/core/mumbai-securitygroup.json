@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Core Security Group Stack",
+  "Description": "Core Security Group Stacks",
   "Outputs": {
     "DS2SecurityGroupId": {
       "Description": "DS2 Security Group Id",

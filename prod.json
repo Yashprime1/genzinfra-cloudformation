@@ -25,7 +25,7 @@
                 "Parameters": {
                 },
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/splunk/application.json"
+                "TemplatePath": "./templates/mumbai/splunk/server.json"
             }            
         }
      }
