@@ -262,7 +262,7 @@
                 "ImageId":{
                     "Ref":"BambooAmiId"
                 },
-                "InstanceType":"t2.xlarge",
+                "InstanceType":"t2.medium",
                 "IamInstanceProfile": {
                     "Ref": "ApplicationInstacneIamProfile"
                 },
