@@ -219,6 +219,14 @@
                 "ExecutionRoleArn":{
                     "Ref":"ApplicationTaskIamRole"
                 },
+                "Volumes": [
+                  {
+                    "Name": "bamboo-home",
+                    "Host" : {
+                      "SourcePath" : "/home/bamboo"
+                    }
+                  }
+                ],
                 "NetworkMode":"host"
             }
         },

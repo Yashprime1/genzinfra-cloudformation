@@ -23,7 +23,7 @@
             },
             "Mu-Bamboo":{
                 "Parameters": {
-                    "BambooAmiId":"ami-06ffb13b5b542053f"
+                    "BambooAmiId":"ami-03db74a0343aa86ed"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/bamboo/bamboo.json"
