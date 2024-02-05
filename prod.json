@@ -20,7 +20,14 @@
                 },
                 "SkipUpdate":  false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
-            }      
+            },
+            "Mu-Bamboo":{
+                "Parameters": {
+                    "BambooAmiId":"ami-06ffb13b5b542053f"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/bamboo/bamboo.json"
+            }        
         }
      }
 }
