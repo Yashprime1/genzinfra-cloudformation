@@ -176,15 +176,6 @@
                 "ClusterName":"BambooEcsCluster"
             }
         },
-        "BambooTokenSecretsManagerSecret": {
-            "Type": "AWS::SecretsManager::Secret",
-            "Properties": {
-                "Description": {
-                "Fn::Sub": "This is a Secrets Manager secret for ${AWS::StackName}-BambooTokenSecretsManagerSecret"
-                },
-                "SecretString": "{\"Bamboo-token\":\"replaceBambootoken\"}"
-            }
-        },
         "ApplicationEcsTaskDefinition":{
             "Type":"AWS::ECS::TaskDefinition",
             "Properties":{
@@ -193,198 +184,37 @@
                     {
                         "Environment": [
                           {
-                            "Name": "SENSU_BACKEND_STATE_DIR",
-                            "Value": "/var/lib/sensu/sensu-backend"
+                            "Name": "JVM_SUPPORT_RECOMMENDED_ARGS",
+                            "Value": "-Xloggc:/var/atlassian/application-data/bamboo/logs -XX:-OmitStackTraceInFastThrow -XX:+PrintConcurrentLocks -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/atlassian/application-data/bamboo/logs -XX:+PrintTenuringDistribution -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+PrintGCApplicationStoppedTime -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=10M -verbose:gc"
                           },
                           {
-                            "Name": "SENSU_BACKEND_LOG_LEVEL",
-                            "Value": "warn"
+                            "Name": "JVM_MAXIMUM_MEMORY",
+                            "Value": "8192m"
                           },
                           {
-                            "Name" : "SENSU_BACKEND_CLUSTER_ADMIN_USERNAME",
-                            "Value" : "admin"
-                          },
-                          {
-                            "Name" : "SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD",
-                            "Value" : "admin"
+                            "Name" : "JVM_MINIMUM_MEMORY",
+                            "Value" : "1024m"
                           }
                         ],
                         "Essential": true,
-                        "Image": "sensu/sensu:latest",
+                        "Image": "yashprime07/docker-bamboo-server",
                         "PortMappings": [
                           {
-                            "ContainerPort": 3000,
-                            "HostPort": 3000,
+                            "ContainerPort": 8085,
+                            "HostPort": 8085,
                             "Protocol": "tcp"
                           },
                           {
-                            "ContainerPort": 8080,
-                            "HostPort": 8080,
-                            "Protocol": "tcp"
-                          },
-                          {
-                            "ContainerPort": 8081,
-                            "HostPort": 8081,
+                            "ContainerPort": 54663,
+                            "HostPort": 54663,
                             "Protocol": "tcp"
                           }
                         ],
                         "MemoryReservation": "256",
                         "Name": "Sensu",
                         "Privileged": false,
-                        "ReadonlyRootFilesystem": false,
-                        "Ulimits": [
-                          {
-                            "HardLimit": 983362,
-                            "Name": "nofile",
-                            "SoftLimit": 983362
-                          },
-                          {
-                            "HardLimit": 983362,
-                            "Name": "nproc",
-                            "SoftLimit": 983362
-                          },
-                          {
-                            "HardLimit": 983362,
-                            "Name": "sigpending",
-                            "SoftLimit": 983362
-                          }
-                        ],
-                        "LogConfiguration": {
-                            "LogDriver": "awsfirelens",
-                            "Options": {
-                              "Host": "3.109.139.154",
-                              "Name": "Bamboo",
-                              "Port": "8088",
-                              "Bamboo_Send_Raw": "Off",
-                              "event_host": "${HOSTNAME}",
-                              "event_index": "review-notifier",
-                              "event_source": "sensu-backend-stdout",
-                              "event_sourcetype": "_json",
-                              "tls": "off",
-                              "tls.verify": "off"
-                            },
-                            "SecretOptions": [
-                                {
-                                    "Name": "Bamboo_Token",
-                                    "ValueFrom": {
-                                        "Fn::Join": [
-                                        ":",
-                                        [
-                                            {
-                                                "Ref": "BambooTokenSecretsManagerSecret"
-                                            },
-                                            "Bamboo-token::"
-                                        ]
-                                        ]
-                                    }
-                                }
-                            ]
-                          },
-                        "EntryPoint": [
-                          "sh",
-                          "-c",
-                          "sensu-backend start"
-                        ]
-                      },
-                      {
-                        "Essential": true,
-                        "Image": "cloudflare/cloudflared:latest",
-                        "Name": {
-                          "Fn::Join": [
-                            "-",
-                            [
-                              {
-                                "Ref": "AWS::StackName"
-                              },
-                              "Cloudflare-WebUi"
-                            ]
-                          ]
-                        },
-                        "Environment": [
-                          {
-                            "Name": "TUNNEL_LOGLEVEL",
-                            "Value": "debug"
-                          }
-                        ],
-                        "ReadonlyRootFilesystem": false,
-                        "Ulimits": [
-                          {
-                            "HardLimit": 900000,
-                            "Name": "nofile",
-                            "SoftLimit": 900000
-                          }
-                        ],
-                        "LogConfiguration": {
-                            "LogDriver": "awsfirelens",
-                            "Options": {
-                              "Host": "3.109.139.154",
-                              "Name": "Bamboo",
-                              "Port": "8088",
-                              "Bamboo_Send_Raw": "Off",
-                              "event_host": "${HOSTNAME}",
-                              "event_index": "review-notifier",
-                              "event_source": "sensu-cloudflare-stdout",
-                              "event_sourcetype": "_json",
-                              "tls": "off",
-                              "tls.verify": "off"
-                            },
-                            "SecretOptions": [
-                                {
-                                    "Name": "Bamboo_Token",
-                                    "ValueFrom": {
-                                        "Fn::Join": [
-                                        ":",
-                                        [
-                                            {
-                                                "Ref": "BambooTokenSecretsManagerSecret"
-                                            },
-                                            "Bamboo-token::"
-                                        ]
-                                        ]
-                                    }
-                                }
-                            ]
-                          },
-                        "MemoryReservation": "256",
-                        "EntryPoint": [
-                          "cloudflared",
-                          "tunnel",
-                          "--url",
-                          "http://localhost:3000",
-                          "--no-autoupdate",
-                          "run"
-                        ]
-                      },
-                    {
-                        "Environment": [
-                          {
-                            "Name": "STACK_NAME",
-                            "Value": {
-                              "Ref": "AWS::StackName"
-                            }
-                          },
-                          {
-                            "Name": "FLB_LOG_LEVEL",
-                            "Value": "debug"
-                          },
-                          {
-                            "Name": "aws_fluent_bit_init_s3_parsers",
-                            "Value": "arn:aws:s3:::fluentbit-yashprime/sensu-backend-parser.conf"
-                          },
-                          {
-                            "Name": "aws_fluent_bit_init_s3_filters",
-                            "Value": "arn:aws:s3:::fluentbit-yashprime/sensu-backend-filter.conf"
-                          }
-                        ],
-                        "Essential": false,
-                        "FirelensConfiguration": {
-                          "Type": "fluentbit"
-                        },
-                        "Image": "amazon/aws-for-fluent-bit:init-2.32.0",
-                        "Memory": 128,
-                        "Name": "log_router",
-                        "Privileged": false
-                      }
+                        "ReadonlyRootFilesystem": false
+                    }
                 ],
                 "ExecutionRoleArn":{
                     "Ref":"ApplicationTaskIamRole"
