@@ -270,6 +270,14 @@
                 }
             }
         },
+        "ApplicationVolume":{
+            "Type" : "AWS::EC2::Volume",
+            "Properties" : {
+                "AvailabilityZone" : "ap-south-1a",
+                "Size" : 16384,
+                "VolumeType" : "gp2"
+              }
+        },
         "ApplicationInstance":{
             "Type":"AWS::EC2::Instance",
             "Properties":{
@@ -303,6 +311,17 @@
                     {
                         "Key":"Name",
                         "Value":"ApplicationInstance"
+                    }
+                ],
+                "Volumes" : [
+                    {
+                        "Device" : "/dev/xvda",
+                        "VolumeId" : {
+                            "Fn::GetAtt":[
+                                "ApplicationVolume",
+                                "VolumeId"
+                            ]
+                        }
                     }
                 ]
             }
