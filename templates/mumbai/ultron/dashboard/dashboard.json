@@ -178,7 +178,7 @@
         "ApplicationEcsCluster":{
             "Type":"AWS::ECS::Cluster",
             "Properties":{
-                "ClusterName":"ApplicationEcsCluster"
+                "ClusterName":"Dash-ApplicationEcsCluster"
             }
         },
         "ApplicationEcsTaskDefinition":{
