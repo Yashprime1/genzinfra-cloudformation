@@ -272,8 +272,8 @@
         },
         "ApplicationVolume":{
             "Type" : "AWS::EC2::Volume",
-            "Properties" : {"
-                "AvailabilityZone" : "ap-south-1a",""
+            "Properties" : {
+                "AvailabilityZone" : "ap-south-1a",
                 "Size" : 16384,
                 "VolumeType" : "gp2"
               }
@@ -281,7 +281,7 @@
         "ApplicationVolumeInstanceAttachment":{
             "Type" : "AWS::EC2::VolumeAttachment",
             "Properties" : {
-                "Device" : "/dev/sdb",
+                "Device" : "/dev/sda",
                 "InstanceId" : {
                     "Ref":"ApplicationInstance"
                 },
