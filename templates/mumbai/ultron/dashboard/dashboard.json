@@ -1,9 +1,14 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
-        "BambooAmiId": {
-          "Description": "The AMI ID for the Bamboo instance",
-          "Type": "String"
+        "AppAmiId": {
+            "Description": "The AMI ID for the Splunk",
+            "Type": "String"
+        },
+        "ContainerImage": {
+            "Description": "The container image for dashboard",
+            "Type": "String",
+            "default":"yashprime07/dashboard:latest"
         }
       },
     "Resources":{
@@ -173,7 +178,16 @@
         "ApplicationEcsCluster":{
             "Type":"AWS::ECS::Cluster",
             "Properties":{
-                "ClusterName":"BambooEcsCluster"
+                "ClusterName":"ApplicationEcsCluster"
+            }
+        },
+        "SplunkTokenSecretsManagerSecret": {
+            "Type": "AWS::SecretsManager::Secret",
+            "Properties": {
+                "Description": {
+                "Fn::Sub": "This is a Secrets Manager secret for ${AWS::StackName}-SplunkTokenSecretsManagerSecret"
+                },
+                "SecretString": "{\"splunk-token\":\"replacesplunktoken\"}"
             }
         },
         "ApplicationEcsTaskDefinition":{
@@ -182,37 +196,14 @@
                 "Family":"ApplicationEcsTaskDefinition",
                 "ContainerDefinitions":[
                     {
-                        "Environment": [
-                          {
-                            "Name": "JVM_SUPPORT_RECOMMENDED_ARGS",
-                            "Value": "-Xloggc:/var/atlassian/application-data/bamboo/logs -XX:-OmitStackTraceInFastThrow -XX:+PrintConcurrentLocks -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/atlassian/application-data/bamboo/logs -XX:+PrintTenuringDistribution -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+PrintGCApplicationStoppedTime -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=10M -verbose:gc"
-                          },
-                          {
-                            "Name": "JVM_MAXIMUM_MEMORY",
-                            "Value": "8192m"
-                          },
-                          {
-                            "Name" : "JVM_MINIMUM_MEMORY",
-                            "Value" : "1024m"
-                          }
-                        ],
                         "Essential": true,
-                        "Image": "yashprime07/docker-bamboo-server",
-                          "MountPoints": [
-                            {
-                              "ContainerPath": "/var/atlassian/application-data",
-                              "SourceVolume": "bamboo-home"
-                            }
-                          ],
-                          "PortMappings": [
+                        "Image": {
+                            "Ref":"ContainerImage"
+                        },
+                        "PortMappings": [
                           {
-                            "ContainerPort": 8085,
-                            "HostPort": 8085,
-                            "Protocol": "tcp"
-                          },
-                          {
-                            "ContainerPort": 54663,
-                            "HostPort": 54663,
+                            "ContainerPort": 8080,
+                            "HostPort": 8080,
                             "Protocol": "tcp"
                           }
                         ],
@@ -220,19 +211,11 @@
                         "Name": "Sensu",
                         "Privileged": false,
                         "ReadonlyRootFilesystem": false
-                    }
+                     }
                 ],
                 "ExecutionRoleArn":{
                     "Ref":"ApplicationTaskIamRole"
                 },
-                "Volumes": [
-                  {
-                    "Name": "bamboo-home",
-                    "Host" : {
-                      "SourcePath" : "/home/bamboo"
-                    }
-                  }
-                ],
                 "NetworkMode":"host"
             }
         },
@@ -268,6 +251,43 @@
                 "TaskDefinition":{
                     "Ref":"ApplicationEcsTaskDefinition"
                 }
+            }
+        },
+        "ApplicationInstance":{
+            "Type":"AWS::EC2::Instance",
+            "Properties":{
+                "ImageId":{
+                    "Ref":"AppAmiId"
+                },
+                "InstanceType":"t2.micro",
+                "IamInstanceProfile": {
+                    "Ref": "ApplicationInstacneIamProfile"
+                },
+                "KeyName": {
+                    "Ref": "ApplicationInstanceKeyPair"
+                },
+                "NetworkInterfaces": [ {
+                    "AssociatePublicIpAddress": "true",
+                    "DeviceIndex": "0",
+                    "GroupSet": [     {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-SecurityGroup-DS2SecurityGroupId"
+                            }
+                    }],
+                    "SubnetId":  {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-Network-AppPublicSubnet1Id"
+                            }
+                    }
+                  } ],
+                "Tags":[
+                    {
+                        "Key":"Name",
+                        "Value":"ApplicationInstance"
+                    }
+                ]
             }
         }
     }

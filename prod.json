@@ -27,7 +27,22 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/bamboo/bamboo.json"
-            }        
+            },
+            "Mu-Nb":{
+                "Parameters": {
+                    "AppAmiId":"ami-0d4a72a586488376d"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/bamboo/bamboo.json"
+            },
+            "Mu-Dash":{
+                "Parameters": {
+                    "AppAmiId":"ami-0d4a72a586488376d"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/bamboo/bamboo.json"
+            }    
+
         }
      }
 }
