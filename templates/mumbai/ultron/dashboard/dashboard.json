@@ -172,22 +172,13 @@
         "ApplicationInstanceKeyPair": {
             "Type": "AWS::EC2::KeyPair",
             "Properties": {
-                "KeyName": "ApplicationInstanceKeyPair"
+                "KeyName": "dash-ApplicationInstanceKeyPair"
             }
         },
         "ApplicationEcsCluster":{
             "Type":"AWS::ECS::Cluster",
             "Properties":{
                 "ClusterName":"ApplicationEcsCluster"
-            }
-        },
-        "SplunkTokenSecretsManagerSecret": {
-            "Type": "AWS::SecretsManager::Secret",
-            "Properties": {
-                "Description": {
-                "Fn::Sub": "This is a Secrets Manager secret for ${AWS::StackName}-SplunkTokenSecretsManagerSecret"
-                },
-                "SecretString": "{\"splunk-token\":\"replacesplunktoken\"}"
             }
         },
         "ApplicationEcsTaskDefinition":{
