@@ -306,15 +306,11 @@
                     }
                 ],
                 "BlockDeviceMappings" : [ {
-                    {
                         "DeviceName" : "/dev/xvda",
-                        "Ebs":
-                            {
+                        "Ebs":{
                                 "VolumeSize" : 16384,
                                 "VolumeType" : "gp2"
-                              }          
-                    
-                    }                      
+                        }                               
                 } ]
             }
         }
