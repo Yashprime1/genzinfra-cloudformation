@@ -281,7 +281,7 @@
         "ApplicationVolumeInstanceAttachment":{
             "Type" : "AWS::EC2::VolumeAttachment",
             "Properties" : {
-                "Device" : "/dev/xvda",
+                "Device" : "/dev/sdb",
                 "InstanceId" : {
                     "Ref":"ApplicationInstance"
                 },
