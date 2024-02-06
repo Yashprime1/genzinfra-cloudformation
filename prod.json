@@ -30,14 +30,16 @@
             },
             "Mu-Nb":{
                 "Parameters": {
-                    "AppAmiId":"ami-0d4a72a586488376d"
+                    "AppAmiId":"ami-0d4a72a586488376d",
+                    "ContainerImage":"yashprime07/notificationbackend:latest"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ultron/notificationbackend/notificationbackend.json"
             },
             "Mu-Dash":{
                 "Parameters": {
-                    "AppAmiId":"ami-0d4a72a586488376d"
+                    "AppAmiId":"ami-0d4a72a586488376d",
+                    "ContainerImage":"yashprime07/dashboard:latest"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ultron/dashboard/dashboard.json"
