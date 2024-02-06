@@ -8,7 +8,7 @@
         "ContainerImage": {
             "Description": "The container image for notificationbackend",
             "Type": "String",
-            "default":"yashprime07/notificationbackend:latest"
+            "Default":"yashprime07/notificationbackend:latest"
         }
       },
     "Resources":{

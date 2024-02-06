@@ -8,7 +8,7 @@
         "ContainerImage": {
             "Description": "The container image for dashboard",
             "Type": "String",
-            "default":"yashprime07/dashboard:latest"
+            "Default":"yashprime07/dashboard:latest"
         }
       },
     "Resources":{
