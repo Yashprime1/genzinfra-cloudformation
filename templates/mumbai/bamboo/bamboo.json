@@ -278,6 +278,21 @@
                 "VolumeType" : "gp2"
               }
         },
+        "ApplicationVolumeInstanceAttachment":{
+            "Type" : "AWS::EC2::VolumeAttachment",
+            "Properties" : {
+                "Device" : "/dev/xvda",
+                "InstanceId" : {
+                    "Ref":"ApplicationInstance"
+                },
+                "VolumeId" : {
+                    "Fn::GetAtt":[
+                        "ApplicationVolume",
+                        "VolumeId"
+                    ]
+                }
+              }
+        },
         "ApplicationInstance":{
             "Type":"AWS::EC2::Instance",
             "Properties":{
@@ -311,17 +326,6 @@
                     {
                         "Key":"Name",
                         "Value":"ApplicationInstance"
-                    }
-                ],
-                "Volumes" : [
-                    {
-                        "Device" : "/dev/xvda",
-                        "VolumeId" : {
-                            "Fn::GetAtt":[
-                                "ApplicationVolume",
-                                "VolumeId"
-                            ]
-                        }
                     }
                 ]
             }
