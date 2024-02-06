@@ -30,7 +30,7 @@
             },
             "Mu-Nb":{
                 "Parameters": {
-                    "AppAmiId":"ami-0d4a72a586488376d",
+                    "AppAmiId":"ami-0bc9200ddb2767499",
                     "ContainerImage":"yashprime07/notificationbackend:latest"
                 },
                 "SkipUpdate": false,
@@ -38,7 +38,7 @@
             },
             "Mu-Dash":{
                 "Parameters": {
-                    "AppAmiId":"ami-0d4a72a586488376d",
+                    "AppAmiId":"ami-0389de08caf0a3e67",
                     "ContainerImage":"yashprime07/dashboard:latest"
                 },
                 "SkipUpdate": false,
