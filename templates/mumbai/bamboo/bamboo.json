@@ -270,29 +270,6 @@
                 }
             }
         },
-        "ApplicationVolume":{
-            "Type" : "AWS::EC2::Volume",
-            "Properties" : {
-                "AvailabilityZone" : "ap-south-1a",
-                "Size" : 16384,
-                "VolumeType" : "gp2"
-              }
-        },
-        "ApplicationVolumeInstanceAttachment":{
-            "Type" : "AWS::EC2::VolumeAttachment",
-            "Properties" : {
-                "Device" : "/dev/xvda",
-                "InstanceId" : {
-                    "Ref":"ApplicationInstance"
-                },
-                "VolumeId" : {
-                    "Fn::GetAtt":[
-                        "ApplicationVolume",
-                        "VolumeId"
-                    ]
-                }
-              }
-        },
         "ApplicationInstance":{
             "Type":"AWS::EC2::Instance",
             "Properties":{
@@ -327,7 +304,18 @@
                         "Key":"Name",
                         "Value":"ApplicationInstance"
                     }
-                ]
+                ],
+                "BlockDeviceMappings" : [ {
+                    {
+                        "DeviceName" : "/dev/xvda",
+                        "Ebs":
+                            {
+                                "VolumeSize" : 16384,
+                                "VolumeType" : "gp2"
+                              }          
+                    
+                    }                      
+                } ]
             }
         }
     }
