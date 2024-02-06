@@ -172,7 +172,7 @@
         "ApplicationInstanceKeyPair": {
             "Type": "AWS::EC2::KeyPair",
             "Properties": {
-                "KeyName": "Nb-ApplicationInstanceKeyPair"
+                "KeyName": "NB-ApplicationInstanceKeyPair"
             }
         },
         "ApplicationEcsCluster":{

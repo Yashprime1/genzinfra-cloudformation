@@ -172,7 +172,7 @@
         "ApplicationInstanceKeyPair": {
             "Type": "AWS::EC2::KeyPair",
             "Properties": {
-                "KeyName": "dash-ApplicationInstanceKeyPair"
+                "KeyName": "Dash-ApplicationInstanceKeyPair"
             }
         },
         "ApplicationEcsCluster":{
