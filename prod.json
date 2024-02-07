@@ -1,51 +1,48 @@
 {
-    "BucketName": "cf-templates-nvirginia", 
-    "BucketRegion": "us-east-1", 
+    "BucketName": "cf-templates-nvirginia",
+    "BucketRegion": "us-east-1",
     "Parallel": "false",
-    "Stacks":{
-        "ap-south-1":{
-            "Mu-Network":{
+    "Stacks": {
+        "ap-south-1": {
+            "Mu-Network": {
                 "Parameters": {
-                    "AppVpcCidr":"10.11.0.0/16",
-                    "AppPublicSubnet1Cidr":"10.11.0.0/24",
-                    "AppPublicSubnet2Cidr":"10.11.1.0/24",
-                    "AppPrivateSubnet1Cidr":"10.11.2.0/24",
-                    "AppPrivateSubnet2Cidr":"10.11.3.0/24"
+                    "AppVpcCidr": "10.11.0.0/16",
+                    "AppPublicSubnet1Cidr": "10.11.0.0/24",
+                    "AppPublicSubnet2Cidr": "10.11.1.0/24",
+                    "AppPrivateSubnet1Cidr": "10.11.2.0/24",
+                    "AppPrivateSubnet2Cidr": "10.11.3.0/24"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
             },
-            "Mu-SecurityGroup":{
-                "Parameters": {
-                },
-                "SkipUpdate":  false,
+            "Mu-SecurityGroup": {
+                "Parameters": {},
+                "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
-            "Mu-Bamboo":{
+            "Mu-Bamboo": {
                 "Parameters": {
-                    "BambooAmiId":"ami-03db74a0343aa86ed"
+                    "BambooAmiId": "ami-03db74a0343aa86ed"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/bamboo/bamboo.json"
             },
-            "Mu-Nb":{
+            "Mu-Nb": {
                 "Parameters": {
-                    "AppAmiId":"ami-0bc9200ddb2767499",
-                    "ContainerImage":"yashprime07/notificationbackend:latest"
+                    "AppAmiId": "ami-0bc9200ddb2767499",
+                    "ContainerImage": "yashprime07/notificationbackend:PROJ-NB-6"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ultron/notificationbackend/notificationbackend.json"
             },
-            "Mu-Dash":{
+            "Mu-Dash": {
                 "Parameters": {
-                    "AppAmiId":"ami-0389de08caf0a3e67",
-                    "ContainerImage":"yashprime07/dashboard:latest"
+                    "AppAmiId": "ami-0389de08caf0a3e67",
+                    "ContainerImage": "yashprime07/dashboard:latest"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ultron/dashboard/dashboard.json"
-            }    
-
+            }
         }
-     }
+    }
 }
-
