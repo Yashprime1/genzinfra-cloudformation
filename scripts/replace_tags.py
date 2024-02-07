@@ -23,6 +23,6 @@ if __name__ == "__main__":
     region = "ap-south-1" 
     stackname = os.getenv('bamboo_deploy_environment')
 
-    stack_data["Stacks"][region][stackname]["ContainerImage"]="gk"
+    stack_data["Stacks"][region][stackname]["Parameters"]["ContainerImage"]="gk"
 
     print(stack_data)
