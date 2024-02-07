@@ -30,9 +30,9 @@ if __name__ == "__main__":
     stackname = os.getenv('bamboo_deploy_environment')
 
     if "dash" in stackname:
-        deployimage = "yashprime07/dashboard:"+
+        deployimage = "yashprime07/dashboard:"+  os.getenv('bamboo_buildResultKey')
     else:
-        deployimage = "yashprime07/notificationbackend:"+
+        deployimage = "yashprime07/notificationbackend:"+  os.getenv('bamboo_buildResultKey')
     stack_data["Stacks"][region][stackname]["Parameters"]["ContainerImage"]=deployimage
 
 
