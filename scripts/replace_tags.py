@@ -29,7 +29,7 @@ if __name__ == "__main__":
     region = "ap-south-1" 
     stackname = os.getenv('bamboo_deploy_environment')
 
-    if "dash" in stackname:
+    if "Dash" in stackname:
         deployimage = "yashprime07/dashboard:"+os.getenv('bamboo_planKey')+"-"+os.getenv('bamboo_buildNumber')
     else:
         deployimage = "yashprime07/notificationbackend:"+os.getenv('bamboo_planKey')+"-"+os.getenv('bamboo_buildNumber')
