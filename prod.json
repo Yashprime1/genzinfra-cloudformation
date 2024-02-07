@@ -38,7 +38,7 @@
             "Mu-Dash": {
                 "Parameters": {
                     "AppAmiId": "ami-0389de08caf0a3e67",
-                    "ContainerImage": "yashprime07/dashboard:PROJ-DASH-22"
+                    "ContainerImage": "yashprime07/dashboard:PROJ-DASH-23"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ultron/dashboard/dashboard.json"
