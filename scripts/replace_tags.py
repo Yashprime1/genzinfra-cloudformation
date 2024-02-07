@@ -17,6 +17,8 @@ def read_json_from_file(filename):
 
 # Sample usage
 if __name__ == "__main__":
+    print(os.getcwd())
+    print(os.listdir())
     filename = '../prod.json' 
     stack_data = read_json_from_file(filename)
 
