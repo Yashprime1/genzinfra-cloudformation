@@ -29,7 +29,12 @@ if __name__ == "__main__":
     region = "ap-south-1" 
     stackname = os.getenv('bamboo_deploy_environment')
 
-    stack_data["Stacks"][region][stackname]["Parameters"]["ContainerImage"]="gk"
+    if "dash" in stackname:
+        deployimage = "yashprime07/dashboard:"+
+    else:
+        deployimage = "yashprime07/notificationbackend:"+
+    stack_data["Stacks"][region][stackname]["Parameters"]["ContainerImage"]=deployimage
+
 
     write_json_to_file(filename,stack_data)
     stack_data = read_json_from_file(filename)
