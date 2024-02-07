@@ -30,7 +30,7 @@
             "Mu-Nb": {
                 "Parameters": {
                     "AppAmiId": "ami-0bc9200ddb2767499",
-                    "ContainerImage": "yashprime07/notificationbackend:PROJ-NB-6"
+                    "ContainerImage": "yashprime07/notificationbackend:PROJ-NB-7"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/ultron/notificationbackend/notificationbackend.json"
