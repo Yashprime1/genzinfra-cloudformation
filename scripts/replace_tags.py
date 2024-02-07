@@ -15,6 +15,12 @@ def read_json_from_file(filename):
     with open(filename, 'r') as file:
         return json.load(file)
 
+
+# Write JSON data to file
+def write_json_to_file(filename, data):
+    with open(filename, 'w') as file:
+        json.dump(data, file, indent=4)
+
 # Sample usage
 if __name__ == "__main__":
     filename = 'prod.json' 
@@ -25,4 +31,6 @@ if __name__ == "__main__":
 
     stack_data["Stacks"][region][stackname]["Parameters"]["ContainerImage"]="gk"
 
+    write_json_to_file(filename,stack_data)
+    stack_data = read_json_from_file(filename)
     print(stack_data)
