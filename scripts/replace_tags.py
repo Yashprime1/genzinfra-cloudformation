@@ -23,7 +23,7 @@ def write_json_to_file(filename, data):
 
 # Sample usage
 if __name__ == "__main__":
-    filename = 'prod.json' 
+    filename = 'genzinfra-cloudformation/prod.json' 
     stack_data = read_json_from_file(filename)
 
     region = "ap-south-1" 
