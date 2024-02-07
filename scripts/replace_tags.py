@@ -38,4 +38,4 @@ if __name__ == "__main__":
 
     write_json_to_file(filename,stack_data)
     stack_data = read_json_from_file(filename)
-    print(stack_data)
+    
