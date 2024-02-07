@@ -7,7 +7,7 @@ import (
 
 
 func main() {
-	fmt.Println("Generating all stack templates")
+	fmt.Println("Generating all stackstemplates")
 	ireland.GenerateStacks()
 	mumbai.GenerateStacks()
 }
