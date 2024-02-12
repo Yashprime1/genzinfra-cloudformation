@@ -2,7 +2,7 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
         "BambooAmiId": {
-          "Description": "The AMI ID used for the Bamboo instances",
+          "Description": "The AMI ID for the Bamboo instance",
           "Type": "String"
         }
       },
@@ -168,6 +168,43 @@
             "Type": "AWS::EC2::KeyPair",
             "Properties": {
                 "KeyName": "ApplicationInstanceKeyPair"
+            }
+        },
+        "ApplicationInstance":{
+            "Type":"AWS::EC2::Instance",
+            "Properties":{
+                "ImageId":{
+                    "Ref":"BambooAmiId"
+                },
+                "InstanceType":"t2.micro",
+                "IamInstanceProfile": {
+                    "Ref": "ApplicationInstacneIamProfile"
+                },
+                "KeyName": {
+                    "Ref": "ApplicationInstanceKeyPair"
+                },
+                "NetworkInterfaces": [ {
+                    "AssociatePublicIpAddress": "true",
+                    "DeviceIndex": "0",
+                    "GroupSet": [     {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-SecurityGroup-DS2SecurityGroupId"
+                            }
+                    }],
+                    "SubnetId":  {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-Network-AppPublicSubnet1Id"
+                            }
+                    }
+                  } ],
+                "Tags":[
+                    {
+                        "Key":"Name",
+                        "Value":"ApplicationInstance"
+                    }
+                ]
             }
         },
         "ApplicationEcsCluster":{
