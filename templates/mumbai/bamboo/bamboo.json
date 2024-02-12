@@ -177,6 +177,7 @@
                     "Ref":"BambooAmiId"
                 },
                 "InstanceType":"t2.large",
+                "IamInstanceProfile": {
                     "Ref": "ApplicationInstacneIamProfile"
                 },
                 "KeyName": {
