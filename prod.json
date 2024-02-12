@@ -20,6 +20,13 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
+            "Mu-Bamboo": {
+                "Parameters": {
+                    "BambooAmiId": "ami-03db74a0343aa86ed"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/bamboo/bamboo.json"
+            },
             "Mu-Nb": {
                 "Parameters": {
                     "AppAmiId": "ami-0bc9200ddb2767499",
