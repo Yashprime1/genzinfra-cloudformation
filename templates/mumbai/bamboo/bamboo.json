@@ -199,6 +199,12 @@
                             }
                     }
                   } ],
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName" : "/dev/xvda",
+                        "Ebs" : { "VolumeSize" : "16" }
+                    }
+                ],
                 "Tags":[
                     {
                         "Key":"Name",
