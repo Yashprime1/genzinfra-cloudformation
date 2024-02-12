@@ -176,8 +176,7 @@
                 "ImageId":{
                     "Ref":"BambooAmiId"
                 },
-                "InstanceType":"t2.medium",
-                "IamInstanceProfile": {
+                "InstanceType":"t2.large",
                     "Ref": "ApplicationInstacneIamProfile"
                 },
                 "KeyName": {
