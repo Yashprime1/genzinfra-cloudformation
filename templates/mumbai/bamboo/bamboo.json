@@ -240,7 +240,7 @@
                           }
                         ],
                         "Essential": true,
-                        "Image": "yashprime07/docker-bamboo-server",
+                        "Image": "atlassian/bamboo-server:9.4.3",
                           "MountPoints": [
                             {
                               "ContainerPath": "/var/atlassian/application-data",
