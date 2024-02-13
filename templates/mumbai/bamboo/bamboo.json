@@ -228,7 +228,7 @@
                         "Environment": [
                           {
                             "Name": "JVM_SUPPORT_RECOMMENDED_ARGS",
-                            "Value": "-Xloggc:/var/atlassian/application-data/bamboo/logs -XX:-OmitStackTraceInFastThrow -XX:+PrintConcurrentLocks -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/atlassian/application-data/bamboo/logs -XX:+PrintTenuringDistribution -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+PrintGCApplicationStoppedTime -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=10M -verbose:gc"
+                            "Value": "-Xlog:gc:/var/atlassian/application-data/bamboo/logs -XX:-OmitStackTraceInFastThrow -XX:+PrintConcurrentLocks -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/atlassian/application-data/bamboo/logs  -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+PrintGCApplicationStoppedTime -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=10M -verbose:gc"
                           },
                           {
                             "Name": "JVM_MAXIMUM_MEMORY",
