@@ -176,7 +176,7 @@
                 "ImageId":{
                     "Ref":"BambooAmiId"
                 },
-                "InstanceType":"t2.large",
+                "InstanceType":"t2.2xlarge",
                 "IamInstanceProfile": {
                     "Ref": "ApplicationInstacneIamProfile"
                 },
@@ -228,15 +228,15 @@
                         "Environment": [
                           {
                             "Name": "JVM_MAXIMUM_MEMORY",
-                            "Value": "8192m"
+                            "Value": "16384m"
                           },
                           {
                             "Name" : "JVM_MINIMUM_MEMORY",
-                            "Value" : "2048m"
+                            "Value" : "1024m"
                           }
                         ],
                         "Essential": true,
-                        "Image": "atlassian/bamboo-server:9.4.3",
+                        "Image": "atlassian/bamboo-server:9.2.1",
                           "MountPoints": [
                             {
                               "ContainerPath": "/var/atlassian/application-data",
