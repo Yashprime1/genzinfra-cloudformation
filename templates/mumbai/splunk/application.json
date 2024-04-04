@@ -432,6 +432,16 @@
                 "ImageId":{
                     "Ref":"SplunkAmiId"
                 },
+                "BlockDeviceMappings": [
+                    {
+                      "DeviceName": "/dev/xvda",
+                      "Ebs": {
+                        "DeleteOnTermination": true,
+                        "VolumeSize": "50",
+                        "VolumeType": "standard"
+                      }
+                    }
+                ],
                 "InstanceType":"t2.micro",
                 "IamInstanceProfile": {
                     "Ref": "ApplicationInstacneIamProfile"
