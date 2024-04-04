@@ -1,31 +1,28 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+name: Build and Deploy Pipeline
 
-# name: Build and Deploy Pipeline
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    types: [opened,synchronize,reopened]
+permissions:
+  id-token: write
+  contents: read
 
-# on:
-#   push:
-#     branches: [ master ]
-#   pull_request:
-#     types: [opened,synchronize,reopened]
-# permissions:
-#   id-token: write
-#   contents: read
-
-# jobs:
-#   build_and_deploy:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v2
-#         with:
-#           role-to-assume: arn:aws:iam::736548753645:role/GithubRole
-#           aws-region: us-east-1
-#       - uses: actions/checkout@v3
-#       - name: Build Templates
-#         run: go run main.go
-#       - name: install dependencies
-#         run: pip3 install cfstack tabulate
-#       - name: Deploy Stacks
-#         run: python3 execute.py
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::736548753645:role/GithubRole
+          aws-region: us-east-1
+      - uses: actions/checkout@v3
+      - name: Build Templates
+        run: go run main.go
+      - name: install dependencies
+        run: pip3 install cfstack tabulate
+      - name: Deploy Stacks
+        run: python3 execute.py
   
