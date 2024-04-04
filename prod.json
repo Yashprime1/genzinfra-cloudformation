@@ -14,35 +14,26 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
-            },
+            }, 
             "Mu-SecurityGroup": {
                 "Parameters": {},
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
-            "Mu-Nb": {
+            "Mu-Splunk":{
                 "Parameters": {
-                    "AppAmiId": "ami-0bc9200ddb2767499",
-                    "ContainerImage": "yashprime07/notificationbackend:PROJ-NB-7"
+                    "SplunkAmiId":"ami-032e2bd35b8dce79d"
                 },
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/ultron/notificationbackend/notificationbackend.json"
+                "TemplatePath": "./templates/mumbai/splunk/server.json"
             },
-            "Mu-Dash": {
+            "Mu-Application":{
                 "Parameters": {
-                    "AppAmiId": "ami-0389de08caf0a3e67",
-                    "ContainerImage": "yashprime07/dashboard:PROJ-DASH-23"
+                    "SplunkAmiId":"ami-0d4a72a586488376d"
                 },
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/ultron/dashboard/dashboard.json"
-            },
-            "Mu-Bamboo": {
-                "Parameters": {
-                    "BambooAmiId": "ami-03db74a0343aa86ed"
-                },
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/bamboo/bamboo.json"
-            }
+                "TemplatePath": "./templates/mumbai/splunk/application.json"
+            }  
         }
     }
 }
