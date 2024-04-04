@@ -339,6 +339,16 @@
                 "IamInstanceProfile": {
                     "Ref": "ApplicationInstacneIamProfile"
                 },
+                "BlockDeviceMappings":[
+                    {
+                        "DeviceName" : "/dev/xvda",
+                        "Ebs" : {
+                            "DeleteOnTermination": true,
+                            "VolumeSize": 50,
+                            "VolumeType":"gp2"
+                        }
+                    }
+                ],
                 "KeyName": {
                     "Ref": "ApplicationInstanceKeyPair"
                 },
