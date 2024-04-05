@@ -484,7 +484,7 @@
         "BambooHomeV2Ec2Volume": {
           "Type": "AWS::EC2::Volume",
           "Properties": {
-            "Size": "128",
+            "Size": "64",
             "AvailabilityZone": "ap-south-1a",
             "VolumeType": "gp2"
           }
