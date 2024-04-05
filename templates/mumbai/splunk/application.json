@@ -442,7 +442,7 @@
                       }
                     },
                     {
-                      "DeviceName": "/dev/xvdbf",
+                      "DeviceName": "/dev/sdb",
                       "Ebs": {
                         "DeleteOnTermination": true,
                         "VolumeSize": "200",
