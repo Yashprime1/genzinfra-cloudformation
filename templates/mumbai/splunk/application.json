@@ -468,7 +468,7 @@
                   "Volumes": [
                     {
                       "VolumeId": {
-                        "Ref": "BambooHomeV8Ec2Volume"
+                        "Ref": "BambooHomeEc2Volume"
                       },
                       "Device": "/dev/sdp"
                     }
@@ -481,7 +481,7 @@
                 ]
             }
         },
-        "BambooHomeV8Ec2Volume": {
+        "BambooHomeEc2Volume": {
           "Type": "AWS::EC2::Volume",
           "Properties": {
             "Size": "256",
