@@ -398,7 +398,7 @@
                 "Cluster":{
                     "Ref":"ApplicationEcsCluster"
                 },
-                "DesiredCount":1,
+                "DesiredCount":0,
                 "LaunchType":"EC2",
                 "DeploymentController":{"Type" :"ECS"},
                 "DeploymentConfiguration": {
@@ -437,16 +437,7 @@
                       "DeviceName": "/dev/xvda",
                       "Ebs": {
                         "DeleteOnTermination": true,
-                        "VolumeSize": "200",
-                        "VolumeType": "standard"
-                      }
-                    },
-                    {
-                      "DeviceName": "/dev/sdb",
-                      "Ebs": {
-                        "DeleteOnTermination": true,
-                        "VolumeSize": "200",
-                        "SnapshotId":"snap-0a7ec20c0fbf7257b",
+                        "VolumeSize": "50",
                         "VolumeType": "standard"
                       }
                     }
@@ -474,6 +465,14 @@
                             }
                     }
                   } ],
+                  "Volumes": [
+                    {
+                      "VolumeId": {
+                        "Ref": "BambooHomeV8Ec2Volume"
+                      },
+                      "Device": "/dev/sdp"
+                    }
+                  ],
                 "Tags":[
                     {
                         "Key":"Name",
@@ -481,6 +480,14 @@
                     }
                 ]
             }
+        },
+        "BambooHomeV8Ec2Volume": {
+          "Type": "AWS::EC2::Volume",
+          "Properties": {
+            "Size": "256",
+            "AvailabilityZone": "eu-west-1a",
+            "VolumeType": "gp2"
+          }
         }
     }
 }
