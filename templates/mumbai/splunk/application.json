@@ -437,7 +437,8 @@
                       "DeviceName": "/dev/xvda",
                       "Ebs": {
                         "DeleteOnTermination": true,
-                        "VolumeSize": "150",
+                        "VolumeSize": "200",
+                        "SnapshotId":"snap-0a7ec20c0fbf7257b",
                         "VolumeType": "standard"
                       }
                     }
