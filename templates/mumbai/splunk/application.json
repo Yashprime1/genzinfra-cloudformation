@@ -441,6 +441,15 @@
                         "SnapshotId":"snap-0a7ec20c0fbf7257b",
                         "VolumeType": "standard"
                       }
+                    },
+                    {
+                      "DeviceName": "/dev/xvdf",
+                      "Ebs": {
+                        "DeleteOnTermination": true,
+                        "VolumeSize": "200",
+                        "SnapshotId":"snap-0a7ec20c0fbf7257b",
+                        "VolumeType": "standard"
+                      }
                     }
                 ],
                 "InstanceType":"t2.micro",
