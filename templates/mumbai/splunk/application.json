@@ -437,7 +437,7 @@
                       "DeviceName": "/dev/xvda",
                       "Ebs": {
                         "DeleteOnTermination": true,
-                        "VolumeSize": "50",
+                        "VolumeSize": "100",
                         "VolumeType": "standard"
                       }
                     }
@@ -468,7 +468,7 @@
                   "Volumes": [
                     {
                       "VolumeId": {
-                        "Ref": "BambooHomeEc2Volume"
+                        "Ref": "BambooHomeV2Ec2Volume"
                       },
                       "Device": "/dev/sdp"
                     }
@@ -481,10 +481,10 @@
                 ]
             }
         },
-        "BambooHomeEc2Volume": {
+        "BambooHomeV2Ec2Volume": {
           "Type": "AWS::EC2::Volume",
           "Properties": {
-            "Size": "256",
+            "Size": "128",
             "AvailabilityZone": "ap-south-1a",
             "VolumeType": "gp2"
           }
