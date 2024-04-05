@@ -437,7 +437,7 @@
                       "DeviceName": "/dev/xvda",
                       "Ebs": {
                         "DeleteOnTermination": true,
-                        "VolumeSize": "100",
+                        "VolumeSize": "150",
                         "VolumeType": "standard"
                       }
                     }
