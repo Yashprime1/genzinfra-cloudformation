@@ -233,6 +233,10 @@
                           {
                             "Name" : "JVM_MINIMUM_MEMORY",
                             "Value" : "1024m"
+                          },
+                          {
+                            "Name":"CATALINA_TMPDIR",
+                            "Value":"/opt/atlassian/bamboo/temp"
                           }
                         ],
                         "Essential": true,
