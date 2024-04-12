@@ -2,7 +2,7 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
         "BambooAmiId": {
-          "Description": "The AMI ID for the Bamboo instance",
+          "Description": "The AMI ID for the Bamboo instances",
           "Type": "String"
         }
       },
