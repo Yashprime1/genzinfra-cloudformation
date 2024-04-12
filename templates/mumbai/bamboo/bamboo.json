@@ -236,7 +236,7 @@
                           },
                           {
                             "Name":"CATALINA_TMPDIR",
-                            "Value":"/opt/atlassian/bamboo/temp"
+                            "Value":"/var/atlassian/application-data/temp"
                           }
                         ],
                         "Essential": true,
