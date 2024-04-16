@@ -279,6 +279,306 @@
                 "NetworkMode":"host"
             }
         },
+        "ApplicationEcsTaskDefinition2":{
+            "Type":"AWS::ECS::TaskDefinition",
+            "Properties":{
+                "Family":"ApplicationEcsTaskDefinition",
+                "ContainerDefinitions":[
+                    {
+                        "Environment": [
+                          {
+                            "Name": "JVM_MAXIMUM_MEMORY",
+                            "Value": "16384m"
+                          },
+                          {
+                            "Name" : "JVM_MINIMUM_MEMORY",
+                            "Value" : "1024m"
+                          },
+                          {
+                            "Name":"CATALINA_TMPDIR",
+                            "Value":"/var/atlassian/application-data/temp"
+                          }
+                        ],
+                        "Essential": true,
+                        "Image": "atlassian/bamboo-server:9.2.1",
+                          "MountPoints": [
+                            {
+                              "ContainerPath": "/var/atlassian/application-data",
+                              "SourceVolume": "bamboo-home"
+                            }
+                          ],
+                          "PortMappings": [
+                          {
+                            "ContainerPort": 8085,
+                            "HostPort": 8085,
+                            "Protocol": "tcp"
+                          },
+                          {
+                            "ContainerPort": 54663,
+                            "HostPort": 54663,
+                            "Protocol": "tcp"
+                          }
+                        ],
+                        "MemoryReservation": "256",
+                        "Name": "Sensu",
+                        "Privileged": false,
+                        "ReadonlyRootFilesystem": false
+                    }
+                ],
+                "ExecutionRoleArn":{
+                    "Ref":"ApplicationTaskIamRole"
+                },
+                "Volumes": [
+                  {
+                    "Name": "bamboo-home",
+                    "Host" : {
+                      "SourcePath" : "/home/bamboo"
+                    }
+                  }
+                ],
+                "NetworkMode":"host"
+            }
+        },
+       "ApplicationEcsTaskDefinition3":{
+            "Type":"AWS::ECS::TaskDefinition",
+            "Properties":{
+                "Family":"ApplicationEcsTaskDefinition",
+                "ContainerDefinitions":[
+                    {
+                        "Environment": [
+                          {
+                            "Name": "JVM_MAXIMUM_MEMORY",
+                            "Value": "16384m"
+                          },
+                          {
+                            "Name" : "JVM_MINIMUM_MEMORY",
+                            "Value" : "1024m"
+                          },
+                          {
+                            "Name":"CATALINA_TMPDIR",
+                            "Value":"/var/atlassian/application-data/temp"
+                          }
+                        ],
+                        "Essential": true,
+                        "Image": "atlassian/bamboo-server:9.2.1",
+                          "MountPoints": [
+                            {
+                              "ContainerPath": "/var/atlassian/application-data",
+                              "SourceVolume": "bamboo-home"
+                            }
+                          ],
+                          "PortMappings": [
+                          {
+                            "ContainerPort": 8085,
+                            "HostPort": 8085,
+                            "Protocol": "tcp"
+                          },
+                          {
+                            "ContainerPort": 54663,
+                            "HostPort": 54663,
+                            "Protocol": "tcp"
+                          }
+                        ],
+                        "MemoryReservation": "256",
+                        "Name": "Sensu",
+                        "Privileged": false,
+                        "ReadonlyRootFilesystem": false
+                    }
+                ],
+                "ExecutionRoleArn":{
+                    "Ref":"ApplicationTaskIamRole"
+                },
+                "Volumes": [
+                  {
+                    "Name": "bamboo-home",
+                    "Host" : {
+                      "SourcePath" : "/home/bamboo"
+                    }
+                  }
+                ],
+                "NetworkMode":"host"
+            }
+        },
+"ApplicationEcsTaskDefinition4":{
+            "Type":"AWS::ECS::TaskDefinition",
+            "Properties":{
+                "Family":"ApplicationEcsTaskDefinition",
+                "ContainerDefinitions":[
+                    {
+                        "Environment": [
+                          {
+                            "Name": "JVM_MAXIMUM_MEMORY",
+                            "Value": "16384m"
+                          },
+                          {
+                            "Name" : "JVM_MINIMUM_MEMORY",
+                            "Value" : "1024m"
+                          },
+                          {
+                            "Name":"CATALINA_TMPDIR",
+                            "Value":"/var/atlassian/application-data/temp"
+                          }
+                        ],
+                        "Essential": true,
+                        "Image": "atlassian/bamboo-server:9.2.1",
+                          "MountPoints": [
+                            {
+                              "ContainerPath": "/var/atlassian/application-data",
+                              "SourceVolume": "bamboo-home"
+                            }
+                          ],
+                          "PortMappings": [
+                          {
+                            "ContainerPort": 8085,
+                            "HostPort": 8085,
+                            "Protocol": "tcp"
+                          },
+                          {
+                            "ContainerPort": 54663,
+                            "HostPort": 54663,
+                            "Protocol": "tcp"
+                          }
+                        ],
+                        "MemoryReservation": "256",
+                        "Name": "Sensu",
+                        "Privileged": false,
+                        "ReadonlyRootFilesystem": false
+                    }
+                ],
+                "ExecutionRoleArn":{
+                    "Ref":"ApplicationTaskIamRole"
+                },
+                "Volumes": [
+                  {
+                    "Name": "bamboo-home",
+                    "Host" : {
+                      "SourcePath" : "/home/bamboo"
+                    }
+                  }
+                ],
+                "NetworkMode":"host"
+            }
+        },
+"ApplicationEcsTaskDefinition5":{
+            "Type":"AWS::ECS::TaskDefinition",
+            "Properties":{
+                "Family":"ApplicationEcsTaskDefinition",
+                "ContainerDefinitions":[
+                    {
+                        "Environment": [
+                          {
+                            "Name": "JVM_MAXIMUM_MEMORY",
+                            "Value": "16384m"
+                          },
+                          {
+                            "Name" : "JVM_MINIMUM_MEMORY",
+                            "Value" : "1024m"
+                          },
+                          {
+                            "Name":"CATALINA_TMPDIR",
+                            "Value":"/var/atlassian/application-data/temp"
+                          }
+                        ],
+                        "Essential": true,
+                        "Image": "atlassian/bamboo-server:9.2.1",
+                          "MountPoints": [
+                            {
+                              "ContainerPath": "/var/atlassian/application-data",
+                              "SourceVolume": "bamboo-home"
+                            }
+                          ],
+                          "PortMappings": [
+                          {
+                            "ContainerPort": 8085,
+                            "HostPort": 8085,
+                            "Protocol": "tcp"
+                          },
+                          {
+                            "ContainerPort": 54663,
+                            "HostPort": 54663,
+                            "Protocol": "tcp"
+                          }
+                        ],
+                        "MemoryReservation": "256",
+                        "Name": "Sensu",
+                        "Privileged": false,
+                        "ReadonlyRootFilesystem": false
+                    }
+                ],
+                "ExecutionRoleArn":{
+                    "Ref":"ApplicationTaskIamRole"
+                },
+                "Volumes": [
+                  {
+                    "Name": "bamboo-home",
+                    "Host" : {
+                      "SourcePath" : "/home/bamboo"
+                    }
+                  }
+                ],
+                "NetworkMode":"host"
+            }
+        },
+"ApplicationEcsTaskDefinition6":{
+            "Type":"AWS::ECS::TaskDefinition",
+            "Properties":{
+                "Family":"ApplicationEcsTaskDefinition",
+                "ContainerDefinitions":[
+                    {
+                        "Environment": [
+                          {
+                            "Name": "JVM_MAXIMUM_MEMORY",
+                            "Value": "16384m"
+                          },
+                          {
+                            "Name" : "JVM_MINIMUM_MEMORY",
+                            "Value" : "1024m"
+                          },
+                          {
+                            "Name":"CATALINA_TMPDIR",
+                            "Value":"/var/atlassian/application-data/temp"
+                          }
+                        ],
+                        "Essential": true,
+                        "Image": "atlassian/bamboo-server:9.2.1",
+                          "MountPoints": [
+                            {
+                              "ContainerPath": "/var/atlassian/application-data",
+                              "SourceVolume": "bamboo-home"
+                            }
+                          ],
+                          "PortMappings": [
+                          {
+                            "ContainerPort": 8085,
+                            "HostPort": 8085,
+                            "Protocol": "tcp"
+                          },
+                          {
+                            "ContainerPort": 54663,
+                            "HostPort": 54663,
+                            "Protocol": "tcp"
+                          }
+                        ],
+                        "MemoryReservation": "256",
+                        "Name": "Sensu",
+                        "Privileged": false,
+                        "ReadonlyRootFilesystem": false
+                    }
+                ],
+                "ExecutionRoleArn":{
+                    "Ref":"ApplicationTaskIamRole"
+                },
+                "Volumes": [
+                  {
+                    "Name": "bamboo-home",
+                    "Host" : {
+                      "SourcePath" : "/home/bamboo"
+                    }
+                  }
+                ],
+                "NetworkMode":"host"
+            }
+        },
         "ApplicationEcsService":{
             "Type":"AWS::ECS::Service",
             "Properties":{
