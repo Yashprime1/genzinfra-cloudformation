@@ -199,7 +199,7 @@
                             "rs0",
                             "--bind_ip",
                             "gymbuddy-mongo"
-                        ]
+                        ],
                         "PortMappings": [
                           {
                             "ContainerPort": 27017,
