@@ -2,7 +2,7 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
         "MongoAmiId": {
-          "Description": "The AMI ID for the Splunk",
+          "Description": "The AMI ID for the Mongo",
           "Type": "String"
         }
       },
@@ -194,6 +194,12 @@
                         ],
                         "Essential": true,
                         "Image": "mongo:7.0.8",
+                        "Command": [
+                            "--replSet",
+                            "rs0",
+                            "--bind_ip",
+                            "gymbuddy-mongo"
+                        ]
                         "PortMappings": [
                           {
                             "ContainerPort": 27017,
