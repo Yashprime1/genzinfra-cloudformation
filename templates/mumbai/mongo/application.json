@@ -215,7 +215,7 @@
                         "MountPoints" : [ 
                             {
                                 "ContainerPath" : "/data/db",
-                                "ReadOnly" : Boolean,
+                                "ReadOnly" : false ,
                                 "SourceVolume" : "mongodata"
                             }
                         ]
