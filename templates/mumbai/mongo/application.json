@@ -198,7 +198,9 @@
                             "--replSet",
                             "rs0",
                             "--bind_ip",
-                            "gymbuddy-mongo"
+                            "gymbuddy-mongo",
+                            "--keyFile",
+                            "/mongo/data/replicakey"
                         ],
                         "PortMappings": [
                           {
@@ -309,7 +311,7 @@
                 }
             }
         },
-        "ApplicationSecondaryEcsService":{
+        "ApplicationSecondary2EcsService":{
             "Type":"AWS::ECS::Service",
             "Properties":{
                 "Cluster":{
