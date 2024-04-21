@@ -173,14 +173,175 @@
         "ApplicationEcsCluster":{
             "Type":"AWS::ECS::Cluster",
             "Properties":{
-                "ClusterName":"ApplicationEcsCluster"
+                "ClusterName":"MongoEcsCluster"
             }
         },
-        "ApplicationInstance":{
+        "ApplicationEcsTaskDefinition":{
+            "Type":"AWS::ECS::TaskDefinition",
+            "Properties":{
+                "Family":"ApplicationEcsTaskDefinition",
+                "ContainerDefinitions":[
+                    {
+                        "Environment": [
+                          {
+                            "Name": "MONGO_INITDB_ROOT_USERNAME",
+                            "Value": "mongoadmin"
+                          },
+                          {
+                            "Name": "MONGO_INITDB_ROOT_PASSWORD",
+                            "Value": "secret"
+                          }
+                        ],
+                        "Essential": true,
+                        "Image": "mongo:7.0.8",
+                        "PortMappings": [
+                          {
+                            "ContainerPort": 27017,
+                            "HostPort": 27017,
+                            "Protocol": "tcp"
+                          }
+                        ],
+                        "MemoryReservation": "256",
+                        "Name": "Mongo",
+                        "Privileged": false,
+                        "ReadonlyRootFilesystem": false,
+                        "Ulimits": [
+                          {
+                            "HardLimit": 983362,
+                            "Name": "nofile",
+                            "SoftLimit": 983362
+                          }
+                        ],
+                        "MountPoints" : [ 
+                            {
+                                "ContainerPath" : "/data/db",
+                                "ReadOnly" : Boolean,
+                                "SourceVolume" : "mongodata"
+                            }
+                        ]
+                      }
+                ],
+                "ExecutionRoleArn":{
+                    "Ref":"ApplicationTaskIamRole"
+                },
+                "Volumes" : [ 
+                    {
+                        "Host" : {
+                            "SourcePath" : "/mongo/data"
+                        },
+                        "Name" : "mongodata"
+                    }
+                ]
+                "NetworkMode":"host"
+            }
+        },
+        "ApplicationPrimaryEcsService":{
+            "Type":"AWS::ECS::Service",
+            "Properties":{
+                "Cluster":{
+                    "Ref":"ApplicationEcsCluster"
+                },
+                "DesiredCount":1,
+                "LaunchType":"EC2",
+                "DeploymentController":{"Type" :"ECS"},
+                "DeploymentConfiguration": {
+                    "MaximumPercent": 100,
+                    "MinimumHealthyPercent": 0
+                },
+                "PlacementConstraints":[
+                    {
+                        "Type":"memberOf",
+                        "Expression":{
+                                        "Fn::Join":
+                                            [
+                                                "",
+                                                [
+                                                    "ec2InstanceId",
+                                                    "==",
+                                                    {"Ref" : "ApplicationInstancePrimary"}
+                                                ]
+                                            ]
+                                    }
+                    }
+                ],
+                "TaskDefinition":{
+                    "Ref":"ApplicationEcsTaskDefinition"
+                }
+            }
+        },
+        "ApplicationSecondary1EcsService":{
+            "Type":"AWS::ECS::Service",
+            "Properties":{
+                "Cluster":{
+                    "Ref":"ApplicationEcsCluster"
+                },
+                "DesiredCount":1,
+                "LaunchType":"EC2",
+                "DeploymentController":{"Type" :"ECS"},
+                "DeploymentConfiguration": {
+                    "MaximumPercent": 100,
+                    "MinimumHealthyPercent": 0
+                },
+                "PlacementConstraints":[
+                    {
+                        "Type":"memberOf",
+                        "Expression":{
+                                        "Fn::Join":
+                                            [
+                                                "",
+                                                [
+                                                    "ec2InstanceId",
+                                                    "==",
+                                                    {"Ref" : "ApplicationInstanceSecondary1"}
+                                                ]
+                                            ]
+                                    }
+                    }
+                ],
+                "TaskDefinition":{
+                    "Ref":"ApplicationEcsTaskDefinition"
+                }
+            }
+        },
+        "ApplicationSecondaryEcsService":{
+            "Type":"AWS::ECS::Service",
+            "Properties":{
+                "Cluster":{
+                    "Ref":"ApplicationEcsCluster"
+                },
+                "DesiredCount":1,
+                "LaunchType":"EC2",
+                "DeploymentController":{"Type" :"ECS"},
+                "DeploymentConfiguration": {
+                    "MaximumPercent": 100,
+                    "MinimumHealthyPercent": 0
+                },
+                "PlacementConstraints":[
+                    {
+                        "Type":"memberOf",
+                        "Expression":{
+                                        "Fn::Join":
+                                            [
+                                                "",
+                                                [
+                                                    "ec2InstanceId",
+                                                    "==",
+                                                    {"Ref" : "ApplicationInstanceSecondary2"}
+                                                ]
+                                            ]
+                                    }
+                    }
+                ],
+                "TaskDefinition":{
+                    "Ref":"ApplicationEcsTaskDefinition"
+                }
+            }
+        },
+        "ApplicationInstancePrimary":{
             "Type":"AWS::EC2::Instance",
             "Properties":{
                 "ImageId":{
-                    "Ref":"SplunkAmiId"
+                    "Ref":"MongoAmiId"
                 },
                 "InstanceType":"t2.micro",
                 "IamInstanceProfile": {
@@ -208,7 +369,81 @@
                 "Tags":[
                     {
                         "Key":"Name",
-                        "Value":"ApplicationInstance"
+                        "Value":"ApplicationInstancePrimary"
+                    }
+                ]
+            }
+        },
+        "ApplicationInstanceSecondary1":{
+            "Type":"AWS::EC2::Instance",
+            "Properties":{
+                "ImageId":{
+                    "Ref":"MongoAmiId"
+                },
+                "InstanceType":"t2.micro",
+                "IamInstanceProfile": {
+                    "Ref": "ApplicationInstacneIamProfile"
+                },
+                "KeyName": {
+                    "Ref": "ApplicationInstanceKeyPair"
+                },
+                "NetworkInterfaces": [ {
+                    "AssociatePublicIpAddress": "true",
+                    "DeviceIndex": "0",
+                    "GroupSet": [     {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-SecurityGroup-DS2SecurityGroupId"
+                            }
+                    }],
+                    "SubnetId":  {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-Network-AppPublicSubnet1Id"
+                            }
+                    }
+                  } ],
+                "Tags":[
+                    {
+                        "Key":"Name",
+                        "Value":"ApplicationInstanceSecondary1"
+                    }
+                ]
+            }
+        },
+        "ApplicationInstanceSecondary2":{
+            "Type":"AWS::EC2::Instance",
+            "Properties":{
+                "ImageId":{
+                    "Ref":"MongoAmiId"
+                },
+                "InstanceType":"t2.micro",
+                "IamInstanceProfile": {
+                    "Ref": "ApplicationInstacneIamProfile"
+                },
+                "KeyName": {
+                    "Ref": "ApplicationInstanceKeyPair"
+                },
+                "NetworkInterfaces": [ {
+                    "AssociatePublicIpAddress": "true",
+                    "DeviceIndex": "0",
+                    "GroupSet": [     {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-SecurityGroup-DS2SecurityGroupId"
+                            }
+                    }],
+                    "SubnetId":  {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-Network-AppPublicSubnet1Id"
+                            }
+                    }
+                  } ],
+                "Tags":[
+                    {
+                        "Key":"Name",
+                        "Value":"ApplicationInstanceSecondary2"
                     }
                 ]
             }

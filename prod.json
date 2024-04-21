@@ -20,19 +20,12 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
-            "Mu-Splunk":{
+            "Mu-Mongo": {
                 "Parameters": {
-                    "SplunkAmiId":"ami-032e2bd35b8dce79d"
+                    "MongoAmiId": "ami-01b4770244e568e3c"
                 },
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/splunk/server.json"
-            },
-            "Mu-Bamboo": {
-                "Parameters": {
-                    "BambooAmiId": "ami-03db74a0343aa86ed"
-                },
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/bamboo/bamboo.json"
+                "TemplatePath": "./templates/mumbai/mongo/application.json"
             }
         }
     }
