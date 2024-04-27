@@ -227,7 +227,7 @@
                                 "SourceVolume" : "mongodata"
                             },
                             {
-                                "ContainerPath" : "/mongo/data/replicakey",
+                                "ContainerPath" : "/mongo/keys",
                                 "ReadOnly" : false,
                                 "SourceVolume" : "mongodatareplicakey"
                             }
@@ -247,7 +247,7 @@
                     },
                     {
                         "Host" : {
-                            "SourcePath" : "/mongo/data/replicakey"
+                            "SourcePath" : "/mongo/keys"
                         },
                         "Name" : "mongodatareplicakey"
                     }
