@@ -198,7 +198,7 @@
                             "--replSet",
                             "rs0",
                             "--bind_ip",
-                            "gymbuddy-mongo",
+                            "localhost",
                             "--keyFile",
                             "/mongo/data/replicakey"
                         ],
