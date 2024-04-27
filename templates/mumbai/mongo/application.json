@@ -2,7 +2,7 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
         "MongoAmiId": {
-          "Description": "The AMI ID for the Mongo",
+          "Description": "The AMI ID for the Mongo Instances",
           "Type": "String"
         }
       },
