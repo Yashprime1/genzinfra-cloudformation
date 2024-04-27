@@ -200,7 +200,7 @@
                             "--bind_ip",
                             "localhost",
                             "--keyFile",
-                            "/mongo/data/replicakey"
+                            "/mongo/keys/replicakey"
                         ],
                         "PortMappings": [
                           {
