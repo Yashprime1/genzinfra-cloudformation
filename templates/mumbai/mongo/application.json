@@ -225,7 +225,13 @@
                                 "ContainerPath" : "/data/db",
                                 "ReadOnly" : false,
                                 "SourceVolume" : "mongodata"
+                            },
+                            {
+                                "ContainerPath" : "/mongo/data/replicakey",
+                                "ReadOnly" : false,
+                                "SourceVolume" : "mongodatareplicakey"
                             }
+
                         ]
                       }
                 ],
@@ -238,6 +244,12 @@
                             "SourcePath" : "/mongo/data"
                         },
                         "Name" : "mongodata"
+                    },
+                    {
+                        "Host" : {
+                            "SourcePath" : "/mongo/data/replicakey"
+                        },
+                        "Name" : "mongodatareplicakey"
                     }
                 ],
                 "NetworkMode":"host"
