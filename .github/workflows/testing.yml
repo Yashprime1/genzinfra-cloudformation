@@ -1,6 +1,10 @@
 name: testing
 run-name: ${{ github.head_ref || github.ref_name }}-${{ github.run_number }} 
 on:
+  pull_request:
+    branches:
+      - master
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
       build-bamboo-elastic-instance-ami:
