@@ -1,0 +1,42 @@
+name: check1
+run-name: ${{ github.head_ref || github.ref_name }}-${{ github.run_number }} 
+on:
+  workflow_dispatch:
+    inputs:
+      build-bamboo-elastic-instance-ami:
+        type: boolean
+        description: This is the boolean to select if this ami is for elastic instances or not
+        default: false
+jobs: 
+  check1:
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.build-bamboo-elastic-instance-ami == true)   }} 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v1.8.0
+        with:
+          app_id: ${{ secrets.CLEVERTAP_PLATFORM_BOT_ID }}
+          private_key: ${{ secrets.CLEVERTAP_PLATFORM_BOT_PRIVATE_ACCESS_KEY }}
+      - name: Test step 1 
+        run: |
+          echo "Step 1(check1)"
+  check2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v1.8.0
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.build-bamboo-elastic-instance-ami == true)   }} 
+        with:
+          app_id: ${{ secrets.CLEVERTAP_PLATFORM_BOT_ID }}
+          private_key: ${{ secrets.CLEVERTAP_PLATFORM_BOT_PRIVATE_ACCESS_KEY }}
+      - name: Test step 1 
+        run: |
+          echo "Step 1(check2)"
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.build-bamboo-elastic-instance-ami == true)   }} 
+      - name: Test step 2 
+        run: |
+          echo "Step 2(check2)"
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.build-bamboo-elastic-instance-ami == true)   }} 
+          
