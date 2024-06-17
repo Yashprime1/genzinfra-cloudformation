@@ -261,12 +261,16 @@
                 "Cluster":{
                     "Ref":"ApplicationEcsCluster"
                 },
-                "DesiredCount":1,
+                "DesiredCount":0,
                 "LaunchType":"EC2",
                 "DeploymentController":{"Type" :"ECS"},
                 "DeploymentConfiguration": {
                     "MaximumPercent": 100,
-                    "MinimumHealthyPercent": 0
+                    "MinimumHealthyPercent": 0,
+                    "DeploymentCircuitBreaker": {
+                        "Enable" : true,
+                        "Rollback" : true
+                      }
                 },
                 "PlacementConstraints":[
                     {
@@ -295,12 +299,16 @@
                 "Cluster":{
                     "Ref":"ApplicationEcsCluster"
                 },
-                "DesiredCount":1,
+                "DesiredCount":0,
                 "LaunchType":"EC2",
                 "DeploymentController":{"Type" :"ECS"},
                 "DeploymentConfiguration": {
                     "MaximumPercent": 100,
-                    "MinimumHealthyPercent": 0
+                    "MinimumHealthyPercent": 0,
+                    "DeploymentCircuitBreaker": {
+                        "Enable" : true,
+                        "Rollback" : true
+                      }
                 },
                 "PlacementConstraints":[
                     {
@@ -329,12 +337,16 @@
                 "Cluster":{
                     "Ref":"ApplicationEcsCluster"
                 },
-                "DesiredCount":1,
+                "DesiredCount":0,
                 "LaunchType":"EC2",
                 "DeploymentController":{"Type" :"ECS"},
                 "DeploymentConfiguration": {
                     "MaximumPercent": 100,
-                    "MinimumHealthyPercent": 0
+                    "MinimumHealthyPercent": 0,
+                    "DeploymentCircuitBreaker": {
+                        "Enable" : true,
+                        "Rollback" : true
+                    }
                 },
                 "PlacementConstraints":[
                     {
