@@ -106,10 +106,6 @@
                                 "HostPort":8088
                             }
                         ],
-                        "Command":[
-                            "exit",
-                            "2"
-                        ],
                         "Environment":[
                             {
                                 "Name":"SPLUNK_START_ARGS",
@@ -144,7 +140,7 @@
                 "Cluster":{
                     "Ref":"SplunkEcsCluster"
                 },
-                "DesiredCount":1,
+                "DesiredCount":20,
                 "LaunchType":"EC2",
                 "DeploymentController":{"Type" :"ECS"},
                 "DeploymentConfiguration": {
