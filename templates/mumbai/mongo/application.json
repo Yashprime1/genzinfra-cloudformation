@@ -261,7 +261,7 @@
                 "Cluster":{
                     "Ref":"ApplicationEcsCluster"
                 },
-                "DesiredCount":0,
+                "DesiredCount":1,
                 "LaunchType":"EC2",
                 "DeploymentController":{"Type" :"ECS"},
                 "DeploymentConfiguration": {
@@ -299,7 +299,7 @@
                 "Cluster":{
                     "Ref":"ApplicationEcsCluster"
                 },
-                "DesiredCount":0,
+                "DesiredCount":1,
                 "LaunchType":"EC2",
                 "DeploymentController":{"Type" :"ECS"},
                 "DeploymentConfiguration": {
@@ -337,7 +337,7 @@
                 "Cluster":{
                     "Ref":"ApplicationEcsCluster"
                 },
-                "DesiredCount":0,
+                "DesiredCount":1,
                 "LaunchType":"EC2",
                 "DeploymentController":{"Type" :"ECS"},
                 "DeploymentConfiguration": {
