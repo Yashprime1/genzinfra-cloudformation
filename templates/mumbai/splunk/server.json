@@ -106,6 +106,10 @@
                                 "HostPort":8088
                             }
                         ],
+                        "Command":[
+                            "exit",
+                            "2"
+                        ],
                         "Environment":[
                             {
                                 "Name":"SPLUNK_START_ARGS",
