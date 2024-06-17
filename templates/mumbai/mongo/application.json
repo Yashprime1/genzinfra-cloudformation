@@ -266,11 +266,7 @@
                 "DeploymentController":{"Type" :"ECS"},
                 "DeploymentConfiguration": {
                     "MaximumPercent": 100,
-                    "MinimumHealthyPercent": 0,
-                    "DeploymentCircuitBreaker": {
-                        "Enable" : true,
-                        "Rollback" : true
-                      }
+                    "MinimumHealthyPercent": 0
                 },
                 "PlacementConstraints":[
                     {
@@ -304,11 +300,7 @@
                 "DeploymentController":{"Type" :"ECS"},
                 "DeploymentConfiguration": {
                     "MaximumPercent": 100,
-                    "MinimumHealthyPercent": 0,
-                    "DeploymentCircuitBreaker": {
-                        "Enable" : true,
-                        "Rollback" : true
-                      }
+                    "MinimumHealthyPercent": 0
                 },
                 "PlacementConstraints":[
                     {
@@ -342,11 +334,7 @@
                 "DeploymentController":{"Type" :"ECS"},
                 "DeploymentConfiguration": {
                     "MaximumPercent": 100,
-                    "MinimumHealthyPercent": 0,
-                    "DeploymentCircuitBreaker": {
-                        "Enable" : true,
-                        "Rollback" : true
-                    }
+                    "MinimumHealthyPercent": 0
                 },
                 "PlacementConstraints":[
                     {
