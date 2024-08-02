@@ -11,11 +11,7 @@ jobs:
             sudo su
             apt-get update
             apt-get install -y pip3 
-            apt-get -o DPkg::Lock::Timeout=300 update -y &
-            apt-get -o DPkg::Lock::Timeout=300 install -y curl git openssl wget unzip ffmpeg &
-            apt-get -o DPkg::Lock::Timeout=300 install -y python3-pip python3-dev python3-setuptools
-            apt-get -o DPkg::Lock::Timeout=300 install -y python3-pip --fix-missing
-
+                      
       - checkout
 
       - run:
