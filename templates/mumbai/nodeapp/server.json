@@ -100,8 +100,8 @@
                         },
                         "PortMappings":[
                             {
-                                "ContainerPort":9997,
-                                "HostPort":9997
+                                "ContainerPort":3000,
+                                "HostPort":3000
                             },
                             {
                                 "ContainerPort":8000,
@@ -146,7 +146,7 @@
                 "Cluster":{
                     "Ref":"SplunkEcsCluster"
                 },
-                "DesiredCount":20,
+                "DesiredCount":1,
                 "LaunchType":"EC2",
                 "DeploymentController":{"Type" :"ECS"},
                 "DeploymentConfiguration": {
