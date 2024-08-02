@@ -1,0 +1,19 @@
+version: 2.1
+jobs:
+  deploy-image:
+    machine:
+      image: ubuntu-2204:current
+
+    steps:
+      - checkout
+  
+      - run:
+          name: "Docker Login"
+          command: |
+            echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin 
+
+
+workflows:
+  deploy-image: 
+    jobs:
+      - deploy-image
