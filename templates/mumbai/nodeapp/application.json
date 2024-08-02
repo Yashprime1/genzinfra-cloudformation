@@ -1,0 +1,497 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "SplunkAmiId": {
+          "Description": "The AMI ID for the Splunk",
+          "Type": "String"
+        },
+        "Image":{
+          "Description": "The image for ndoeapp",
+          "Type": "String"
+        }
+      },
+    "Resources":{
+        "ApplicationInstacneIamRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "MongoInstanceIamRolePolicy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                                "ec2:DescribeInstances",
+                                                "ec2-instance-connect:SendSSHPublicKey",
+                                                "ec2:DescribeInstances",
+                                                "ec2:DescribeTags",
+                                                "ec2:CreateTags",
+                                                "ecs:RegisterContainerInstance",
+                                                "ecs:DeregisterContainerInstance",
+                                                "ecs:DescribeContainerInstances",
+                                                "ecs:DiscoverPollEndpoint",
+                                                "ecs:*",
+                                                "ec2:*",
+                                                "logs:*"
+                                        ],
+                                    "Resource": [
+                                        "arn:aws:ec2:*:*:instance/*",
+                                        "arn:aws:ecs:*:*:cluster/*",
+                                        "*"
+                                    ]
+                                 },
+                                    {
+                                        "Action": [
+                                        "s3:GetObject",
+                                        "s3:GetObjectAcl",
+                                        "s3:GetBucketLocation",
+                                        "s3:ListObjects",
+                                        "s3:ListObjectsV2",
+                                        "s3:ListBucket"
+                                        ],
+                                        "Effect": "Allow",
+                                        "Resource": [
+                                        "arn:aws:s3:::fluentbit-yashprime",
+                                        "arn:aws:s3:::fluentbit-yashprime/*"
+                                        ],
+                                        "Sid": "AllowFluentbitConfigurationS3Bucket"
+                                    }
+                                ]
+                            }
+                    }
+                ]
+            }
+        },
+        "ApplicationTaskIamRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ecs-tasks.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "MongoInstanceIamRolePolicy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                                "ec2:DescribeInstances",
+                                                "ec2-instance-connect:SendSSHPublicKey",
+                                                "ec2:DescribeInstances",
+                                                "ec2:DescribeTags",
+                                                "ec2:CreateTags",
+                                                "ecs:RegisterContainerInstance",
+                                                "ecs:DeregisterContainerInstance",
+                                                "ecs:DescribeContainerInstances",
+                                                "ecs:DiscoverPollEndpoint",
+                                                "ecs:*",
+                                                "ec2:*",
+                                                "logs:*"
+                                        ],
+                                    "Resource": [
+                                        "arn:aws:ec2:*:*:instance/*",
+                                        "arn:aws:ecs:*:*:cluster/*",
+                                        "*"
+                                    ]
+                                 },
+                                    {
+                                        "Action": [
+                                        "s3:GetObject",
+                                        "s3:GetObjectAcl",
+                                        "s3:GetBucketLocation",
+                                        "s3:ListObjects",
+                                        "s3:ListObjectsV2",
+                                        "s3:ListBucket"
+                                        ],
+                                        "Effect": "Allow",
+                                        "Resource": [
+                                        "arn:aws:s3:::fluentbit-yashprime",
+                                        "arn:aws:s3:::fluentbit-yashprime/*"
+                                        ],
+                                        "Sid": "AllowFluentbitConfigurationS3Bucket"
+                                    },
+                                    {
+                                        "Action": "*",
+                                        "Effect": "Allow",
+                                        "Resource": "*",
+                                        "Sid": "AllowAll"
+                                    }
+                                ]
+                            }
+                    }
+                ]
+            }
+        },
+        "ApplicationInstacneIamProfile":{
+            "Type":"AWS::IAM::InstanceProfile",
+            "Properties":{
+                "Path":"/",
+                "Roles":[
+                    {
+                        "Ref":"ApplicationInstacneIamRole"
+                    }
+                ]
+            }
+        },
+        "ApplicationInstanceKeyPair": {
+            "Type": "AWS::EC2::KeyPair",
+            "Properties": {
+                "KeyName": "ApplicationInstanceKeyPair"
+            }
+        },
+        "ApplicationEcsCluster":{
+            "Type":"AWS::ECS::Cluster",
+            "Properties":{
+                "ClusterName":"ApplicationEcsCluster"
+            }
+        },
+        "SplunkTokenSecretsManagerSecret": {
+            "Type": "AWS::SecretsManager::Secret",
+            "Properties": {
+                "Description": {
+                "Fn::Sub": "This is a Secrets Manager secret for ${AWS::StackName}-SplunkTokenSecretsManagerSecret"
+                },
+                "SecretString": "{\"splunk-token\":\"replacesplunktoken\"}"
+            }
+        },
+        "ApplicationEcsTaskDefinition":{
+            "Type":"AWS::ECS::TaskDefinition",
+            "Properties":{
+                "Family":"ApplicationEcsTaskDefinition",
+                "ContainerDefinitions":[
+                    {
+                        "Environment": [
+                          {
+                            "Name": "SENSU_BACKEND_STATE_DIR",
+                            "Value": "/var/lib/sensu/sensu-backend"
+                          },
+                          {
+                            "Name": "SENSU_BACKEND_LOG_LEVEL",
+                            "Value": "warn"
+                          },
+                          {
+                            "Name" : "SENSU_BACKEND_CLUSTER_ADMIN_USERNAME",
+                            "Value" : "admin"
+                          },
+                          {
+                            "Name" : "SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD",
+                            "Value" : "admin"
+                          }
+                        ],
+                        "Essential": true,
+                        "Image": "sensu/sensu:latest",
+                        "PortMappings": [
+                          {
+                            "ContainerPort": 3000,
+                            "HostPort": 3000,
+                            "Protocol": "tcp"
+                          },
+                          {
+                            "ContainerPort": 8080,
+                            "HostPort": 8080,
+                            "Protocol": "tcp"
+                          },
+                          {
+                            "ContainerPort": 8081,
+                            "HostPort": 8081,
+                            "Protocol": "tcp"
+                          }
+                        ],
+                        "MemoryReservation": "256",
+                        "Name": "Sensu",
+                        "Privileged": false,
+                        "ReadonlyRootFilesystem": false,
+                        "Ulimits": [
+                          {
+                            "HardLimit": 983362,
+                            "Name": "nofile",
+                            "SoftLimit": 983362
+                          },
+                          {
+                            "HardLimit": 983362,
+                            "Name": "nproc",
+                            "SoftLimit": 983362
+                          },
+                          {
+                            "HardLimit": 983362,
+                            "Name": "sigpending",
+                            "SoftLimit": 983362
+                          }
+                        ],
+                        "LogConfiguration": {
+                            "LogDriver": "awsfirelens",
+                            "Options": {
+                              "Host": "3.109.139.154",
+                              "Name": "splunk",
+                              "Port": "8088",
+                              "Splunk_Send_Raw": "Off",
+                              "event_host": "${HOSTNAME}",
+                              "event_index": "review-notifier",
+                              "event_source": "sensu-backend-stdout",
+                              "event_sourcetype": "_json",
+                              "tls": "off",
+                              "tls.verify": "off"
+                            },
+                            "SecretOptions": [
+                                {
+                                    "Name": "Splunk_Token",
+                                    "ValueFrom": {
+                                        "Fn::Join": [
+                                        ":",
+                                        [
+                                            {
+                                                "Ref": "SplunkTokenSecretsManagerSecret"
+                                            },
+                                            "splunk-token::"
+                                        ]
+                                        ]
+                                    }
+                                }
+                            ]
+                          },
+                        "EntryPoint": [
+                          "sh",
+                          "-c",
+                          "sensu-backend start"
+                        ]
+                      },
+                      {
+                        "Essential": true,
+                        "Image": "cloudflare/cloudflared:latest",
+                        "Name": {
+                          "Fn::Join": [
+                            "-",
+                            [
+                              {
+                                "Ref": "AWS::StackName"
+                              },
+                              "Cloudflare-WebUi"
+                            ]
+                          ]
+                        },
+                        "Environment": [
+                          {
+                            "Name": "TUNNEL_LOGLEVEL",
+                            "Value": "debug"
+                          }
+                        ],
+                        "ReadonlyRootFilesystem": false,
+                        "Ulimits": [
+                          {
+                            "HardLimit": 900000,
+                            "Name": "nofile",
+                            "SoftLimit": 900000
+                          }
+                        ],
+                        "LogConfiguration": {
+                            "LogDriver": "awsfirelens",
+                            "Options": {
+                              "Host": "3.109.139.154",
+                              "Name": "splunk",
+                              "Port": "8088",
+                              "Splunk_Send_Raw": "Off",
+                              "event_host": "${HOSTNAME}",
+                              "event_index": "review-notifier",
+                              "event_source": "sensu-cloudflare-stdout",
+                              "event_sourcetype": "_json",
+                              "tls": "off",
+                              "tls.verify": "off"
+                            },
+                            "SecretOptions": [
+                                {
+                                    "Name": "Splunk_Token",
+                                    "ValueFrom": {
+                                        "Fn::Join": [
+                                        ":",
+                                        [
+                                            {
+                                                "Ref": "SplunkTokenSecretsManagerSecret"
+                                            },
+                                            "splunk-token::"
+                                        ]
+                                        ]
+                                    }
+                                }
+                            ]
+                          },
+                        "MemoryReservation": "256",
+                        "EntryPoint": [
+                          "cloudflared",
+                          "tunnel",
+                          "--url",
+                          "http://localhost:3000",
+                          "--no-autoupdate",
+                          "run"
+                        ]
+                      },
+                    {
+                        "Environment": [
+                          {
+                            "Name": "STACK_NAME",
+                            "Value": {
+                              "Ref": "AWS::StackName"
+                            }
+                          },
+                          {
+                            "Name": "FLB_LOG_LEVEL",
+                            "Value": "debug"
+                          },
+                          {
+                            "Name": "aws_fluent_bit_init_s3_parsers",
+                            "Value": "arn:aws:s3:::fluentbit-yashprime/sensu-backend-parser.conf"
+                          },
+                          {
+                            "Name": "aws_fluent_bit_init_s3_filters",
+                            "Value": "arn:aws:s3:::fluentbit-yashprime/sensu-backend-filter.conf"
+                          }
+                        ],
+                        "Essential": false,
+                        "FirelensConfiguration": {
+                          "Type": "fluentbit"
+                        },
+                        "Image": "amazon/aws-for-fluent-bit:init-2.32.0",
+                        "Memory": 128,
+                        "Name": "log_router",
+                        "Privileged": false
+                      }
+                ],
+                "ExecutionRoleArn":{
+                    "Ref":"ApplicationTaskIamRole"
+                },
+                "NetworkMode":"host"
+            }
+        },
+        "ApplicationEcsService":{
+            "Type":"AWS::ECS::Service",
+            "Properties":{
+                "Cluster":{
+                    "Ref":"ApplicationEcsCluster"
+                },
+                "DesiredCount":0,
+                "LaunchType":"EC2",
+                "DeploymentController":{"Type" :"ECS"},
+                "DeploymentConfiguration": {
+                    "MaximumPercent": 100,
+                    "MinimumHealthyPercent": 0
+                },
+                "PlacementConstraints":[
+                    {
+                        "Type":"memberOf",
+                        "Expression":{
+                                        "Fn::Join":
+                                            [
+                                                "",
+                                                [
+                                                    "ec2InstanceId",
+                                                    "==",
+                                                    {"Ref" : "ApplicationInstance"}
+                                                ]
+                                            ]
+                                    }
+                    }
+                ],
+                "TaskDefinition":{
+                    "Ref":"ApplicationEcsTaskDefinition"
+                }
+            }
+        },
+        "ApplicationInstance":{
+            "Type":"AWS::EC2::Instance",
+            "Properties":{
+                "ImageId":{
+                    "Ref":"SplunkAmiId"
+                },
+                "BlockDeviceMappings": [
+                    {
+                      "DeviceName": "/dev/xvda",
+                      "Ebs": {
+                        "DeleteOnTermination": true,
+                        "VolumeSize": "100",
+                        "VolumeType": "standard"
+                      }
+                    }
+                ],
+                "InstanceType":"t2.micro",
+                "IamInstanceProfile": {
+                    "Ref": "ApplicationInstacneIamProfile"
+                },
+                "KeyName": {
+                    "Ref": "ApplicationInstanceKeyPair"
+                },
+                "NetworkInterfaces": [ {
+                    "AssociatePublicIpAddress": "true",
+                    "DeviceIndex": "0",
+                    "GroupSet": [     {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-SecurityGroup-DS2SecurityGroupId"
+                            }
+                    }],
+                    "SubnetId":  {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-Network-AppPublicSubnet1Id"
+                            }
+                    }
+                  } ],
+                  "Volumes": [
+                    {
+                      "VolumeId": {
+                        "Ref": "BambooHomeV2Ec2Volume"
+                      },
+                      "Device": "/dev/sdp"
+                    }
+                  ],
+                "Tags":[
+                    {
+                        "Key":"Name",
+                        "Value":"ApplicationInstance"
+                    }
+                ]
+            }
+        },
+        "BambooHomeV2Ec2Volume": {
+          "Type": "AWS::EC2::Volume",
+          "Properties": {
+            "Size": "64",
+            "AvailabilityZone": "ap-south-1a",
+            "VolumeType": "gp2"
+          }
+        }
+    }
+}
