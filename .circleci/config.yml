@@ -5,12 +5,23 @@ jobs:
       image: ubuntu-2204:current
 
     steps:
-      - checkout
-  
       - run:
-          name: "Docker Login Step"
+          name: "Install Pre-requisites"
           command: |
-            echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin 
+            apt-get update
+            apt-get install -y pip3 
+            apt-get -o DPkg::Lock::Timeout=300 update -y &
+            apt-get -o DPkg::Lock::Timeout=300 install -y curl git openssl wget unzip ffmpeg &
+            apt-get -o DPkg::Lock::Timeout=300 install -y python3-pip python3-dev python3-setuptools
+            apt-get -o DPkg::Lock::Timeout=300 install -y python3-pip --fix-missing
+
+      - checkout
+      
+      - run:
+          name: "Deploy"
+          command: |
+            pip3 install cfstack tabulate
+            python3 execute.py 
 
 
 workflows:
