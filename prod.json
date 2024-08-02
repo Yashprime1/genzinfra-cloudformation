@@ -22,7 +22,7 @@
             },
             "Mu-Nodeapp": {
                 "Parameters": {
-                    "SplunkAmiId": "ami-08a5fe654aba64e30",
+                    "SplunkAmiId": "ami-09ac1d56455dbb5f7",
                     "Image":"yashprime07/circlecitest"
                 },
                 "SkipUpdate": false,
