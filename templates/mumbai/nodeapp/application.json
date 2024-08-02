@@ -6,7 +6,7 @@
           "Type": "String"
         },
         "Image":{
-          "Description": "The image for ndoeapp",
+          "Description": "The image for nodeapp",
           "Type": "String"
         }
       },
