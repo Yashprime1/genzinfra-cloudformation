@@ -14,19 +14,6 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
-            }, 
-            "Mu-SecurityGroup": {
-                "Parameters": {},
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
-            },
-            "Mu-Nodeapp": {
-                "Parameters": {
-                    "SplunkAmiId": "ami-08a5fe654aba64e30",
-                    "Image":"yashprime07/circlecitest"
-                },
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/nodeapp/server.json"
             }
         }
     }
