@@ -8,10 +8,8 @@ jobs:
       - run:
           name: "Install Pre-requisites"
           command: |
-            sudo su
-            apt-get update
-            apt-get install -y pip3 
-                      
+            sudo apt-get install -y pip3 
+
       - checkout
 
       - run:
