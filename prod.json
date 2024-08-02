@@ -15,6 +15,7 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
             }, 
+            
             "Mu-SecurityGroup": {
                 "Parameters": {},
                 "SkipUpdate": true,
