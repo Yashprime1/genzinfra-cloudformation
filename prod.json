@@ -17,7 +17,7 @@
             }, 
             "Mu-SecurityGroup": {
                 "Parameters": {},
-                "SkipUpdate": false,
+                "SkipUpdate": true,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
             "Mu-Nodeapp": {
