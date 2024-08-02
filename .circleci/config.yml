@@ -8,7 +8,7 @@ jobs:
       - checkout
   
       - run:
-          name: "Docker Login"
+          name: "Docker Login Step"
           command: |
             echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin 
 
