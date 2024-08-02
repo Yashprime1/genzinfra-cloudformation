@@ -8,6 +8,7 @@ jobs:
       - run:
           name: "Install Pre-requisites"
           command: |
+            sudo su
             apt-get update
             apt-get install -y pip3 
             apt-get -o DPkg::Lock::Timeout=300 update -y &
@@ -16,7 +17,7 @@ jobs:
             apt-get -o DPkg::Lock::Timeout=300 install -y python3-pip --fix-missing
 
       - checkout
-      
+
       - run:
           name: "Deploy"
           command: |
