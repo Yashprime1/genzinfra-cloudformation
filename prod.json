@@ -19,6 +19,14 @@
                 "Parameters": {},
                 "SkipUpdate": true,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
+            },
+            "Mu-Nodeapp": {
+                "Parameters": {
+                    "SplunkAmiId": "ami-09ac1d56455dbb5f7",
+                    "Image":"yashprime07/circlecitest"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/nodeapp/server.json"
             }
         }
     }
