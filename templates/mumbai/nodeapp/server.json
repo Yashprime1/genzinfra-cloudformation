@@ -4,7 +4,11 @@
         "SplunkAmiId": {
           "Description": "The AMI ID for the Splunk Servers",
           "Type": "String"
-        }
+        },
+        "Image":{
+            "Description": "The image for ndoeapp",
+            "Type": "String"
+          }
       },
     "Resources":{
         "SplunkInstacneIamRole": {
@@ -91,7 +95,9 @@
                 "ContainerDefinitions":[
                     {
                         "Name":"SplunkEcsContainer",
-                        "Image":"yashprime07/splunk",
+                        "Image":{
+                            "Ref":"Image"
+                        },
                         "PortMappings":[
                             {
                                 "ContainerPort":9997,
