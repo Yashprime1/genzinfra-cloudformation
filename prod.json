@@ -52,7 +52,7 @@
                     "Image":"yashprime07/circlecitest"
                 },
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/nodeapp/server.json"
+                "TemplatePath": "./templates/mumbai/nodeapp/server-seoul.json"
             }
         }
     }
