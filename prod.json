@@ -1,6 +1,6 @@
 {
-    "BucketName": "cf-templates-nvirginia",
-    "BucketRegion": "us-east-1",
+    "BucketName": "cf-templates-mumbai07",
+    "BucketRegion": "ap-south-1",
     "Parallel": "false",
     "Stacks": {
         "ap-south-1": {
