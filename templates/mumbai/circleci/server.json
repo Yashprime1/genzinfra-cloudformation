@@ -1,0 +1,213 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "CircleCiAmiId": {
+          "Description": "The AMI ID for the CircleCi Servers",
+          "Type": "String"
+        }
+      },
+    "Resources":{
+        "CircleCiInstacneIamRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "MongoInstanceIamRolePolicy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                                "ec2:DescribeInstances",
+                                                "ec2-instance-connect:SendSSHPublicKey",
+                                                "ec2:DescribeInstances",
+                                                "ec2:DescribeTags",
+                                                "ec2:CreateTags",
+                                                "ecs:RegisterContainerInstance",
+                                                "ecs:DeregisterContainerInstance",
+                                                "ecs:DescribeContainerInstances",
+                                                "ecs:DiscoverPollEndpoint",
+                                                "ecs:*",
+                                                "ec2:*",
+                                                "logs:*"
+                                        ],
+                                    "Resource": [
+                                        "arn:aws:ec2:*:*:instance/*",
+                                        "arn:aws:ecs:*:*:cluster/*",
+                                        "*"
+                                    ]
+                                 }
+                                ]
+                            }
+                    }
+                ]
+            }
+        },
+        "CircleCiInstacneIamProfile":{
+            "Type":"AWS::IAM::InstanceProfile",
+            "Properties":{
+                "Path":"/",
+                "Roles":[
+                    {
+                        "Ref":"CircleCiInstacneIamRole"
+                    }
+                ]
+            }
+        },
+        "CircleCiInstanceKeyPair": {
+            "Type": "AWS::EC2::KeyPair",
+            "Properties": {
+                "KeyName": "CircleCiInstanceKeyPair"
+            }
+        },
+        "CircleCiEcsCluster":{
+            "Type":"AWS::ECS::Cluster",
+            "Properties":{
+                "ClusterName":"CircleCiEcsCluster"
+            }
+        },
+        "CircleCiEcsTaskDefinition":{
+            "Type":"AWS::ECS::TaskDefinition",
+            "Properties":{
+                "Family":"CircleCiEcsTaskDefinition",
+                "ContainerDefinitions":[
+                    {
+                        "Name":"CircleCiEcsContainer",
+                        "Image":"",
+                        "PortMappings":[
+                            {
+                                "ContainerPort":9997,
+                                "HostPort":9997
+                            },
+                            {
+                                "ContainerPort":8000,
+                                "HostPort":8000
+                            },
+                            {
+                                "ContainerPort":8088,
+                                "HostPort":8088
+                            }
+                        ],
+                        "Environment":[
+                            {
+                                "Name":"CircleCi_START_ARGS",
+                                "Value": "--accept-license"
+                            },
+                            {
+                                "Name":"CircleCi_PASSWORD",
+                                "Value": "12345678910"
+                            }
+                        ],
+                        "Memory":64,
+                        "Cpu":64,
+                        "LogConfiguration":{
+                            "LogDriver":"awslogs",
+                            "Options":{
+                                "awslogs-group":"/ecs/CircleCiEcsCluster",
+                                "awslogs-region":{
+                                    "Ref":"AWS::Region"
+                                },
+                                "awslogs-create-group": "true",
+                                "awslogs-stream-prefix":"ecs"
+                            }
+                        }
+                    }
+                ],
+                "NetworkMode":"host"
+            }
+        },
+        "CircleCiMainEcsService":{
+            "Type":"AWS::ECS::Service",
+            "Properties":{
+                "Cluster":{
+                    "Ref":"CircleCiEcsCluster"
+                },
+                "DesiredCount":20,
+                "LaunchType":"EC2",
+                "DeploymentController":{"Type" :"ECS"},
+                "DeploymentConfiguration": {
+                    "MaximumPercent": 100,
+                    "MinimumHealthyPercent": 0,
+                    "DeploymentCircuitBreaker": {
+                        "Enable" : true,
+                        "Rollback" : true
+                    }
+                },
+                "PlacementConstraints":[
+                    {
+                        "Type":"memberOf",
+                        "Expression":{
+                                        "Fn::Join":
+                                            [
+                                                "",
+                                                [
+                                                    "ec2InstanceId",
+                                                    "==",
+                                                    {"Ref" : "CircleCiInstance"}
+                                                ]
+                                            ]
+                                    }
+                    }
+                ],
+                "TaskDefinition":{
+                    "Ref":"CircleCiEcsTaskDefinition"
+                }
+            }
+        },
+        "CircleCiInstance":{
+            "Type":"AWS::EC2::Instance",
+            "Properties":{
+                "ImageId":{
+                  "Ref": "CircleCiAmiId"
+                },
+                "InstanceType":"t2.micro",
+                "IamInstanceProfile": {
+                    "Ref": "CircleCiInstacneIamProfile"
+                },
+                "KeyName": {
+                    "Ref": "CircleCiInstanceKeyPair"
+                },
+                "NetworkInterfaces": [ {
+                    "AssociatePublicIpAddress": "true",
+                    "DeviceIndex": "0",
+                    "GroupSet": [     {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-SecurityGroup-DS2SecurityGroupId"
+                            }
+                    }],
+                    "SubnetId":  {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-Network-AppPublicSubnet1Id"
+                            }
+                    }
+                  } ],
+                "Tags":[
+                    {
+                        "Key":"Name",
+                        "Value":"CircleCiInstance"
+                    }
+                ]
+            }
+        }
+    }
+}
