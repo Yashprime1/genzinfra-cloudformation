@@ -44,7 +44,7 @@
             "Sk-SecurityGroup": {
                 "Parameters": {},
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
+                "TemplatePath": "./templates/mumbai/core/seoul-securitygroup.json"
             },
              "Sk-Nodeapp": {
                 "Parameters": {
