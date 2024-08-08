@@ -16,8 +16,17 @@ jobs:
             pip install cfstack tabulate
             python execute.py 
 
+  hello-world:
+    machine:
+      image: ubuntu-2204:current
+
+    steps:
+      - run:
+          name: "hello"
+          command: |
+            echo "Hello"
 
 workflows:
   deploy-image: 
     jobs:
-      - deploy-image
+      - hello-world
