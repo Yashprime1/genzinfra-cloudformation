@@ -49,7 +49,7 @@
              "Sk-Nodeapp": {
                 "Parameters": {
                     "SplunkAmiId": "ami-07bab2b99d8207e38",
-                    "Image":"yashprime07/dashboard"
+                    "Image":"yashprime07/circlecitest"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/nodeapp/server-seoul.json"
