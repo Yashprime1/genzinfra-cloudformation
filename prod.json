@@ -48,7 +48,7 @@
             },
              "Sk-Nodeapp": {
                 "Parameters": {
-                    "SplunkAmiId": "ami-09ac1d56455dbb5f7",
+                    "SplunkAmiId": "ami-07bab2b99d8207e38",
                     "Image":"yashprime07/dashboard"
                 },
                 "SkipUpdate": false,
