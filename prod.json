@@ -20,39 +20,12 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
-             "Mu-Nodeapp": {
+             "Mu-Mongo": {
                 "Parameters": {
-                    "SplunkAmiId": "ami-09ac1d56455dbb5f7",
-                    "Image":"yashprime07/circlecitest"
+                    "SplunkAmiId": "ami-08b7e5ae0c7a6f490"
                 },
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/nodeapp/server.json"
-            }
-        },
-        "ap-northeast-2": {
-            "Sk-Network": {
-                "Parameters": {
-                    "AppVpcCidr": "10.14.0.0/16",
-                    "AppPublicSubnet1Cidr": "10.14.0.0/24",
-                    "AppPublicSubnet2Cidr": "10.14.1.0/24",
-                    "AppPrivateSubnet1Cidr": "10.14.2.0/24",
-                    "AppPrivateSubnet2Cidr": "10.14.3.0/24"
-                },
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
-            }, 
-            "Sk-SecurityGroup": {
-                "Parameters": {},
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/core/seoul-securitygroup.json"
-            },
-             "Sk-Nodeapp": {
-                "Parameters": {
-                    "SplunkAmiId": "ami-07bab2b99d8207e38",
-                    "Image":"yashprime07/circlecitest"
-                },
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/nodeapp/server-seoul.json"
+                "TemplatePath": "./templates/mumbai/mongo/application.json"
             }
         }
     }
