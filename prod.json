@@ -22,7 +22,7 @@
             },
              "Mu-Mongo": {
                 "Parameters": {
-                    "SplunkAmiId": "ami-08b7e5ae0c7a6f490"
+                    "MongoAmiId": "ami-08b7e5ae0c7a6f490"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/mongo/application.json"
