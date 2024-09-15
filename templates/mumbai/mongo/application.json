@@ -183,14 +183,6 @@
                 "ContainerDefinitions":[
                     {
                         "Environment": [
-                          {
-                            "Name": "MONGO_INITDB_ROOT_USERNAME",
-                            "Value": "mongoadmin"
-                          },
-                          {
-                            "Name": "MONGO_INITDB_ROOT_PASSWORD",
-                            "Value": "secret"
-                          }
                         ],
                         "Essential": true,
                         "Image": "mongo:7.0.8",
