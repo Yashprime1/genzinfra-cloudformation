@@ -188,7 +188,10 @@
                         "Image": "mongo:7.0.8",
                         "Command": [
                             "--replSet",
-                            "rs0",
+                            "audit-rs0",
+                            "--auth",
+                            "--port",
+                            "27017",
                             "--bind_ip",
                             "localhost"
                         ],
