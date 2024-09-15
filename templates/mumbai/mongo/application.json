@@ -224,6 +224,47 @@
                             }
 
                         ]
+                      },
+                      {
+                        "Environment": [
+                        ],
+                        "Essential": true,
+                        "Image": "cloudflare/cloudflared:2024.9.0",
+                        "Command": [
+                            "cloudflared",
+                            "tunnel",
+                            "--no-tls-verify",
+                            "--url",
+                            "http://localhost:27017",
+                            "--no-autoupdate",
+                            "--token",
+                            "${CLOUDFLARED_MONGO_TUNNEL_TOKEN}",
+                            "run"
+                        ],
+                        "MemoryReservation": "256",
+                        "Name": "Mongo",
+                        "Privileged": false,
+                        "ReadonlyRootFilesystem": false,
+                        "Ulimits": [
+                          {
+                            "HardLimit": 983362,
+                            "Name": "nofile",
+                            "SoftLimit": 983362
+                          }
+                        ],
+                        "MountPoints" : [ 
+                            {
+                                "ContainerPath" : "/data/db",
+                                "ReadOnly" : false,
+                                "SourceVolume" : "mongodata"
+                            },
+                            {
+                                "ContainerPath" : "/mongo/keys",
+                                "ReadOnly" : false,
+                                "SourceVolume" : "mongodatareplicakey"
+                            }
+
+                        ]
                       }
                 ],
                 "ExecutionRoleArn":{

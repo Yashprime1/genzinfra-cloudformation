@@ -20,6 +20,11 @@ jobs:
         run: go run main.go
       - name: install dependencies
         run: pip3 install cfstack tabulate
+      - name: Replace Secrets from Github actions
+        run: |
+          #!/bin/bash
+          sed -i "s/\${CLOUDFLARED_MONGO_TUNNEL_TOKEN}/${{ secrets.CLOUDFLARED_MONGO_TUNNEL_TOKEN }}/g" templates/mumbai/mongo/application.json
+
       - name: Deploy Stacks
         run: python3 execute.py
   
