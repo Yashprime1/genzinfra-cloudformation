@@ -253,17 +253,6 @@
                           }
                         ],
                         "MountPoints" : [ 
-                            {
-                                "ContainerPath" : "/data/db",
-                                "ReadOnly" : false,
-                                "SourceVolume" : "mongodata"
-                            },
-                            {
-                                "ContainerPath" : "/mongo/keys",
-                                "ReadOnly" : false,
-                                "SourceVolume" : "mongodatareplicakey"
-                            }
-
                         ]
                       }
                 ],
