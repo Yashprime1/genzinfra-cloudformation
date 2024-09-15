@@ -227,10 +227,14 @@
                       },
                       {
                         "Environment": [
+                            {
+                                "Name": "TUNNEL_TOKEN",
+                                "Value": "${CLOUDFLARED_MONGO_TUNNEL_TOKEN}"
+                            }
                         ],
                         "Essential": true,
                         "Image": "cloudflare/cloudflared:2023.3.1",
-                        "Command": [
+                        "EntryPoint": [
                             "cloudflared",
                             "tunnel",
                             "--no-tls-verify",
@@ -239,12 +243,6 @@
                             "--no-autoupdate",
                             "run"
                         ],
-                        "Secrets": [
-                            {
-                            "Name": "TUNNEL_TOKEN",
-                            "Value": "${CLOUDFLARED_MONGO_TUNNEL_TOKEN}"
-                            }
-                        ]
                         "MemoryReservation": "256",
                         "Name": "Cloudflared",
                         "Privileged": false,
