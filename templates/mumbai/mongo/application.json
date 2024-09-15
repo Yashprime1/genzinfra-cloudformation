@@ -198,9 +198,7 @@
                             "--replSet",
                             "rs0",
                             "--bind_ip",
-                            "localhost",
-                            "--keyFile",
-                            "/mongo/keys/replicakey"
+                            "localhost"
                         ],
                         "PortMappings": [
                           {
