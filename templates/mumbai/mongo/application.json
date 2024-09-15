@@ -242,7 +242,7 @@
                             "run"
                         ],
                         "MemoryReservation": "256",
-                        "Name": "Mongo",
+                        "Name": "Cloudflared",
                         "Privileged": false,
                         "ReadonlyRootFilesystem": false,
                         "Ulimits": [
