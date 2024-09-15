@@ -22,7 +22,7 @@
             },
              "Mu-Mongo": {
                 "Parameters": {
-                    "MongoAmiId": "ami-08b7e5ae0c7a6f490"
+                    "MongoAmiId": "ami-0337f90b58cd407b2"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/mongo/application.json"
