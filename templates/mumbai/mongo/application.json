@@ -191,8 +191,7 @@
                             "rs0",
                             "--port",
                             "27017",
-                            "--bind_ip",
-                            "localhost"
+                            "--bind_ip_all"
                         ],
                         "PortMappings": [
                           {
