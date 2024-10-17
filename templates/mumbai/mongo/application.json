@@ -386,6 +386,16 @@
                 "ImageId":{
                     "Ref":"MongoAmiId"
                 },
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/xvda",
+                        "Ebs": {
+                            "VolumeSize": 8,
+                            "VolumeType": "gp2",
+                            "Encrypted": true
+                        }
+                    }
+                ],
                 "InstanceType":"t2.micro",
                 "IamInstanceProfile": {
                     "Ref": "ApplicationInstacneIamProfile"
