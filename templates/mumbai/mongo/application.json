@@ -478,7 +478,6 @@
                                     "KeyId"
                                 ]
                             },
-                            "SnapshotId" : "snap-0c7ba223d9475400d",
                             "VolumeType" : "gp2"
                         }
                     }                      
