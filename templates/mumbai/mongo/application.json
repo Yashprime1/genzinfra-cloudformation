@@ -427,12 +427,62 @@
                 ]
             }
         },
+        "ApplicationKey":{
+            "Type" : "AWS::KMS::Key",
+            "Properties" : {
+                "Description" : "The KMS Key",
+                "KeyPolicy": {
+                    "Id": "key-default-1",
+                    "Statement": [
+                      {
+                        "Action": "kms:*",
+                        "Effect": "Allow",
+                        "Principal": {
+                          "AWS": {
+                            "Fn::Join": [
+                              ":",
+                              [
+                                "arn:aws:iam:",
+                                {
+                                  "Ref": "AWS::AccountId"
+                                },
+                                "root"
+                              ]
+                            ]
+                          }
+                        },
+                        "Resource": "*",
+                        "Sid": "EnableIamPoliciesToGiveIamUsersAndRolesInTheAccountAccessToThisCmk"
+                      }
+                    ],
+                    "Version": "2012-10-17"
+                  },
+                "Enabled" : true
+              }
+        },
         "ApplicationInstanceSecondary1":{
             "Type":"AWS::EC2::Instance",
             "Properties":{
                 "ImageId":{
                     "Ref":"MongoAmiId"
                 },
+                "BlockDeviceMappings" : [ 
+                    {
+                        "DeviceName" : "/dev/xvda",
+                        "Ebs" : {
+                            "DeleteOnTermination" : true,
+                            "Encrypted" : true,
+                            "KmsKeyId" : {
+                                "Fn::GetAtt":[
+                                    "ApplicationKey",
+                                    "KeyId"
+                                ]
+                            },
+                            "SnapshotId" : "snap-0c7ba223d9475400d",
+                            "VolumeType" : "gp2"
+                        }
+                    }                      
+                ],
                 "InstanceType":"t2.micro",
                 "IamInstanceProfile": {
                     "Ref": "ApplicationInstacneIamProfile"
