@@ -473,6 +473,12 @@
             "Properties" : {
                 "Encrypted":true,
                 "AvailabilityZone":"ap-south-1a",
+                "KmsKeyId" : {
+                    "Fn::GetAtt":[
+                        "ApplicationKey",
+                        "KeyId"
+                    ]
+                },
                 "VolumeType" : "gp2",
                 "SnapshotId":"snap-082f80f52cf0d71a1"
               }
