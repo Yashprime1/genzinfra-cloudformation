@@ -460,6 +460,13 @@
                 "Enabled" : true
               }
         },
+        "ApplicationSideVolume":{
+            "Type" : "AWS::EC2::Volume",
+            "Properties" : {
+                "Size" : "8",
+                "VolumeType" : "gp2"
+              }
+          },
         "ApplicationInstanceSecondary1":{
             "Type":"AWS::EC2::Instance",
             "Properties":{
@@ -489,6 +496,14 @@
                 "KeyName": {
                     "Ref": "ApplicationInstanceKeyPair"
                 },
+                "Volumes":[
+                    {
+                        "Device" : "/dev/sdf",
+                        "VolumeId" : {
+                            "Ref":"ApplicationSideVolume"
+                        }
+                    }
+                ],
                 "NetworkInterfaces": [ {
                     "AssociatePublicIpAddress": "true",
                     "DeviceIndex": "0",
