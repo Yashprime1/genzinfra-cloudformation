@@ -386,16 +386,6 @@
                 "ImageId":{
                     "Ref":"MongoAmiId"
                 },
-                "BlockDeviceMappings": [
-                    {
-                        "DeviceName": "/dev/xvda",
-                        "Ebs": {
-                            "VolumeSize": 8,
-                            "VolumeType": "gp2",
-                            "Encrypted": true
-                        }
-                    }
-                ],
                 "InstanceType":"t2.micro",
                 "IamInstanceProfile": {
                     "Ref": "ApplicationInstacneIamProfile"
@@ -468,43 +458,12 @@
                 "VolumeType" : "gp2"
               }
         },
-        "ApplicationSideEncryptedVolume":{
-            "Type" : "AWS::EC2::Volume",
-            "Properties" : {
-                "Encrypted":true,
-                "AvailabilityZone":"ap-south-1a",
-                "KmsKeyId" : {
-                    "Fn::GetAtt":[
-                        "ApplicationKey",
-                        "KeyId"
-                    ]
-                },
-                "VolumeType" : "gp2",
-                "SnapshotId":"snap-082f80f52cf0d71a1"
-              }
-        },
         "ApplicationInstanceSecondary1":{
             "Type":"AWS::EC2::Instance",
             "Properties":{
                 "ImageId":{
                     "Ref":"MongoAmiId"
                 },
-                "BlockDeviceMappings" : [ 
-                    {
-                        "DeviceName" : "/dev/xvda",
-                        "Ebs" : {
-                            "DeleteOnTermination" : true,
-                            "Encrypted" : true,
-                            "KmsKeyId" : {
-                                "Fn::GetAtt":[
-                                    "ApplicationKey",
-                                    "KeyId"
-                                ]
-                            },
-                            "VolumeType" : "gp2"
-                        }
-                    }                      
-                ],
                 "InstanceType":"t2.micro",
                 "IamInstanceProfile": {
                     "Ref": "ApplicationInstacneIamProfile"
@@ -516,7 +475,7 @@
                     {
                         "Device" : "/dev/sdf",
                         "VolumeId" : {
-                            "Ref":"ApplicationSideEncryptedVolume"
+                            "Ref":"ApplicationSideVolume"
                         }
                     }
                 ],
