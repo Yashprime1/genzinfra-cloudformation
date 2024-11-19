@@ -20,12 +20,12 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
-            "Mu-Mongo": {
+            "Mu-Bamboo": {
                 "Parameters": {
-                    "MongoAmiId": "ami-0337f90b58cd407b2"
+                    "BambooAmiId": "ami-063b9a736a745711a"
                 },
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/mongo/application.json"
+                "TemplatePath": "./templates/mumbai/bamboo/bamboo.json"
             }
         }
     }
