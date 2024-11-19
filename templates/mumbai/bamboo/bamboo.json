@@ -241,13 +241,24 @@
                         ],
                         "Essential": true,
                         "Image": "atlassian/bamboo-server:9.5.1",
-                          "MountPoints": [
-                            {
-                              "ContainerPath": "/var/atlassian/application-data",
-                              "SourceVolume": "bamboo-home"
-                            }
-                          ],
-                          "PortMappings": [
+                        "Ulimits": [
+                          {
+                            "HardLimit": 900000,
+                            "Name": "nofile",
+                            "SoftLimit": 900000
+                          }
+                        ],
+                        "MountPoints": [
+                          {
+                            "SourceVolume": "bamboo-home",
+                            "ContainerPath": "/home/bamboo" 
+                          },
+                          {
+                            "SourceVolume": "bamboo-application-data",
+                            "ContainerPath": "/var/atlassian/application-data/bamboo"
+                          },
+                        ],
+                        "PortMappings": [
                           {
                             "ContainerPort": 8085,
                             "HostPort": 8085,
@@ -273,6 +284,12 @@
                     "Name": "bamboo-home",
                     "Host" : {
                       "SourcePath" : "/home/bamboo"
+                    }
+                  },
+                  {
+                    "Name": "bamboo-application-data",
+                    "Host" : {
+                      "SourcePath" : "/var/atlassian/application-data/bamboo"
                     }
                   }
                 ],
