@@ -66,6 +66,20 @@
                 "DBInstanceClass": "db.r5.large"
             }
         },
+        "PromotionsRDSD2BInstance": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "DBParameterGroupName": {
+                    "Ref": "PromotionsRDSDBParameterGroup"
+                },
+                "Engine": "aurora-postgresql",
+                "EngineVersion": "16.4",
+                "DBClusterIdentifier": {
+                    "Ref": "PromotionsRDSDBCluster"
+                },
+                "DBInstanceClass": "db.r5.large"
+            }
+        },
         "PromotionsRDSDBParameterGroup": {
             "Type": "AWS::RDS::DBParameterGroup",
             "Properties": {
