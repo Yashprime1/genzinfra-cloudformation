@@ -32,38 +32,47 @@
         "PromotionsRDSDBCluster":{
             "Type" : "AWS::RDS::DBCluster",
             "Properties" : {
-                "AllocatedStorage" : 20,
-                "AutoMinorVersionUpgrade" : true,
-                "BackupRetentionPeriod" : 30,
-                "CopyTagsToSnapshot" : true,
-                "DatabaseName" : "promotions",
-                "DBClusterInstanceClass" : "db.r5.large",
-                "DBSubnetGroupName": {
-                    "Ref": "PromotionsRdsDbSubnetGroup"
-                },
-                "DBClusterParameterGroupName":{
-                    "Ref":"PromotionsRDSDBClusterParameterGroup"
-                },
-                "Engine": "aurora-postgresql",
-                "EngineVersion": "16.4",
-                "MasterUsername": "yashprime",
-                "MasterUserPassword" : "yashprime",
-                "Port" : 5432,
-                "PubliclyAccessible": false,
-                "StorageType": "gp3",
-                "StorageEncrypted": true,
-                "VpcSecurityGroupIds": [
+                "DBClusterIdentifier":"mycluster-1"
+            }
+        },   
+        "PromotionsRDSDBInstance": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+              "AllocatedStorage": 20,
+              "AllowMajorVersionUpgrade": true,
+              "AutoMinorVersionUpgrade": true,
+              "BackupRetentionPeriod": 30,
+              "CopyTagsToSnapshot": true,
+              "DBInstanceClass": "db.r5.large",
+              "DBName": "promotions",
+              "DBSubnetGroupName": {
+                "Ref": "PromotionsRdsDbSubnetGroup"
+              },
+              "DBParameterGroupName":{
+                "Ref":"PromotionsRDSDBParameterGroup"
+              },
+              "DBClusterIdentifier":"mycluster-1",
+              "Engine": "aurora-postgresql",
+              "EngineVersion": "16.4",
+              "MasterUsername": "promotions",
+              "MasterUserPassword": "promotions",
+              "Port": "5432",
+              "PubliclyAccessible": false,
+              "StorageType": "gp3",
+              "StorageEncrypted": true,
+              "VPCSecurityGroups": [
                     {
                         "Fn::ImportValue": 
                             {
                                 "Fn::Sub": "Mu-SecurityGroup-DS2SecurityGroupId"
                             }
                     }
-                ]
-            }
-        },   
-        "PromotionsRDSDBClusterParameterGroup": {
-            "Type": "AWS::RDS::DBClusterParameterGroup",
+              ]
+            },
+            "DeletionPolicy": "Snapshot"
+          },
+        "PromotionsRDSDBParameterGroup": {
+            "Type": "AWS::RDS::DBParameterGroup",
             "Properties": {
                 "Description": "PromotionsRDS Custom Parameter Group",
                 "Family": "postgres16",
