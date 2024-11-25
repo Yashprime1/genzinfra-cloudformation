@@ -41,4 +41,12 @@ func AddOutputsForCoreNetworkStack(template *cloudformation.Template) {
 		},
 	}
 
+	template.Outputs["AppPublicSubnet3Id"] = cloudformation.Output{
+		Description: cloudformation.String("App Public Subnet 3 Id"),
+		Value:       cloudformation.Ref("AppPublicSubnet3"),
+		Export: &cloudformation.Export{
+			Name: cloudformation.Sub("${AWS::StackName}-AppPublicSubnet3Id"),
+		},
+	}
+
 }
