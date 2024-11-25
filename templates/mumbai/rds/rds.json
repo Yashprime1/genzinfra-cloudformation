@@ -37,12 +37,8 @@
                 "BackupRetentionPeriod" : 30,
                 "CopyTagsToSnapshot" : true,
                 "DatabaseName" : "promotions",
-                "DBClusterInstanceClass" : "db.r5.large",
                 "DBSubnetGroupName": {
                     "Ref": "PromotionsRdsDbSubnetGroup"
-                },
-                "DBClusterParameterGroupName":{
-                    "Ref":"PromotionsRDSDBClusterParameterGroup"
                 },
                 "Engine": "aurora-postgresql",
                 "EngineVersion": "16.4",
@@ -62,8 +58,23 @@
                 ]
             }
         },   
-        "PromotionsRDSDBClusterParameterGroup": {
-            "Type": "AWS::RDS::DBClusterParameterGroup",
+        "PromotionsRDSDBInstance": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "DBParameterGroupName": {
+                    "Ref": "PromotionsRDSDBParameterGroup"
+                },
+                "Engine": "aurora-postgresql",
+                "EngineVersion": "16.4",
+                "DBClusterIdentifier": {
+                    "Ref": "PromotionsRDSDBCluster"
+                },
+                "PubliclyAccessible": "false",
+                "DBInstanceClass": "db.r5.large"
+            }
+        },
+        "PromotionsRDSDBParameterGroup": {
+            "Type": "AWS::RDS::DBParameterGroup",
             "Properties": {
                 "Description": "PromotionsRDS Custom Parameter Group",
                 "Family": "postgres16",
