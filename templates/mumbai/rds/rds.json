@@ -36,6 +36,9 @@
                 "DBSubnetGroupName": {
                     "Ref": "PromotionsRdsDbSubnetGroup"
                 },
+                "DBClusterParameterGroupName":{
+                    "Ref":"PromotionsRDSDBClusterParameterGroup"
+                },
                 "Engine": "aurora-postgresql",
                 "EngineVersion": "16.4",
                 "MasterUsername": "yashprime",
@@ -87,6 +90,16 @@
                 "Family": "aurora-postgresql16",
                 "Parameters": {
                     "shared_preload_libraries": "auto_explain,orafce,pgaudit,pg_bigm,pg_similarity,pg_stat_statements,pg_tle,pg_hint_plan,pg_prewarm,plprofiler,pglogical,pg_cron"
+                }
+            }
+        },
+        "PromotionsRDSDBClusterParameterGroup": {
+            "Type": "AWS::RDS::DBClusterParameterGroup",
+            "Properties": {
+                "Description": "PromotionsRDS Custom Cluster Parameter Group",
+                "Family": "aurora-postgresql16",
+                "Parameters": {
+                    "rds.force_ssl":0
                 }
             }
         }
