@@ -45,7 +45,6 @@
                 "MasterUsername": "yashprime",
                 "MasterUserPassword" : "yashprime",
                 "Port" : 5432,
-                "PubliclyAccessible": false,
                 "StorageType": "gp3",
                 "StorageEncrypted": true,
                 "VpcSecurityGroupIds": [
@@ -69,7 +68,6 @@
                 "DBClusterIdentifier": {
                     "Ref": "PromotionsRDSDBCluster"
                 },
-                "PubliclyAccessible": "false",
                 "DBInstanceClass": "db.r5.large"
             }
         },
