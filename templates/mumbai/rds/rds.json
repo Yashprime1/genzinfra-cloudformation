@@ -32,10 +32,6 @@
         "PromotionsRDSDBCluster":{
             "Type" : "AWS::RDS::DBCluster",
             "Properties" : {
-                "AllocatedStorage" : 20,
-                "AutoMinorVersionUpgrade" : true,
-                "BackupRetentionPeriod" : 30,
-                "CopyTagsToSnapshot" : true,
                 "DatabaseName" : "promotions",
                 "DBSubnetGroupName": {
                     "Ref": "PromotionsRdsDbSubnetGroup"
@@ -45,7 +41,6 @@
                 "MasterUsername": "yashprime",
                 "MasterUserPassword" : "yashprime",
                 "Port" : 5432,
-                "StorageType": "gp3",
                 "StorageEncrypted": true,
                 "VpcSecurityGroupIds": [
                     {
