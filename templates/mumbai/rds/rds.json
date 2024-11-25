@@ -29,38 +29,6 @@
               ]
             }
         },
-        "PromotionsRDSDBCluster":{
-            "Type" : "AWS::RDS::DBCluster",
-            "Properties" : {
-                "AllocatedStorage" : 20,
-                "AutoMinorVersionUpgrade" : true,
-                "BackupRetentionPeriod" : 30,
-                "CopyTagsToSnapshot" : true,
-                "DatabaseName" : "promotions",
-                "DBClusterInstanceClass" : "db.t3.medium",
-                "DBSubnetGroupName": {
-                    "Ref": "PromotionsRdsDbSubnetGroup"
-                },
-                "DBClusterParameterGroupName":{
-                    "Ref":"PromotionsRDSDBClusterParameterGroup"
-                },
-                "Engine": "aurora-postgresql",
-                "EngineVersion": "16.4",
-                "MasterUsername": "yashprime"
-                "Port" : 5432,
-                "PubliclyAccessible": false,
-                "StorageType": "gp3",
-                "StorageEncrypted": true,
-                "VpcSecurityGroupIds": [
-                    {
-                        "Fn::ImportValue": 
-                            {
-                                "Fn::Sub": "Mu-SecurityGroup-DS2SecurityGroupId"
-                            }
-                    }
-                ]
-            }
-        },   
         "PromotionsRDSDBClusterParameterGroup": {
             "Type": "AWS::RDS::DBClusterParameterGroup",
             "Properties": {
