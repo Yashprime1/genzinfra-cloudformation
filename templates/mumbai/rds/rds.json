@@ -46,7 +46,8 @@
                 },
                 "Engine": "aurora-postgresql",
                 "EngineVersion": "16.4",
-                "MasterUsername": "yashprime"
+                "MasterUsername": "yashprime",
+                "MasterUserPassword" : "yashprime",
                 "Port" : 5432,
                 "PubliclyAccessible": false,
                 "StorageType": "gp3",
