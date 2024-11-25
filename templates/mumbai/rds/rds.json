@@ -29,8 +29,41 @@
               ]
             }
         },
-        "PromotionsRDSDBParameterGroup": {
-            "Type": "AWS::RDS::DBParameterGroup",
+        "PromotionsRDSDBCluster":{
+            "Type" : "AWS::RDS::DBCluster",
+            "Properties" : {
+                "AllocatedStorage" : 20,
+                "AutoMinorVersionUpgrade" : true,
+                "BackupRetentionPeriod" : 30,
+                "CopyTagsToSnapshot" : true,
+                "DatabaseName" : "promotions",
+                "DBClusterInstanceClass" : "db.r5.large",
+                "DBSubnetGroupName": {
+                    "Ref": "PromotionsRdsDbSubnetGroup"
+                },
+                "DBClusterParameterGroupName":{
+                    "Ref":"PromotionsRDSDBClusterParameterGroup"
+                },
+                "Engine": "aurora-postgresql",
+                "EngineVersion": "16.4",
+                "MasterUsername": "yashprime",
+                "MasterUserPassword" : "yashprime",
+                "Port" : 5432,
+                "PubliclyAccessible": false,
+                "StorageType": "gp3",
+                "StorageEncrypted": true,
+                "VpcSecurityGroupIds": [
+                    {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-SecurityGroup-DS2SecurityGroupId"
+                            }
+                    }
+                ]
+            }
+        },   
+        "PromotionsRDSDBClusterParameterGroup": {
+            "Type": "AWS::RDS::DBClusterParameterGroup",
             "Properties": {
                 "Description": "PromotionsRDS Custom Parameter Group",
                 "Family": "postgres16",
@@ -38,14 +71,6 @@
                     "shared_preload_libraries": "auto_explain,orafce,pgaudit,pg_bigm,pg_similarity,pg_stat_statements,pg_tle,pg_hint_plan,pg_prewarm,plprofiler,pglogical,pg_cron",
                     "rds.force_ssl": 0
                 }
-            }
-        },
-        "PromotionsRDSDBCluster":{
-            "Type" : "AWS::RDS::DBCluster",
-            "Properties" : {
-                "DBClusterIdentifier":"mycluster-1",
-                "Engine":"aurora-postgresql",
-                "EngineVersion":"16.4"
             }
         }
     }
