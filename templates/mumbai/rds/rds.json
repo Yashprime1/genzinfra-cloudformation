@@ -37,7 +37,7 @@
                 "BackupRetentionPeriod" : 30,
                 "CopyTagsToSnapshot" : true,
                 "DatabaseName" : "promotions",
-                "DBClusterInstanceClass" : "db.t3.medium",
+                "DBClusterInstanceClass" : "db.r5.large",
                 "DBSubnetGroupName": {
                     "Ref": "PromotionsRdsDbSubnetGroup"
                 },
