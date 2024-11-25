@@ -43,7 +43,8 @@
         "PromotionsRDSDBCluster":{
             "Type" : "AWS::RDS::DBCluster",
             "Properties" : {
-                "DBClusterIdentifier":"mycluster-1"
+                "DBClusterIdentifier":"mycluster-1",
+                "Engine":"aurora-postgresql"
             }
         }
     }
