@@ -18,6 +18,10 @@
       "Description": "The CIDR block for the public subnet2 for App",
       "Type": "String"
     },
+    "AppPublicSubnet3Cidr": {
+      "Description": "The CIDR block for the public subnet2 for App",
+      "Type": "String"
+    },
     "AppVpcCidr": {
       "Description": "The CIDR block for the VPC for App",
       "Type": "String"
