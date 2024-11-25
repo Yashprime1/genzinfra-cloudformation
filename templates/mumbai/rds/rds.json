@@ -39,7 +39,7 @@
                     "rds.force_ssl": 0
                 }
             }
-        }
+        },
         "PromotionsRDSDBCluster":{
             "Type" : "AWS::RDS::DBCluster",
             "Properties" : {
