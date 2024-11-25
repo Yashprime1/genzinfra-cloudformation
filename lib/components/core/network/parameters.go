@@ -13,6 +13,10 @@ func AddParametersForCoreNetworkStack(template *cloudformation.Template,defaults
 		Type: "String",
 		Description: cloudformation.String("The CIDR block for the public subnet2 for App"),
 	}
+	template.Parameters["AppPublicSubnet3Cidr"] = cloudformation.Parameter{
+		Type: "String",
+		Description: cloudformation.String("The CIDR block for the public subnet3 for App"),
+	}
 	template.Parameters["AppPrivateSubnet1Cidr"] = cloudformation.Parameter{
 		Type: "String",
 		Description: cloudformation.String("The CIDR block for the private subnet 1 for App"),
