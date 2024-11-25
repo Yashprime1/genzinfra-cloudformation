@@ -23,12 +23,12 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
-            "Mu-Bamboo": {
+            "Mu-RDS": {
                 "Parameters": {
-                    "BambooAmiId": "ami-063b9a736a745711a"
+              
                 },
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/mumbai/bamboo/bamboo.json"
+                "TemplatePath": "./templates/mumbai/rds/rds.json"
             }
         }
     }
