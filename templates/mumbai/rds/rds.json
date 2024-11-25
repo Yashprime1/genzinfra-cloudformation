@@ -44,7 +44,8 @@
             "Type" : "AWS::RDS::DBCluster",
             "Properties" : {
                 "DBClusterIdentifier":"mycluster-1",
-                "Engine":"aurora-postgresql"
+                "Engine":"aurora-postgresql",
+                "EngineVersion":"16.4"
             }
         }
     }
