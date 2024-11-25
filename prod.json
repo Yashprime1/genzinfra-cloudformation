@@ -4,7 +4,18 @@
     "Parallel": "false",
     "Stacks": {
         "ap-south-1": {
-        
+            "Mu-Network": {
+                "Parameters": {
+                    "AppVpcCidr": "10.16.0.0/16",
+                    "AppPublicSubnet1Cidr": "10.16.0.0/24",
+                    "AppPublicSubnet2Cidr": "10.16.1.0/24",
+                    "AppPublicSubnet3Cidr": "10.16.2.0/24",
+                    "AppPrivateSubnet1Cidr": "10.16.3.0/24",
+                    "AppPrivateSubnet2Cidr": "10.16.4.0/24"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
+            }
         }
     }
 }
