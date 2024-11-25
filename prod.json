@@ -4,8 +4,6 @@
     "Parallel": "false",
     "Stacks": {
         "ap-south-1": {
-        },
-        "ap-northeast-2": {
             "Mu-Network": {
                 "Parameters": {
                     "AppVpcCidr": "10.16.0.0/16",
@@ -30,6 +28,8 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/mumbai/rds/rds.json"
             }
+        },
+        "ap-northeast-2": {
         }
     }
 }
