@@ -1,74 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Core Network Stack",
-  "Outputs": {
-    "AppPrivateSubnet1Id": {
-      "Description": "App Private Subnet 1 Id",
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-AppPrivateSubnet1Id"
-        }
-      },
-      "Value": {
-        "Ref": "AppPrivateSubnet1"
-      }
-    },
-    "AppPrivateSubnet2Id": {
-      "Description": "App Private Subnet 2 Id",
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-AppPrivateSubnet2Id"
-        }
-      },
-      "Value": {
-        "Ref": "AppPrivateSubnet2"
-      }
-    },
-    "AppPublicSubne1tId": {
-      "Description": "App Public Subnet 1 Id",
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-AppPublicSubnet1Id"
-        }
-      },
-      "Value": {
-        "Ref": "AppPublicSubnet1"
-      }
-    },
-    "AppPublicSubnet2Id": {
-      "Description": "App Public Subnet 2 Id",
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-AppPublicSubnet2Id"
-        }
-      },
-      "Value": {
-        "Ref": "AppPublicSubnet2"
-      }
-    },
-    "AppPublicSubnet3Id": {
-      "Description": "App Public Subnet 3 Id",
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-AppPublicSubnet3Id"
-        }
-      },
-      "Value": {
-        "Ref": "AppPublicSubnet3"
-      }
-    },
-    "AppVPCId": {
-      "Description": "App Vpc Id",
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-AppVPCId"
-        }
-      },
-      "Value": {
-        "Ref": "AppVPC"
-      }
-    }
-  },
   "Parameters": {
     "AppPrivateSubnet1Cidr": {
       "Description": "The CIDR block for the private subnet 1 for App",
@@ -334,6 +266,74 @@
         }
       },
       "Type": "AWS::EC2::VPCGatewayAttachment"
+    }
+  },
+  "Outputs": {
+    "AppPrivateSubnet1Id": {
+      "Description": "App Private Subnet 1 Id",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-AppPrivateSubnet1Id"
+        }
+      },
+      "Value": {
+        "Ref": "AppPrivateSubnet1"
+      }
+    },
+    "AppPrivateSubnet2Id": {
+      "Description": "App Private Subnet 2 Id",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-AppPrivateSubnet2Id"
+        }
+      },
+      "Value": {
+        "Ref": "AppPrivateSubnet2"
+      }
+    },
+    "AppPublicSubne1tId": {
+      "Description": "App Public Subnet 1 Id",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-AppPublicSubnet1Id"
+        }
+      },
+      "Value": {
+        "Ref": "AppPublicSubnet1"
+      }
+    },
+    "AppPublicSubnet2Id": {
+      "Description": "App Public Subnet 2 Id",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-AppPublicSubnet2Id"
+        }
+      },
+      "Value": {
+        "Ref": "AppPublicSubnet2"
+      }
+    },
+    "AppPublicSubnet3Id": {
+      "Description": "App Public Subnet 3 Id",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-AppPublicSubnet3Id"
+        }
+      },
+      "Value": {
+        "Ref": "AppPublicSubnet3"
+      }
+    },
+    "AppVPCId": {
+      "Description": "App Vpc Id",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-AppVPCId"
+        }
+      },
+      "Value": {
+        "Ref": "AppVPC"
+      }
     }
   }
 }
