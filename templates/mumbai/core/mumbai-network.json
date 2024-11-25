@@ -85,14 +85,6 @@
       },
       "Type": "AWS::EC2::RouteTable"
     },
-    "AppPublicRouteTable3": {
-      "Properties": {
-        "VpcId": {
-          "Ref": "AppVPC"
-        }
-      },
-      "Type": "AWS::EC2::RouteTable"
-    },
     "AppPublicRouteTable2IGRoute": {
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
@@ -104,21 +96,6 @@
         },
         "RouteTableId": {
           "Ref": "AppPublicRouteTable2"
-        }
-      },
-      "Type": "AWS::EC2::Route"
-    },
-    "AppPublicRouteTable3IGRoute": {
-      "Properties": {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": {
-          "Fn::GetAtt": [
-            "AppInternetGateway",
-            "InternetGatewayId"
-          ]
-        },
-        "RouteTableId": {
-          "Ref": "AppPublicRouteTable3"
         }
       },
       "Type": "AWS::EC2::Route"
@@ -195,44 +172,6 @@
         },
         "SubnetId": {
           "Ref": "AppPublicSubnet2"
-        }
-      },
-      "Type": "AWS::EC2::SubnetRouteTableAssociation"
-    },
-    "AppPublicSubnet3": {
-      "Properties": {
-        "AvailabilityZone": {
-          "Fn::Select": [
-            2,
-            {
-              "Fn::GetAZs": {
-                "Ref": "AWS::Region"
-              }
-            }
-          ]
-        },
-        "CidrBlock": {
-          "Ref": "AppPublicSubnet3Cidr"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "AppPublicSubnet3"
-          }
-        ],
-        "VpcId": {
-          "Ref": "AppVPC"
-        }
-      },
-      "Type": "AWS::EC2::Subnet"
-    },
-    "AppPublicSubnet3RouteTableAssociation": {
-      "Properties": {
-        "RouteTableId": {
-          "Ref": "AppPublicRouteTable3"
-        },
-        "SubnetId": {
-          "Ref": "AppPublicSubnet3"
         }
       },
       "Type": "AWS::EC2::SubnetRouteTableAssociation"
