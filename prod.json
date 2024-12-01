@@ -34,6 +34,11 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/ireland/core/ireland-network.json"
+            }, 
+            "Eu-SecurityGroup": {
+                "Parameters": {},
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/ireland/core/ireland-securitygroup.json"
             }
         },
         "ap-northeast-2": {
