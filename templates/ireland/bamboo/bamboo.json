@@ -1,0 +1,334 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "BambooAmiId": {
+          "Description": "The AMI ID for the Bamboo instances",
+          "Type": "String"
+        }
+      },
+    "Resources":{
+        "ApplicationInstacneIamRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "MongoInstanceIamRolePolicy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                                "ec2:DescribeInstances",
+                                                "ec2-instance-connect:SendSSHPublicKey",
+                                                "ec2:DescribeInstances",
+                                                "ec2:DescribeTags",
+                                                "ec2:CreateTags",
+                                                "ecs:RegisterContainerInstance",
+                                                "ecs:DeregisterContainerInstance",
+                                                "ecs:DescribeContainerInstances",
+                                                "ecs:DiscoverPollEndpoint",
+                                                "ecs:*",
+                                                "ec2:*",
+                                                "logs:*"
+                                        ],
+                                    "Resource": [
+                                        "arn:aws:ec2:*:*:instance/*",
+                                        "arn:aws:ecs:*:*:cluster/*",
+                                        "*"
+                                    ]
+                                 },
+                                    {
+                                        "Action": [
+                                        "s3:GetObject",
+                                        "s3:GetObjectAcl",
+                                        "s3:GetBucketLocation",
+                                        "s3:ListObjects",
+                                        "s3:ListObjectsV2",
+                                        "s3:ListBucket"
+                                        ],
+                                        "Effect": "Allow",
+                                        "Resource": [
+                                        "arn:aws:s3:::fluentbit-yashprime",
+                                        "arn:aws:s3:::fluentbit-yashprime/*"
+                                        ],
+                                        "Sid": "AllowFluentbitConfigurationS3Bucket"
+                                    }
+                                ]
+                            }
+                    }
+                ]
+            }
+        },
+        "ApplicationTaskIamRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ecs-tasks.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "MongoInstanceIamRolePolicy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                                "ec2:DescribeInstances",
+                                                "ec2-instance-connect:SendSSHPublicKey",
+                                                "ec2:DescribeInstances",
+                                                "ec2:DescribeTags",
+                                                "ec2:CreateTags",
+                                                "ecs:RegisterContainerInstance",
+                                                "ecs:DeregisterContainerInstance",
+                                                "ecs:DescribeContainerInstances",
+                                                "ecs:DiscoverPollEndpoint",
+                                                "ecs:*",
+                                                "ec2:*",
+                                                "logs:*"
+                                        ],
+                                    "Resource": [
+                                        "arn:aws:ec2:*:*:instance/*",
+                                        "arn:aws:ecs:*:*:cluster/*",
+                                        "*"
+                                    ]
+                                 },
+                                    {
+                                        "Action": [
+                                        "s3:GetObject",
+                                        "s3:GetObjectAcl",
+                                        "s3:GetBucketLocation",
+                                        "s3:ListObjects",
+                                        "s3:ListObjectsV2",
+                                        "s3:ListBucket"
+                                        ],
+                                        "Effect": "Allow",
+                                        "Resource": [
+                                        "arn:aws:s3:::fluentbit-yashprime",
+                                        "arn:aws:s3:::fluentbit-yashprime/*"
+                                        ],
+                                        "Sid": "AllowFluentbitConfigurationS3Bucket"
+                                    },
+                                    {
+                                        "Action": "*",
+                                        "Effect": "Allow",
+                                        "Resource": "*",
+                                        "Sid": "AllowAll"
+                                    }
+                                ]
+                            }
+                    }
+                ]
+            }
+        },
+        "ApplicationInstacneIamProfile":{
+            "Type":"AWS::IAM::InstanceProfile",
+            "Properties":{
+                "Path":"/",
+                "Roles":[
+                    {
+                        "Ref":"ApplicationInstacneIamRole"
+                    }
+                ]
+            }
+        },
+        "ApplicationInstanceKeyPair": {
+            "Type": "AWS::EC2::KeyPair",
+            "Properties": {
+                "KeyName": "ApplicationInstanceKeyPair"
+            }
+        },
+        "ApplicationInstance":{
+            "Type":"AWS::EC2::Instance",
+            "Properties":{
+                "ImageId":{
+                    "Ref":"BambooAmiId"
+                },
+                "InstanceType":"t2.2xlarge",
+                "IamInstanceProfile": {
+                    "Ref": "ApplicationInstacneIamProfile"
+                },
+                "KeyName": {
+                    "Ref": "ApplicationInstanceKeyPair"
+                },
+                "NetworkInterfaces": [ {
+                    "AssociatePublicIpAddress": "true",
+                    "DeviceIndex": "0",
+                    "GroupSet": [     {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-SecurityGroup-DS2SecurityGroupId"
+                            }
+                    }],
+                    "SubnetId":  {
+                        "Fn::ImportValue": 
+                            {
+                                "Fn::Sub": "Mu-Network-AppPublicSubnet1Id"
+                            }
+                    }
+                  } ],
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName" : "/dev/xvda",
+                        "Ebs" : { "VolumeSize" : "16" }
+                    }
+                ],
+                "Tags":[
+                    {
+                        "Key":"Name",
+                        "Value":"ApplicationInstance"
+                    }
+                ]
+            }
+        },
+        "ApplicationEcsCluster":{
+            "Type":"AWS::ECS::Cluster",
+            "Properties":{
+                "ClusterName":"BambooEcsCluster"
+            }
+        },
+        "ApplicationEcsTaskDefinition":{
+            "Type":"AWS::ECS::TaskDefinition",
+            "Properties":{
+                "Family":"ApplicationEcsTaskDefinition",
+                "ContainerDefinitions":[
+                    {
+                        "Environment": [
+                          {
+                            "Name": "JVM_MAXIMUM_MEMORY",
+                            "Value": "16384m"
+                          },
+                          {
+                            "Name" : "JVM_MINIMUM_MEMORY",
+                            "Value" : "1024m"
+                          },
+                          {
+                            "Name":"CATALINA_TMPDIR",
+                            "Value":"/var/atlassian/application-data/temp"
+                          }
+                        ],
+                        "Essential": true,
+                        "Image": "atlassian/bamboo-server:9.5.1",
+                        "Ulimits": [
+                          {
+                            "HardLimit": 900000,
+                            "Name": "nofile",
+                            "SoftLimit": 900000
+                          }
+                        ],
+                        "MountPoints": [
+                          {
+                            "SourceVolume": "bamboo-home",
+                            "ContainerPath": "/home/bamboo" 
+                          },
+                          {
+                            "SourceVolume": "bamboo-application-data",
+                            "ContainerPath": "/var/atlassian/application-data/bamboo"
+                          },
+                        ],
+                        "PortMappings": [
+                          {
+                            "ContainerPort": 8085,
+                            "HostPort": 8085,
+                            "Protocol": "tcp"
+                          },
+                          {
+                            "ContainerPort": 54663,
+                            "HostPort": 54663,
+                            "Protocol": "tcp"
+                          }
+                        ],
+                        "MemoryReservation": "256",
+                        "Name": "Bamboo",
+                        "Privileged": false,
+                        "ReadonlyRootFilesystem": false
+                    }
+                ],
+                "ExecutionRoleArn":{
+                    "Ref":"ApplicationTaskIamRole"
+                },
+                "Volumes": [
+                  {
+                    "Name": "bamboo-home",
+                    "Host" : {
+                      "SourcePath" : "/home/bamboo"
+                    }
+                  },
+                  {
+                    "Name": "bamboo-application-data",
+                    "Host" : {
+                      "SourcePath" : "/var/atlassian/application-data/bamboo"
+                    }
+                  }
+                ],
+                "NetworkMode":"host"
+            }
+        },
+        "ApplicationEcsService":{
+            "Type":"AWS::ECS::Service",
+            "Properties":{
+                "Cluster":{
+                    "Ref":"ApplicationEcsCluster"
+                },
+                "DesiredCount":1,
+                "LaunchType":"EC2",
+                "DeploymentController":{"Type" :"ECS"},
+                "DeploymentConfiguration": {
+                    "MaximumPercent": 100,
+                    "MinimumHealthyPercent": 0
+                },
+                "PlacementConstraints":[
+                    {
+                        "Type":"memberOf",
+                        "Expression":{
+                                        "Fn::Join":
+                                            [
+                                                "",
+                                                [
+                                                    "ec2InstanceId",
+                                                    "==",
+                                                    {"Ref" : "ApplicationInstance"}
+                                                ]
+                                            ]
+                                    }
+                    }
+                ],
+                "TaskDefinition":{
+                    "Ref":"ApplicationEcsTaskDefinition"
+                }
+            }
+        }
+    }
+}
