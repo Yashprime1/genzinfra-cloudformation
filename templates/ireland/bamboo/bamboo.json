@@ -189,13 +189,13 @@
                     "GroupSet": [     {
                         "Fn::ImportValue": 
                             {
-                                "Fn::Sub": "Mu-SecurityGroup-DS2SecurityGroupId"
+                                "Fn::Sub": "Eu-SecurityGroup-DS2SecurityGroupId"
                             }
                     }],
                     "SubnetId":  {
                         "Fn::ImportValue": 
                             {
-                                "Fn::Sub": "Mu-Network-AppPublicSubnet1Id"
+                                "Fn::Sub": "Eu-Network-AppPublicSubnet1Id"
                             }
                     }
                   } ],
