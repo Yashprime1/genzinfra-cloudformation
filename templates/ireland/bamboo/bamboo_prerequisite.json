@@ -19,7 +19,7 @@
                         {
                             "Fn::Sub": "Eu-Network-AppPublicSubnet2Id"
                         }
-                }
+                },
                 {
                     "Fn::ImportValue": 
                         {
