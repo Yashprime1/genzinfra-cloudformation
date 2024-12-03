@@ -23,6 +23,12 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/ireland/core/ireland-securitygroup.json"
             },
+            "Eu-Bamboo-Prerequsite": {
+                "Parameters": {
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/ireland/bamboo/bamboo_prerequisite.json"
+            },
             "Eu-Bamboo": {
                 "Parameters": {
                     "BambooAmiId": "ami-063b9a736a745711a"
