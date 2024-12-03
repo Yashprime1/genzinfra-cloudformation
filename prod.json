@@ -31,7 +31,7 @@
             },
             "Eu-Bamboo": {
                 "Parameters": {
-                    "BambooAmiId": "ami-063b9a736a745711a"
+                    "BambooAmiId": "ami-0f757674b1fc45839"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/ireland/bamboo/bamboo.json"

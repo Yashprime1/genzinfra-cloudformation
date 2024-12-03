@@ -3,7 +3,7 @@
     "Parameters": {
     },
     "Resources":{
-        "PromotionsRdsDbSubnetGroup": {
+        "BambooRdsDbSubnetGroup": {
             "Type": "AWS::RDS::DBSubnetGroup",
             "Properties": {
               "DBSubnetGroupDescription": "Promotions db subnet group",
@@ -29,48 +29,86 @@
               ]
             }
         },
-        "PromotionsRDSDBCluster":{
-            "Type" : "AWS::RDS::DBCluster",
-            "Properties" : {
-                "AllocatedStorage" : 20,
-                "AutoMinorVersionUpgrade" : true,
-                "BackupRetentionPeriod" : 30,
-                "CopyTagsToSnapshot" : true,
-                "DatabaseName" : "promotions",
-                "DBClusterInstanceClass" : "db.t3.medium",
-                "DBSubnetGroupName": {
-                    "Ref": "PromotionsRdsDbSubnetGroup"
-                },
-                "DBClusterParameterGroupName":{
-                    "Ref":"PromotionsRDSDBClusterParameterGroup"
-                },
-                "Engine": "aurora-postgresql",
-                "EngineVersion": "16.4",
-                "MasterUsername": "yashprime"
-                "Port" : 5432,
-                "PubliclyAccessible": false,
-                "StorageType": "gp3",
-                "StorageEncrypted": true,
-                "VpcSecurityGroupIds": [
-                    {
-                        "Fn::ImportValue": 
-                            {
-                                "Fn::Sub": "Eu-SecurityGroup-DS2SecurityGroupId"
-                            }
-                    }
-                ]
-            }
-        },   
-        "PromotionsRDSDBClusterParameterGroup": {
-            "Type": "AWS::RDS::DBClusterParameterGroup",
+        "BambooRdsSecretsManagerSecret": {
+            "Type": "AWS::SecretsManager::Secret",
             "Properties": {
-                "Description": "PromotionsRDS Custom Parameter Group",
-                "Family": "postgres16",
-                "Parameters": {
-                    "shared_preload_libraries": "auto_explain,orafce,pgaudit,pg_bigm,pg_similarity,pg_stat_statements,pg_tle,pg_hint_plan,pg_prewarm,plprofiler,pglogical,pg_cron",
-                    "rds.force_ssl": 0
-                }
+              "Description": {
+                "Fn::Sub": "This is a Secrets Manager secret for Bamboo Atlassian RDS instance"
+              },
+              "GenerateSecretString": {
+                "SecretStringTemplate": "{\"username\": \"postgres\"}",
+                "GenerateStringKey": "password",
+                "PasswordLength": 20,
+                "ExcludeCharacters": "\"@/\\'`(){}[]:!$"
+              }
             }
+        },
+        "BambooRdsSecretsManagerSecretTargetAttachment": {
+            "Type": "AWS::SecretsManager::SecretTargetAttachment",
+            "Properties": {
+              "SecretId": {
+                "Ref": "BambooRdsSecretsManagerSecret"
+              },
+              "TargetId": {
+                "Ref": "BambooRdsDbInstance"
+              },
+              "TargetType": "AWS::RDS::DBInstance"
+            }
+        },
+        "BambooRdsDbInstance": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+              "AllocatedStorage": 32,
+              "AllowMajorVersionUpgrade": true,
+              "AutoMinorVersionUpgrade": true,
+              "BackupRetentionPeriod": 30,
+              "CopyTagsToSnapshot": true,
+              "DBInstanceClass": "db.m5.large",
+              "DBName": "postgres",
+              "DBSubnetGroupName": {
+                "Ref": "RdsDbSubnetGroup"
+              },
+              "Engine": "postgres",
+              "EngineVersion": "12.7",
+              "MasterUsername": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "{{resolve:secretsmanager:",
+                    {
+                      "Ref": "BambooRdsSecretsManagerSecret"
+                    },
+                    ":SecretString:username}}"
+                  ]
+                ]
+              },
+              "MasterUserPassword": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "{{resolve:secretsmanager:",
+                    {
+                      "Ref": "BambooRdsSecretsManagerSecret"
+                    },
+                    ":SecretString:password}}"
+                  ]
+                ]
+              },
+              "MultiAZ": "true",
+              "Port": "5432",
+              "PubliclyAccessible": false,
+              "StorageType": "gp2",
+              "StorageEncrypted": true,
+              "VPCSecurityGroups": [
+                {
+                    "Fn::ImportValue": 
+                        {
+                            "Fn::Sub": "Eu-SecurityGroup-DS2SecurityGroupId"
+                        }
+                }
+              ]
+            },
+            "DeletionPolicy": "Snapshot"
         }
     }
 }
