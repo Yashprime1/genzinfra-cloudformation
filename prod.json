@@ -3,38 +3,30 @@
     "BucketRegion": "ap-south-1",
     "Parallel": "false",
     "Stacks": {
-        "ap-south-1": {  
-        },
-        "eu-west-1": {
-            "Eu-Network": {
+        "ap-south-1": {
+            "Mu-Network": {
                 "Parameters": {
-                    "AppVpcCidr": "10.17.0.0/16",
-                    "AppPublicSubnet1Cidr": "10.17.0.0/24",
-                    "AppPublicSubnet2Cidr": "10.17.1.0/24",
-                    "AppPrivateSubnet1Cidr": "10.17.2.0/24",
-                    "AppPublicSubnet3Cidr": "10.17.3.0/24",
-                    "AppPrivateSubnet2Cidr": "10.17.4.0/24"
+                    "AppVpcCidr": "10.16.0.0/16",
+                    "AppPublicSubnet1Cidr": "10.16.0.0/24",
+                    "AppPublicSubnet2Cidr": "10.16.1.0/24",
+                    "AppPublicSubnet3Cidr": "10.16.2.0/24",
+                    "AppPrivateSubnet1Cidr": "10.16.3.0/24",
+                    "AppPrivateSubnet2Cidr": "10.16.4.0/24"
                 },
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/ireland/core/ireland-network.json"
+                "TemplatePath": "./templates/mumbai/core/mumbai-network.json"
             }, 
-            "Eu-SecurityGroup": {
+            "Mu-SecurityGroup": {
                 "Parameters": {},
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/ireland/core/ireland-securitygroup.json"
+                "TemplatePath": "./templates/mumbai/core/mumbai-securitygroup.json"
             },
-            "Eu-Bamboo-Prerequsite": {
+            "Mu-RDS": {
                 "Parameters": {
+              
                 },
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/ireland/bamboo/bamboo_prerequisite.json"
-            },
-            "Eu-Bamboo": {
-                "Parameters": {
-                    "BambooAmiId": "ami-0f757674b1fc45839"
-                },
-                "SkipUpdate": false,
-                "TemplatePath": "./templates/ireland/bamboo/bamboo.json"
+                "TemplatePath": "./templates/mumbai/rds/rds.json"
             }
         }
     }
