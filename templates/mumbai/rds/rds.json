@@ -40,7 +40,7 @@
                     "Ref":"PromotionsRDSDBClusterParameterGroup"
                 },
                 "Engine": "aurora-postgresql",
-                "EngineVersion": "16.4",
+                "EngineVersion": "16.6",
                 "MasterUsername": "yashprime",
                 "MasterUserPassword" : "yashprime",
                 "Port" : 5432,
@@ -62,7 +62,7 @@
                     "Ref": "PromotionsRDSDBParameterGroup"
                 },
                 "Engine": "aurora-postgresql",
-                "EngineVersion": "16.4",
+                "EngineVersion": "16.6",
                 "DBClusterIdentifier": {
                     "Ref": "PromotionsRDSDBCluster"
                 },
@@ -76,7 +76,7 @@
                     "Ref": "PromotionsRDSDBParameterGroup"
                 },
                 "Engine": "aurora-postgresql",
-                "EngineVersion": "16.4",
+                "EngineVersion": "16.6",
                 "DBClusterIdentifier": {
                     "Ref": "PromotionsRDSDBCluster"
                 },
