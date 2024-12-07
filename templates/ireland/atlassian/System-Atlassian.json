@@ -895,7 +895,7 @@
         "AvailabilityZone": "eu-west-1a",
         "VolumeType": "gp2",
         "Encrypted": true,
-        "KmsKeyId":"7f81c9c0-fd85-49d1-9307-aba1a0290a01"
+        "KmsKeyId":"7f81c9c0-fd85-49d1-9307-aba1a0290a01",
         "SnapshotId": "snap-012a82e630ef7566d",
         "Tags": [
           {
