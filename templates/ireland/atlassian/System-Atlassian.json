@@ -848,6 +848,47 @@
         ]
       }
     },
+    "BambooRdsDbInstance": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "AllocatedStorage": {
+          "Ref": "RdsAllocatedStorage"
+        },
+        "AllowMajorVersionUpgrade": true,
+        "DBSnapshotIdentifier": "bamboosnapshot",
+        "AutoMinorVersionUpgrade": true,
+        "BackupRetentionPeriod": 30,
+        "CopyTagsToSnapshot": true,
+        "DBInstanceClass": {
+          "Ref": "RdsInstanceType"
+        },
+        "DBName": "postgres",
+        "DBSubnetGroupName": {
+          "Ref": "RdsDbSubnetGroup"
+        },
+        "Engine": "postgres",
+        "EngineVersion": {
+          "Ref": "BambooRdsPostgresEngineVersion"
+        },
+        "MultiAZ": {
+          "Ref": "RdsMultipleAvailabilityZone"
+        },
+        "Port": "5432",
+        "PubliclyAccessible": false,
+        "StorageType": "gp2",
+        "StorageEncrypted": true,
+        "KmsKeyId":"arn:aws:kms:eu-west-1:736548753645:key/b399ce49-2412-4fb8-b564-5cafc73b251f",
+        "VPCSecurityGroups": [
+          {
+              "Fn::ImportValue": 
+                  {
+                      "Fn::Sub": "${NetworkStack}-SecurityGroup-DS2SecurityGroupId"
+                  }
+          }
+        ]
+      },
+      "DeletionPolicy": "Snapshot"
+    },
     "BambooRdsUserSecretsManagerSecret": {
       "Type": "AWS::SecretsManager::Secret",
       "Properties": {
@@ -895,7 +936,7 @@
         "AvailabilityZone": "eu-west-1a",
         "VolumeType": "gp2",
         "Encrypted": true,
-        "KmsKeyId":"7f81c9c0-fd85-49d1-9307-aba1a0290a01",
+        "KmsKeyId":"7f81c9c0-fd85-49d1-9307-aba1a0290a01"
         "SnapshotId": "snap-012a82e630ef7566d",
         "Tags": [
           {
