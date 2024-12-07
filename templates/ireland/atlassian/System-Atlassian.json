@@ -848,46 +848,6 @@
         ]
       }
     },
-    "BambooRdsDbInstance": {
-      "Type": "AWS::RDS::DBInstance",
-      "Properties": {
-        "AllocatedStorage": {
-          "Ref": "RdsAllocatedStorage"
-        },
-        "AllowMajorVersionUpgrade": true,
-        "DBSnapshotIdentifier": "arn:aws:rds:eu-west-1:062484260092:snapshot:bamboordssnapshot",
-        "AutoMinorVersionUpgrade": true,
-        "BackupRetentionPeriod": 30,
-        "CopyTagsToSnapshot": true,
-        "DBInstanceClass": {
-          "Ref": "RdsInstanceType"
-        },
-        "DBName": "postgres",
-        "DBSubnetGroupName": {
-          "Ref": "RdsDbSubnetGroup"
-        },
-        "Engine": "postgres",
-        "EngineVersion": {
-          "Ref": "BambooRdsPostgresEngineVersion"
-        },
-        "MultiAZ": {
-          "Ref": "RdsMultipleAvailabilityZone"
-        },
-        "Port": "5432",
-        "PubliclyAccessible": false,
-        "StorageType": "gp2",
-        "StorageEncrypted": true,
-        "VPCSecurityGroups": [
-          {
-              "Fn::ImportValue": 
-                  {
-                      "Fn::Sub": "${NetworkStack}-SecurityGroup-DS2SecurityGroupId"
-                  }
-          }
-        ]
-      },
-      "DeletionPolicy": "Snapshot"
-    },
     "BambooRdsUserSecretsManagerSecret": {
       "Type": "AWS::SecretsManager::Secret",
       "Properties": {
