@@ -944,10 +944,7 @@
         "Size": "8",
         "AvailabilityZone": "eu-west-1a",
         "VolumeType": "gp2",
-        "Encrypted": true,
-        "KmsKeyId": {
-          "Ref": "BambooV8Ec2VolumeSdpKmsKey"
-        },
+        "Encrypted": false,
         "SnapshotId": "snap-04023430ec532de0f",
         "Tags": [
           {
