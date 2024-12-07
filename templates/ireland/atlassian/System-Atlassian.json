@@ -974,11 +974,6 @@
                   }
           }
         ],
-        "SubnetId": {
-          "Fn::ImportValue": {
-            "Fn::Sub": "${NetworkStack}-Network-AppPublicSubnet1Id"
-          }
-        },
         "Volumes": [
           {
             "VolumeId": {
