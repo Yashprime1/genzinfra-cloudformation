@@ -862,7 +862,6 @@
         "DBInstanceClass": {
           "Ref": "RdsInstanceType"
         },
-        "DBName": "postgres",
         "DBSubnetGroupName": {
           "Ref": "RdsDbSubnetGroup"
         },
