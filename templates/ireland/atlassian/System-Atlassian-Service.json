@@ -1,10 +1,6 @@
 {
   "Description": "Template to provision hosted Atlassian components",
   "Parameters": {
-    "BambooV8ContainerTag": {
-      "Description": "Container tag for Bamboo 8.0.4 docker image",
-      "Type": "String"
-    },
     "CloudflareTunnelLogLevel": {
       "Description": "Cloudflare tunnel logging level {debug, info, warn, error, fatal}. At debug level cloudflared will log request URL, method, protocol, content length, as well as, all request and response headers. This can expose sensitive information in your logs",
       "Default": "info",
