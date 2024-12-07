@@ -73,14 +73,6 @@
     "VpcNetworkPrefix": {
       "Default": "",
       "Type": "String"
-    },
-    "BambooV8Ec2VolumeSdpKmsKey": {
-      "Default": "443d79ca-e933-4940-81cf-8589b20fc0be",
-      "Type": "String"
-    },
-    "BambooV8Ec2VolumeSdfKmsKey": {
-      "Default": "fa409a23-ed73-4116-a118-1aac9fc31941",
-      "Type": "String"
     }
   },
   "Mappings": {
@@ -856,6 +848,46 @@
         ]
       }
     },
+    "BambooRdsDbInstance": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "AllocatedStorage": {
+          "Ref": "RdsAllocatedStorage"
+        },
+        "AllowMajorVersionUpgrade": true,
+        "DBSnapshotIdentifier": "arn:aws:rds:eu-west-1:062484260092:snapshot:bamboordssnapshot",
+        "AutoMinorVersionUpgrade": true,
+        "BackupRetentionPeriod": 30,
+        "CopyTagsToSnapshot": true,
+        "DBInstanceClass": {
+          "Ref": "RdsInstanceType"
+        },
+        "DBName": "postgres",
+        "DBSubnetGroupName": {
+          "Ref": "RdsDbSubnetGroup"
+        },
+        "Engine": "postgres",
+        "EngineVersion": {
+          "Ref": "BambooRdsPostgresEngineVersion"
+        },
+        "MultiAZ": {
+          "Ref": "RdsMultipleAvailabilityZone"
+        },
+        "Port": "5432",
+        "PubliclyAccessible": false,
+        "StorageType": "gp2",
+        "StorageEncrypted": true,
+        "VPCSecurityGroups": [
+          {
+              "Fn::ImportValue": 
+                  {
+                      "Fn::Sub": "${NetworkStack}-SecurityGroup-DS2SecurityGroupId"
+                  }
+          }
+        ]
+      },
+      "DeletionPolicy": "Snapshot"
+    },
     "BambooRdsUserSecretsManagerSecret": {
       "Type": "AWS::SecretsManager::Secret",
       "Properties": {
@@ -866,6 +898,61 @@
           "PasswordLength": 14,
           "ExcludeCharacters": "\"@/\\'`(){}[]:!$|"
         }
+      }
+    },
+    "BambooV8EncryptedV2Ec2Volume": {
+      "Type": "AWS::EC2::Volume",
+      "Properties": {
+        "Size": "1024",
+        "AvailabilityZone": "eu-west-1a",
+        "VolumeType": "gp3",
+        "Iops": "5000",
+        "Encrypted": true,
+        "KmsKeyId": "7f81c9c0-fd85-49d1-9307-aba1a0290a01",
+        "SnapshotId": "snap-0d14d10230efcd42b",
+        "Tags": [
+          {
+            "Key": "SnapshotIdentifier",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "BambooEncryptedEc2Volume"
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "BambooEncryptedHomeEc2Volume": {
+      "Type": "AWS::EC2::Volume",
+      "Properties": {
+        "Size": "8",
+        "AvailabilityZone": "eu-west-1a",
+        "VolumeType": "gp2",
+        "Encrypted": true,
+        "KmsKeyId":"7f81c9c0-fd85-49d1-9307-aba1a0290a01"
+        "SnapshotId": "snap-012a82e630ef7566d",
+        "Tags": [
+          {
+            "Key": "SnapshotIdentifier",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "BambooEncryptedHomeEc2Volume"
+                ]
+              ]
+            }
+          }
+        ]
       }
     },
     "BambooV8Ec2Instance": {
@@ -914,11 +1001,15 @@
         },
         "Volumes": [
           {
-            "VolumeId": "vol-0cf4a43905c874773",
+            "VolumeId": {
+              "Ref": "BambooV8EncryptedV2Ec2Volume"
+            },
             "Device": "/dev/sdf"
           },
           {
-            "VolumeId": "vol-07b12d5d709b2fa23",
+            "VolumeId": {
+              "Ref": "BambooEncryptedHomeEc2Volume"
+            },
             "Device": "/dev/sdp"
           }
         ],
