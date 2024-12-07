@@ -96,6 +96,9 @@
       "BambooEc2Instance": {
         "Enabled": true
       },
+      "BambooDockerEc2Instance":{
+        "Enabled": true
+      },
       "1": {
         "Enabled": false
       },
