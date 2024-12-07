@@ -33,6 +33,14 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/ireland/atlassian/System-Atlassian.json"
+            },
+            "Eu-Bamboo-Service": {
+                "Parameters": {
+                    "NetworkStack":"Eu",
+                    "VpcNetworkPrefix":"10.17"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/ireland/atlassian/System-Atlassian-Service.json"
             }
         }
 

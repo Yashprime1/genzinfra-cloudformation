@@ -665,15 +665,6 @@
         }
       }
     },
-    "ArtifactoryDockerUserCredentialsSecretsManagerSecret": {
-      "Type": "AWS::SecretsManager::Secret",
-      "Properties": {
-        "Description": {
-          "Fn::Sub": "This is a Secrets Manager secret for Artifactory docker user credentials"
-        },
-        "SecretString": "{\"username\":\"secret-user\",\"password\":\"secret-password\"}"
-      }
-    },
     "BambooEcsTaskExecutionIamPolicy": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
@@ -698,7 +689,7 @@
               ],
               "Resource": [
                 {
-                  "Ref": "ArtifactoryDockerUserCredentialsSecretsManagerSecret"
+                  "Ref": "CloudflareTunnelTokenSecretsManagerSecret"
                 }
               ]
             }
@@ -887,18 +878,6 @@
         ]
       },
       "DeletionPolicy": "Snapshot"
-    },
-    "BambooRdsUserSecretsManagerSecret": {
-      "Type": "AWS::SecretsManager::Secret",
-      "Properties": {
-        "Description": {
-          "Fn::Sub": "This is a Secrets Manager secret for bamboouser role on Postgres"
-        },
-        "GenerateSecretString": {
-          "PasswordLength": 14,
-          "ExcludeCharacters": "\"@/\\'`(){}[]:!$|"
-        }
-      }
     },
     "BambooV8EncryptedV2Ec2Volume": {
       "Type": "AWS::EC2::Volume",
