@@ -1051,18 +1051,6 @@
         },
         "SecretString": "<replaceme>"
       }
-    },
-    "GrafanaDotWizroketDotNetTXTRoute53RecordSet": {
-      "Type": "AWS::Route53::RecordSet",
-      "Properties": {
-        "HostedZoneId": "Z2KMG56HKA8K5F",
-        "ResourceRecords": [
-          "\"_yRF-pTD-Ev2MQNKJLoABT_Y7mwkKyWiGskw7yu447U\""
-        ],
-        "TTL": "300",
-        "Type": "TXT",
-        "Name": "_acme-challenge.grafana.wizrocket.net"
-      }
     }
   },
   "Outputs": {
