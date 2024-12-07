@@ -19,9 +19,21 @@
                 "TemplatePath": "./templates/ireland/core/ireland-network.json"
             }, 
             "Eu-SecurityGroup": {
-                "Parameters": {},
+                "Parameters": {
+                    "SystemStack":"System"
+                },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/ireland/core/ireland-securitygroup.json"
+            },
+            "Eu-Bamboo": {
+                "Parameters": {
+                    "NetworkStack":"Eu",
+                    "VpcNetworkPrefix":"10.17",
+                    "RdsInstanceType": "db.m5.large",
+                    "RdsAllocatedStorage": "64"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/ireland/atlassian/System-Atlassian.json"
             }
         }
 

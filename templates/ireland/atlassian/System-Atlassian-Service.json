@@ -1,0 +1,1607 @@
+{
+  "Description": "Template to provision hosted Atlassian components",
+  "Parameters": {
+    "SystemStack": {
+      "Description": "Name of the stack that acts as the base for all stacks in System",
+      "Default": "",
+      "Type": "String"
+    },
+    "CertificateDomain": {
+      "Description": "Domain name of the TLS certificate that is generated via ACM for this stack. Example: Setting this to wizrocket.net will cause the common name of the certificate to be set to 'build.CertificateDomain'",
+      "Default": "wizrocket.net",
+      "Type": "String"
+    },
+    "BambooV8ContainerTag": {
+      "Description": "Container tag for Bamboo 8.0.4 docker image",
+      "Type": "String"
+    },
+    "SensuClientImageName": {
+      "Default": "sensu",
+      "Type": "String"
+    },
+    "SensuClientImageTag": {
+      "Type": "String"
+    },
+    "SensuClientContainerTag": {
+      "Type": "String"
+    },
+    "SplunkForwarderImageName": {
+      "Default": "clevertap/splunk-forwarder",
+      "Type": "String"
+    },
+    "SplunkForwarderImageTag": {
+      "Default": "",
+      "Type": "String"
+    },
+    "CadvisorImageName": {
+      "Default": "",
+      "Type": "String"
+    },
+    "CadvisorImageTag": {
+      "Default": "",
+      "Type": "String"
+    },
+    "EnableSensuV3Client": {
+      "Default": "true",
+      "Type": "String"
+    },
+    "CloudflareTunnelLogLevel": {
+      "Description": "Cloudflare tunnel logging level {debug, info, warn, error, fatal}. At debug level cloudflared will log request URL, method, protocol, content length, as well as, all request and response headers. This can expose sensitive information in your logs",
+      "Default": "info",
+      "AllowedValues": [
+        "debug",
+        "info",
+        "warn",
+        "error",
+        "fatal"
+      ],
+      "Type": "String"
+    },
+    "SensuV2BackendUrl": {
+      "Default": "wss://sensu-v2-backend.clevertap.net",
+      "Type": "String"
+    }
+  },
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "Stack configuration"
+          },
+          "Parameters": [
+            "SystemStack"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Bamboo configuration"
+          },
+          "Parameters": [
+            "BambooV8ContainerTag"
+          ]
+        }
+      ]
+    }
+  },
+  "Conditions": {
+    "IsSensuV3Enabled": {
+      "Fn::Equals": [
+        {
+          "Ref": "EnableSensuV3Client"
+        },
+        "true"
+      ]
+
+    }
+  },
+  "Resources": {
+    "BambooEcsTaskDefinitionIamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "BambooEcsTaskDefinitionIamRole"
+            ]
+          ]
+        }
+      }
+    },
+    "BambooEcsTaskDefinitionIamPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "BambooEcsTaskDefinitionIamPolicy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Sid": "AllowCloudformationActions",
+              "Effect": "Allow",
+              "Action": [
+                "cloudformation:CreateStack",
+                "cloudformation:DeleteStack",
+                "cloudformation:DescribeStacks",
+                "cloudformation:DescribeStackResource",
+                "cloudformation:UpdateStack",
+                "cloudformation:CreateChangeSet",
+                "cloudformation:DeleteChangeSet",
+                "cloudformation:DescribeChangeSet",
+                "cloudformation:ExecuteChangeSet",
+                "cloudformation:GetStackPolicy",
+                "cloudformation:SetStackPolicy",
+                "cloudformation:ValidateTemplate",
+                "iam:PassRole"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "PolicyForAccessToCfstackBucket",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::cfstack-init-templatess3bucket-*",
+                "arn:aws:s3:::cfstack-init-templatess3bucket-*/*",
+                "arn:aws:s3:::cfstack-init-sources3bucket-*",
+                "arn:aws:s3:::cfstack-init-sources3bucket-*/*"
+              ],
+              "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion",
+                "s3:GetBucketVersioning",
+                "s3:PutObject"
+              ]
+            },
+            {
+              "Sid": "GrantPermsToMigrateKeys",
+              "Effect": "Allow",
+              "Action": [
+                "kms:ListGrants",
+                "kms:CreateGrant",
+                "kms:RevokeGrant"
+              ],
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowAccessForScaleUp",
+              "Effect": "Allow",
+              "Action": [
+                "ecs:DescribeServices",
+                "ecs:DescribeTaskDefinition",
+                "ecs:DescribeClusters",
+                "autoscaling:DescribeAutoScalingGroups",
+                "autoscaling:SetDesiredCapacity"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowEcrRegistryPushAccess",
+              "Effect": "Allow",
+              "Action": [
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:PutImage",
+                "ecr:InitiateLayerUpload",
+                "ecr:UploadLayerPart",
+                "ecr:CompleteLayerUpload",
+                "ecr:GetAuthorizationToken"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "TempAllowCompleteAccess",
+              "Effect": "Allow",
+              "Action": "*",
+              "Resource": "*"
+            },
+            {
+              "Sid": "PolicyForAccessToAjsBucket",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::static.wizrocket.com*",
+                "arn:aws:s3:::static.wizrocket.com*/*"
+              ],
+              "Action": [
+                "s3:PutObject"
+              ]
+            },
+            {
+              "Sid": "PolicyForCloudfronInvalidateCacheAccess",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:cloudfront:::distribution/E1OCAMMKX0F1A1"
+              ],
+              "Action": [
+                "cloudfront:CreateInvalidation"
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "BambooEcsTaskDefinitionIamRole"
+          }
+        ]
+      }
+    },
+    "BambooEcsTaskExecutionIamPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "BambooEcsTaskExecutionIamPolicy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Sid": "AllowSecretsRetreiveValue",
+              "Effect": "Allow",
+              "Action": [
+                "secretsmanager:GetSecretValue"
+              ],
+              "Resource": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${SystemStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                  }
+                },
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${SystemStack}-SharedResources-SplunkTokenSecretsManagerSecret"
+                  }
+                },
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${AWS::StackName}-CloudflareTunnelTokenSecretsManagerSecretName"
+                  }
+                }
+              ]
+            },
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:GetObjectAcl",
+                "s3:GetBucketLocation",
+                "s3:ListObjects",
+                "s3:ListObjectsV2",
+                "s3:ListBucket"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${SystemStack}-SharedResources-FluentBitConfigS3BucketArn"
+                  }
+                },
+                {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${SystemStack}-SharedResources-FluentBitConfigS3BucketArn"
+                        }
+                      },
+                      "*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "AllowFluentbitConfigurationS3Bucket"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "BambooEcsTaskExecutionIamRole"
+          }
+        ]
+      }
+    },
+    "CloudFormationServiceIamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "cloudformation.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "CloudFormationServiceIamPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": "*",
+              "Resource": "*"
+            }
+          ]
+        },
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "CloudFormationServiceIamPolicy"
+            ]
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "CloudFormationServiceIamRole"
+          }
+        ]
+      }
+    },
+    "BambooEcsTaskExecutionIamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "BambooEcsTaskExecutionIamRole"
+            ]
+          ]
+        }
+      }
+    },
+    "BambooV8V2EcsTaskDefinition": {
+      "Type": "AWS::ECS::TaskDefinition",
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Name": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "BambooV8"
+                ]
+              ]
+            },
+            "Image": {
+              "Fn::Join": [
+                ":",
+                [
+                  {
+                    "Fn::Sub": "${AWS::AccountId}.dkr.ecr.eu-west-1.amazonaws.com/bamboo-server"
+                  },
+                  {
+                    "Ref": "BambooV8ContainerTag"
+                  }
+                ]
+              ]
+            },
+            "Environment": [
+              {
+                "Name": "CATALINA_CONNECTOR_SECURE",
+                "Value": "true"
+              },
+              {
+                "Name": "ATL_TOMCAT_CONNECTIONTIMEOUT",
+                "Value": "120000"
+              },
+              {
+                "Name":"CATALINA_TMPDIR",
+                "Value":"/var/atlassian/application-data/bamboo/temp"
+              },
+              {
+                "Name": "CATALINA_CONNECTOR_SCHEME",
+                "Value": "https"
+              },
+              {
+                "Name": "CATALINA_CONNECTOR_PROXYPORT",
+                "Value": "443"
+              },
+              {
+                "Name": "CATALINA_CONNECTOR_PROXYNAME",
+                "Value": {
+                  "Fn::Join": [
+                    ".",
+                    [
+                      "build",
+                      {
+                        "Ref": "CertificateDomain"
+                      }
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "CLOUDFORMATION_SERVICE_ROLE_ARN",
+                "Value": {
+                  "Fn::GetAtt": [
+                    "CloudFormationServiceIamRole",
+                    "Arn"
+                  ]
+                }
+              },
+              {
+                "Name": "DOCKER_HOST",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "tcp://",
+                      {
+                        "Fn::Join": [
+                          ".",
+                          [
+                            {
+                              "Fn::ImportValue": {
+                                "Fn::Sub": "${SystemStack}-Network-VpcNetworkPrefix"
+                              }
+                            },
+                            "20.100"
+                          ]
+                        ]
+                      },
+                      ":2375"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name":"JVM_SUPPORT_RECOMMENDED_ARGS",
+                "Value":"-Xlog:gc*,gc+age=trace:file=/var/atlassian/application-data/bamboo/logs/atlassian-bamboo-gc-%t.log:time,level,tags:filesize=10M,filecount=5 -XX:-OmitStackTraceInFastThrow -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/atlassian/application-data/bamboo/logs/"
+              },
+              {
+                "Name": "JVM_MINIMUM_MEMORY",
+                "Value": "1024m"
+              },
+              {
+                "Name": "JVM_MAXIMUM_MEMORY",
+                "Value": "8192m"
+              }
+            ],
+            "PortMappings": [
+              {
+                "ContainerPort": "8085",
+                "HostPort": "8085",
+                "Protocol": "tcp"
+              }
+            ],
+            "MemoryReservation": 256,
+            "Ulimits": [
+              {
+                "HardLimit": 900000,
+                "Name": "nofile",
+                "SoftLimit": 900000
+              }
+            ],
+            "MountPoints": [
+              {
+                "SourceVolume": "bamboo-application-data",
+                "ContainerPath": "/var/atlassian/application-data/bamboo"
+              },
+              {
+                "SourceVolume": "bamboo-home",
+                "ContainerPath": "/home/bamboo"
+              }
+            ],
+            "LinuxParameters": {
+              "InitProcessEnabled": true
+            }
+          },
+          {
+            "Essential": true,
+            "Image": "artifactory.clevertap.net/clevertap/cloudflare:2023.3.1",
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${SystemStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                }
+              }
+            },
+            "Name": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "Cloudflare"
+                ]
+              ]
+
+            },
+            "Environment": [
+              {
+                "Name": "TUNNEL_LOGLEVEL",
+                "Value": {
+                  "Ref": "CloudflareTunnelLogLevel"
+                }
+              }
+            ],
+            "ReadonlyRootFilesystem": false,
+            "Ulimits": [
+              {
+                "HardLimit": 900000,
+                "Name": "nofile",
+                "SoftLimit": 900000
+              }
+            ],
+            "MemoryReservation": "256",
+            "EntryPoint": [
+              "cloudflared",
+              "tunnel",
+              "--url",
+              "http://localhost:8085",
+              "--no-autoupdate",
+              "run"
+            ],
+            "Secrets": [
+              {
+                "Name": "TUNNEL_TOKEN",
+                "ValueFrom": {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${AWS::StackName}-CloudflareTunnelTokenSecretsManagerSecretName"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "Family": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "BambooV8EcsTaskDefinition"
+            ]
+          ]
+        },
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "BambooEcsTaskDefinitionIamRole",
+            "Arn"
+          ]
+        },
+        "NetworkMode": "host",
+        "PlacementConstraints": [
+          {
+            "Type": "memberOf",
+            "Expression": {
+              "Fn::Join": [
+                "",
+                [
+                  "attribute:cluster.instance-identifier == ",
+                  {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${AWS::StackName}-BambooV8EcsCluster"
+                          }
+                        },
+                        "BambooV8Ec2Instance"
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            }
+          }
+        ],
+        "Volumes": [
+          {
+            "Name": "bamboo-application-data",
+            "Host": {
+              "SourcePath": "/var/atlassian/application-data/bamboo"
+            }
+          },
+          {
+            "Name": "bamboo-home",
+            "Host": {
+              "SourcePath": "/home/bamboo"
+            }
+          }
+        ],
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "BambooEcsTaskDefinitionIamRole",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "BambooV8V2EcsService": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-BambooV8EcsCluster"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "DesiredCount": 1,
+        "LaunchType": "EC2",
+        "PlacementConstraints": [
+          {
+            "Expression": {
+              "Fn::Join": [
+                "",
+                [
+                  "attribute:cluster.instance-identifier == ",
+                  {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${AWS::StackName}-BambooV8EcsCluster"
+                          }
+                        },
+                        "BambooV8Ec2Instance"
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            },
+            "Type": "memberOf"
+          }
+        ],
+        "TaskDefinition": {
+          "Ref": "BambooV8V2EcsTaskDefinition"
+        }
+      }
+    },
+    "SplunkForwarderEcsTaskDefinition": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Environment": [
+              {
+                "Name": "SPLUNK_START_ARGS",
+                "Value": "--accept-license"
+              },
+              {
+                "Name": "SPLUNK_PASSWORD",
+                "Value": "aliceInWonderland"
+              },
+              {
+                "Name": "SPLUNK_USER",
+                "Value": "root"
+              },
+              {
+                "Name": "STACK_NAME",
+                "Value": {
+                  "Ref": "AWS::StackName"
+                }
+              }
+            ],
+            "Essential": true,
+            "Image": {
+              "Fn::Join": [
+                ":",
+                [
+                  {
+                    "Fn::Sub": "artifactory.clevertap.net/clevertap/${SplunkForwarderImageName}"
+                  },
+                  {
+                    "Ref": "SplunkForwarderImageTag"
+                  }
+                ]
+              ]
+            },
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${SystemStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                }
+              }
+            },
+            "MemoryReservation": 128,
+            "MountPoints": [
+              {
+                "ContainerPath": "/var/atlassian/application-data/bamboo/logs",
+                "ReadOnly": true,
+                "SourceVolume": "bamboo-var-log"
+              },
+              {
+                "ContainerPath": "/var/atlassian/application-data/bamboo/shared/builds",
+                "ReadOnly": true,
+                "SourceVolume": "build-logs"
+              },
+              {
+                "ContainerPath": "/var/log",
+                "ReadOnly": true,
+                "SourceVolume": "var-log"
+              },
+              {
+                "ContainerPath": "/etc/cfn_stackname",
+                "ReadOnly": true,
+                "SourceVolume": "stack-name-file"
+              }
+            ],
+            "Name": "splunk-forwarder",
+            "Privileged": false,
+            "ReadonlyRootFilesystem": false
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "BambooEcsTaskExecutionIamRole",
+            "Arn"
+          ]
+        },
+        "NetworkMode": "host",
+        "Volumes": [
+          {
+            "Host": {
+              "SourcePath": "/var/atlassian/application-data/bamboo/logs"
+            },
+            "Name": "bamboo-var-log"
+          },
+          {
+            "Host": {
+              "SourcePath": "/var/atlassian/application-data/bamboo/shared/builds"
+            },
+            "Name": "build-logs"
+          },
+          {
+            "Host": {
+              "SourcePath": "/var/log"
+            },
+            "Name": "var-log"
+          },
+          {
+            "Host": {
+              "SourcePath": "/etc/cfn_stackname"
+            },
+            "Name": "stack-name-file"
+          }
+        ]
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    },
+    "SplunkEcsService": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-BambooV8EcsCluster"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "SchedulingStrategy": "DAEMON",
+        "TaskDefinition": {
+          "Ref": "SplunkForwarderEcsTaskDefinition"
+        }
+      }
+    },
+    "SensuV3AgentGoEcsService": {
+      "Condition": "IsSensuV3Enabled",
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-BambooV8EcsCluster"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "SchedulingStrategy": "DAEMON",
+        "TaskDefinition": {
+          "Ref": "SensuV3AgentGoEcsTaskDefinition"
+        }
+      },
+      "Type": "AWS::ECS::Service"
+    },
+    "SensuV3AgentGoEcsTaskDefinition": {
+      "Condition": "IsSensuV3Enabled",
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "EntryPoint": [
+              "sh",
+              "-c",
+              "sensu-agent start"
+            ],
+            "Environment": [
+              {
+                "Name": "SENSU_BACKEND_URL",
+                "Value": {
+                  "Ref": "SensuV2BackendUrl"
+                }
+              },
+              {
+                "Name": "SENSU_LOG_LEVEL",
+                "Value": "warn"
+              },
+              {
+                "Name": "SENSU_DISABLE_API",
+                "Value": true
+              },
+              {
+                "Name": "SENSU_DISABLE_SOCKETS",
+                "Value": true
+              },
+              {
+                "Name": "SENSU_STATSD_DISABLE",
+                "Value": true
+              },
+              {
+                "Name": "SENSU_CACHE_DIR",
+                "Value": "/var/lib/sensu"
+              },
+              {
+                "Name": "SENSU_NAMESPACE",
+                "Value": "default"
+              },
+              {
+                "Name": "SENSU_SUBSCRIPTIONS",
+                "Value": "bamboo all"
+              },
+              {
+                "Name": "SENSU_DETECT_CLOUD_PROVIDER",
+                "Value": "true"
+              },
+              {
+                "Name": "SENSU_KEEPALIVE_CRITICAL_TIMEOUT",
+                "Value": "180"
+              },
+              {
+                "Name": "SENSU_KEEPALIVE_WARNING_TIMEOUT",
+                "Value": "90"
+              },
+              {
+                "Name": "SENSU_AGENT_MANAGED_ENTITY",
+                "Value": "true"
+              },
+              {
+                "Name": "APPLICATION_NAME",
+                "Value": "bamboo"
+              },
+              {
+                "Name": "SENSU_KEEPALIVE_HANDLERS",
+                "Value": "keepalive opsgenie pagerduty"
+              },
+              {
+                "Name": "STACK_NAME",
+                "Value": {
+                  "Ref": "AWS::StackName"
+                }
+              },
+              {
+                "Name": "STACK_PREFIX",
+                "Value": "eu1"
+              }
+            ],
+            "Essential": true,
+            "Image": "artifactory.clevertap.net/clevertap/sensu-rhel:6.10.0",
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${SystemStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                }
+              }
+            },
+            "LogConfiguration": {
+              "LogDriver": "awsfirelens",
+              "Options": {
+                "Host": "http-inputs.clevertap.splunkcloud.com",
+                "Name": "splunk",
+                "Port": "443",
+                "Splunk_Send_Raw": "Off",
+                "event_host": "${HOSTNAME}",
+                "event_index": "sensu",
+                "event_source": "sensu-stdout",
+                "event_sourcetype": "_json",
+                "tls": "on",
+                "tls.verify": "off"
+              },
+              "SecretOptions": [
+                {
+                  "Name": "Splunk_Token",
+                  "ValueFrom": {
+                    "Fn::Join": [
+                      ":",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${SystemStack}-SharedResources-SplunkTokenSecretsManagerSecret"
+                          }
+                        },
+                        "splunk-token::"
+                      ]
+                    ]
+                  }
+                }
+              ]
+            },
+            "MemoryReservation": 256,
+            "MountPoints": [
+              {
+                "ContainerPath": "/var/lib/sensu",
+                "SourceVolume": "cache-dir"
+              },
+              {
+                "ContainerPath": "/etc/cfn_stackname",
+                "ReadOnly": true,
+                "SourceVolume": "stack-name-file"
+              },
+              {
+                "ContainerPath": "/home/bamboo",
+                "ReadOnly": true,
+                "SourceVolume": "bamboo-home"
+              },
+              {
+                "ContainerPath": "/var/atlassian/application-data/bamboo",
+                "ReadOnly": true,
+                "SourceVolume": "bamboo-build-dir"
+              },
+              {
+                "ContainerPath": "/rootfs",
+                "ReadOnly": true,
+                "SourceVolume": "root-fs"
+              }
+            ],
+            "Name": "Sensu-Agent",
+            "Privileged": false
+          },
+          {
+            "Environment": [
+              {
+                "Name": "STACK_NAME",
+                "Value": {
+                  "Ref": "AWS::StackName"
+                }
+              },
+              {
+                "Name": "FLB_LOG_LEVEL",
+                "Value": "warn"
+              },
+              {
+                "Name": "aws_fluent_bit_init_s3_parsers",
+                "Value": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${SystemStack}-SharedResources-FluentBitConfigS3BucketArn"
+                        }
+                      },
+                      "master/sensu-agent-parser.conf"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "aws_fluent_bit_init_s3_filters",
+                "Value": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${SystemStack}-SharedResources-FluentBitConfigS3BucketArn"
+                        }
+                      },
+                      "master/sensu-agent-filter.conf"
+                    ]
+                  ]
+                }
+              }
+            ],
+            "Essential": true,
+            "FirelensConfiguration": {
+              "Type": "fluentbit"
+            },
+            "Image": "artifactory.clevertap.net/clevertap/aws-for-fluent-bit:init-2.32.0",
+            "LogConfiguration": {
+              "LogDriver": "awsfirelens",
+              "Options": {
+                "Host": "http-inputs.clevertap.splunkcloud.com",
+                "Name": "splunk",
+                "Port": "443",
+                "Splunk_Send_Raw": "Off",
+                "event_host": "${HOSTNAME}",
+                "event_index": "sensu",
+                "event_source": "fluentbit-stdout",
+                "event_sourcetype": "_json",
+                "tls": "on",
+                "tls.verify": "off"
+              },
+              "SecretOptions": [
+                {
+                  "Name": "Splunk_Token",
+                  "ValueFrom": {
+                    "Fn::Join": [
+                      ":",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${SystemStack}-SharedResources-SplunkTokenSecretsManagerSecret"
+                          }
+                        },
+                        "splunk-token::"
+                      ]
+                    ]
+                  }
+                }
+              ]
+            },
+            "Memory": 128,
+            "Name": "log_router",
+            "Privileged": false,
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${SystemStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                }
+              }
+            }
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "BambooEcsTaskExecutionIamRole",
+            "Arn"
+          ]
+        },
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "BambooEcsTaskExecutionIamRole",
+            "Arn"
+          ]
+        },
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "NetworkMode": "host",
+        "Volumes": [
+          {
+            "DockerVolumeConfiguration": {
+              "Driver": "local",
+              "Scope": "task"
+            },
+            "Name": "cache-dir"
+          },
+          {
+            "Host": {
+              "SourcePath": "/etc/cfn_stackname"
+            },
+            "Name": "stack-name-file"
+          },
+          {
+            "Host": {
+              "SourcePath": "/home/bamboo"
+            },
+            "Name": "bamboo-home"
+          },
+          {
+            "Host": {
+              "SourcePath": "/var/atlassian/application-data/bamboo"
+            },
+            "Name": "bamboo-build-dir"
+          },
+          {
+            "Host": {
+              "SourcePath": "/"
+            },
+            "Name": "root-fs"
+          }
+        ]
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    },
+    "CadvisorEcsTaskIamRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com"
+              },
+              "Sid": "AllowEcsTaskRole"
+            }
+          ]
+        },
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "CadvisorEcsTaskIamRole"
+            ]
+          ]
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "CadvisorEcsTaskIamPolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${SystemStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                  }
+                }
+              ],
+              "Sid": "AllowSecretsRetrieveValue"
+            }
+          ]
+        },
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "CadvisorEcsTaskIamPolicy"
+            ]
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "CadvisorEcsTaskIamRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "CadvisorEcsTaskDefinition": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Essential": true,
+            "Image": {
+              "Fn::Join": [
+                ":",
+                [
+                  "artifactory.clevertap.net/clevertap/cadvisor",
+                  {
+                    "Fn::Sub": "${CadvisorImageTag}"
+                  }
+                ]
+              ]
+            },
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${SystemStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                }
+              }
+            },
+            "MemoryReservation": 128,
+            "MountPoints": [
+              {
+                "ContainerPath": "/rootfs",
+                "ReadOnly": true,
+                "SourceVolume": "source-rootfs"
+              },
+              {
+                "ContainerPath": "/var/run",
+                "SourceVolume": "run-dir"
+              },
+              {
+                "ContainerPath": "/sys",
+                "ReadOnly": true,
+                "SourceVolume": "system-folder"
+              },
+              {
+                "ContainerPath": "/var/lib/docker",
+                "ReadOnly": true,
+                "SourceVolume": "docker-folder"
+              },
+              {
+                "ContainerPath": "/sys/fs/cgroup",
+                "ReadOnly": true,
+                "SourceVolume": "cgroup-mount"
+              },
+              {
+                "ContainerPath": "/dev/mapper",
+                "ReadOnly": true,
+                "SourceVolume": "volume-mount"
+              }
+            ],
+            "Name": "cadvisor",
+            "PortMappings": [
+              {
+                "ContainerPort": 8080,
+                "HostPort": 8090,
+                "Protocol": "tcp"
+              }
+            ],
+            "Privileged": true,
+            "ReadonlyRootFilesystem": true
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "CadvisorEcsTaskIamRole",
+            "Arn"
+          ]
+        },
+        "Volumes": [
+          {
+            "Host": {
+              "SourcePath": "/"
+            },
+            "Name": "source-rootfs"
+          },
+          {
+            "Host": {
+              "SourcePath": "/var/run"
+            },
+            "Name": "run-dir"
+          },
+          {
+            "Host": {
+              "SourcePath": "/sys"
+            },
+            "Name": "system-folder"
+          },
+          {
+            "Host": {
+              "SourcePath": "/var/lib/docker"
+            },
+            "Name": "docker-folder"
+          },
+          {
+            "Host": {
+              "SourcePath": "/sys/fs/cgroup"
+            },
+            "Name": "cgroup-mount"
+          },
+          {
+            "Host": {
+              "SourcePath": "/dev/mapper"
+            },
+            "Name": "volume-mount"
+          }
+        ]
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    },
+    "CadvisorEcsService": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-BambooV8EcsCluster"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "SchedulingStrategy": "DAEMON",
+        "TaskDefinition": {
+          "Ref": "CadvisorEcsTaskDefinition"
+        },
+        "PlacementConstraints": [
+          {
+            "Type": "distinctInstance"
+          }
+        ]
+      }
+    },
+    "TerraformAgentEcsTaskExecutionIamPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "TerraformAgentEcsTaskExecutionIamPolicy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Sid": "AllowSecretsRetreiveValue",
+              "Effect": "Allow",
+              "Action": [
+                "secretsmanager:GetSecretValue"
+              ],
+              "Resource": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${SystemStack}-SharedResources-TerraformAgentApiKeySecretsManagerSecretName"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "TerraformAgentEcsTaskExecutionIamRole"
+          }
+        ]
+      }
+    },
+    "TerraformAgentEcsTaskExecutionIamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "TerraformAgentEcsTaskExecutionIamRole"
+            ]
+          ]
+        }
+      }
+    },
+    "TerraformAgentEcsTaskDefinition": {
+      "Type": "AWS::ECS::TaskDefinition",
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Name": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "TerraformAgent"
+                ]
+              ]
+            },
+            "Image": {
+              "Fn::Join": [
+                ":",
+                [
+                  "hashicorp/tfc-agent",
+                  "1.10.0"
+                ]
+              ]
+            },
+            "Environment": [
+              {
+                "Name": "TFC_AGENT_TOKEN",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${SystemStack}-SharedResources-TerraformAgentApiKeySecretsManagerSecretName"
+                        }
+                      },
+                      ":SecretString:}}"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "TFC_AGENT_NAME",
+                "Value": "terraform-agent"
+              },
+              {
+                "Name": "TFC_AGENT_SINGLE",
+                "Value": "true"
+              }
+            ],
+            "MemoryReservation": 256,
+            "Ulimits": [
+              {
+                "HardLimit": 900000,
+                "Name": "nofile",
+                "SoftLimit": 900000
+              }
+            ]
+          }
+        ],
+        "Family": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "TerraformAgentEcsTaskDefinition"
+            ]
+          ]
+        },
+        "NetworkMode": "host",
+        "PlacementConstraints": [
+          {
+            "Type": "memberOf",
+            "Expression": {
+              "Fn::Join": [
+                "",
+                [
+                  "attribute:cluster.instance-identifier == ",
+                  {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${AWS::StackName}-BambooV8EcsCluster"
+                          }
+                        },
+                        "BambooV8Ec2Instance"
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            }
+          }
+        ],
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "TerraformAgentEcsTaskExecutionIamRole",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "TerraformAgentEcsService": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-BambooV8EcsCluster"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "DesiredCount": 1,
+        "LaunchType": "EC2",
+        "SchedulingStrategy": "REPLICA",
+        "PlacementConstraints": [
+          {
+            "Expression": {
+              "Fn::Join": [
+                "",
+                [
+                  "attribute:cluster.instance-identifier == ",
+                  {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${AWS::StackName}-BambooV8EcsCluster"
+                          }
+                        },
+                        "BambooV8Ec2Instance"
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            },
+            "Type": "memberOf"
+          }
+        ],
+        "TaskDefinition": {
+          "Ref": "TerraformAgentEcsTaskDefinition"
+        }
+      }
+    }
+  }
+}
