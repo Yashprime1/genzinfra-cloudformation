@@ -75,11 +75,11 @@
       "Type": "String"
     },
     "BambooV8Ec2VolumeSdpKmsKey": {
-      "Default": "arn:aws:kms:eu-west-1:062484260092:key/443d79ca-e933-4940-81cf-8589b20fc0be",
+      "Default": "443d79ca-e933-4940-81cf-8589b20fc0be",
       "Type": "String"
     },
     "BambooV8Ec2VolumeSdfKmsKey": {
-      "Default": "arn:aws:kms:eu-west-1:062484260092:key/fa409a23-ed73-4116-a118-1aac9fc31941",
+      "Default": "fa409a23-ed73-4116-a118-1aac9fc31941",
       "Type": "String"
     }
   },
@@ -944,7 +944,7 @@
         "Size": "8",
         "AvailabilityZone": "eu-west-1a",
         "VolumeType": "gp2",
-        "Encrypted": false,
+        "Encrypted": true,
         "SnapshotId": "snap-04023430ec532de0f",
         "Tags": [
           {
