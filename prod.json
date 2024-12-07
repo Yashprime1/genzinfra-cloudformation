@@ -20,7 +20,6 @@
             }, 
             "Eu-SecurityGroup": {
                 "Parameters": {
-                    "SystemStack":"System"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/ireland/core/ireland-securitygroup.json"
