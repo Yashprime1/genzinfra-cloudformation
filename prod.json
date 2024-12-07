@@ -36,7 +36,6 @@
             },
             "Eu-Bamboo-Service": {
                 "Parameters": {
-                    "NetworkStack":"Eu",
                     "VpcNetworkPrefix":"10.17"
                 },
                 "SkipUpdate": false,
