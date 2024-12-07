@@ -962,6 +962,7 @@
             "production"
           ]
         },
+        "KeyName":"bamboo",
         "InstanceInitiatedShutdownBehavior": "stop",
         "InstanceType": "c5.12xlarge",
         "Monitoring": true,
