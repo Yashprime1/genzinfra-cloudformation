@@ -66,10 +66,6 @@
       "Default":20,
       "Description": "Atlassian RDS EC2 instance type volume size. Upto 20 is Free Tier eligible"
     },
-    "BambooContainerTag": {
-      "Description": "Container tag for Bamboo docker image",
-      "Type": "String"
-    },
     "BambooV8Ec2InstanceAmi": {
       "Default": "ami-04469649190159c95",
       "Type": "String"
@@ -286,7 +282,6 @@
               ],
               "Resource": "*"
             },
-            {
               "Sid": "WriteLogsToCloudWatchLogs",
               "Effect": "Allow",
               "Action": [
