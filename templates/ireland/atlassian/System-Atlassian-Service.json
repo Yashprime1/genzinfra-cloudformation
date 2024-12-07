@@ -344,9 +344,7 @@
                     ".",
                     [
                       "build",
-                      {
-                        "Ref": "CertificateDomain"
-                      }
+                     "yashprime.ninja"
                     ]
                   ]
                 }
