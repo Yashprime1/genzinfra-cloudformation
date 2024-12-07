@@ -908,62 +908,6 @@
         }
       }
     },
-    "BambooV8EncryptedV2Ec2Volume": {
-      "Type": "AWS::EC2::Volume",
-      "Properties": {
-        "Size": "1024",
-        "AvailabilityZone": "eu-west-1a",
-        "VolumeType": "gp3",
-        "Iops": "5000",
-        "Encrypted": true,
-        "KmsKeyId": {
-          "Ref": "BambooV8Ec2VolumeSdfKmsKey"
-        },
-        "SnapshotId": "snap-0b3ad58b1ff5baf39",
-        "Tags": [
-          {
-            "Key": "SnapshotIdentifier",
-            "Value": {
-              "Fn::Join": [
-                "-",
-                [
-                  {
-                    "Ref": "AWS::StackName"
-                  },
-                  "BambooEncryptedEc2Volume"
-                ]
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "BambooEncryptedHomeEc2Volume": {
-      "Type": "AWS::EC2::Volume",
-      "Properties": {
-        "Size": "8",
-        "AvailabilityZone": "eu-west-1a",
-        "VolumeType": "gp2",
-        "Encrypted": true,
-        "SnapshotId": "snap-04023430ec532de0f",
-        "Tags": [
-          {
-            "Key": "SnapshotIdentifier",
-            "Value": {
-              "Fn::Join": [
-                "-",
-                [
-                  {
-                    "Ref": "AWS::StackName"
-                  },
-                  "BambooEncryptedHomeEc2Volume"
-                ]
-              ]
-            }
-          }
-        ]
-      }
-    },
     "BambooV8Ec2Instance": {
       "Type": "AWS::EC2::Instance",
       "Condition": "IsBambooV8Ec2InstanceEnabled",
@@ -1010,15 +954,11 @@
         },
         "Volumes": [
           {
-            "VolumeId": {
-              "Ref": "BambooV8EncryptedV2Ec2Volume"
-            },
+            "VolumeId": "vol-0cf4a43905c874773",
             "Device": "/dev/sdf"
           },
           {
-            "VolumeId": {
-              "Ref": "BambooEncryptedHomeEc2Volume"
-            },
+            "VolumeId": "vol-07b12d5d709b2fa23",
             "Device": "/dev/sdp"
           }
         ],
