@@ -282,6 +282,7 @@
               ],
               "Resource": "*"
             },
+            {
               "Sid": "WriteLogsToCloudWatchLogs",
               "Effect": "Allow",
               "Action": [
