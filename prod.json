@@ -28,7 +28,7 @@
                 "Parameters": {
                     "NetworkStack":"Eu",
                     "VpcNetworkPrefix":"10.17",
-                    "RdsInstanceType": "db.t2.medium",
+                    "RdsInstanceType": "db.m5.large",
                     "RdsAllocatedStorage": "16"
                 },
                 "SkipUpdate": false,
