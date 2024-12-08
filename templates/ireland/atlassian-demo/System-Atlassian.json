@@ -999,7 +999,7 @@
         },
         "KeyName":"bamboo",
         "InstanceInitiatedShutdownBehavior": "stop",
-        "InstanceType": "t2.xlarge",
+        "InstanceType": "t2.2xlarge",
         "Monitoring": true,
         "Volumes": [
           {
