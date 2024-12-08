@@ -24,22 +24,22 @@
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/ireland/core/ireland-securitygroup.json"
             },
-            "Eu-Bamboo": {
+            "Eu-Bamboo-Demo1": {
                 "Parameters": {
                     "NetworkStack":"Eu",
                     "VpcNetworkPrefix":"10.17",
-                    "RdsInstanceType": "db.m5.large",
-                    "RdsAllocatedStorage": "64"
+                    "RdsInstanceType": "db.t2.medium",
+                    "RdsAllocatedStorage": "16"
                 },
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/ireland/atlassian/System-Atlassian.json"
+                "TemplatePath": "./templates/ireland/atlassian-demo/System-Atlassian.json"
             },
-            "Eu-Bamboo-Service": {
-                "Parameters": {
+            "Eu-Bamboo-Demo1-Service": {
+                "Parameters": { 
                     "VpcNetworkPrefix":"10.17"
                 },
                 "SkipUpdate": false,
-                "TemplatePath": "./templates/ireland/atlassian/System-Atlassian-Service.json"
+                "TemplatePath": "./templates/ireland/atlassian-demo/System-Atlassian-Service.json"
             }
         }
 
