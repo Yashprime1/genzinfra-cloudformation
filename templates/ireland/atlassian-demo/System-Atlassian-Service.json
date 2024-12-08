@@ -382,10 +382,6 @@
                 }
               },
               {
-                "Name":"JVM_SUPPORT_RECOMMENDED_ARGS",
-                "Value":"-Xlog:gc*,gc+age=trace:file=/var/atlassian/application-data/bamboo/logs/atlassian-bamboo-gc-%t.log:time,level,tags:filesize=10M,filecount=5 -XX:-OmitStackTraceInFastThrow -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/atlassian/application-data/bamboo/logs/"
-              },
-              {
                 "Name": "JVM_MINIMUM_MEMORY",
                 "Value": "1024m"
               },
