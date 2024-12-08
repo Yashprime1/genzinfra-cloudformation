@@ -315,7 +315,7 @@
                 ]
               ]
             },
-            "Image": "yashprime07/bamboo-server:main-6",
+            "Image": "yashprime07/bamboo-server:github-master-35",
             "Environment": [
               {
                 "Name": "CATALINA_CONNECTOR_SECURE",
