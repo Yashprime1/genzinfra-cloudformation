@@ -16,6 +16,10 @@
     "VpcNetworkPrefix": {
       "Default": "",
       "Type": "String"
+    },
+    "Subdomain": {
+      "Default": "",
+      "Type": "String"
     }
   },
   "Resources": {
@@ -343,7 +347,9 @@
                   "Fn::Join": [
                     ".",
                     [
-                      "build",
+                     {
+                      "Ref":"Subdomain"
+                     },
                      "yashprime.ninja"
                     ]
                   ]
