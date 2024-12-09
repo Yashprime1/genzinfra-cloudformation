@@ -65,7 +65,7 @@
                     "NetworkStack":"Eu",
                     "VpcNetworkPrefix":"10.17",
                     "RdsInstanceType": "db.m5.large",
-                    "RdsAllocatedStorage": "16"
+                    "RdsAllocatedStorage": "64"
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/ireland/atlassian-prod-clone/System-Atlassian.json"
