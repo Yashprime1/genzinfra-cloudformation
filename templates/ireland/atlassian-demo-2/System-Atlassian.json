@@ -1,0 +1,1086 @@
+{
+  "Description": "Template to provision hosted Atlassian components",
+  "Parameters": {
+    "NetworkStack": {
+      "Description": "Name of the stack that acts as the base for all stacks in network",
+      "Default": "",
+      "Type": "String"
+    },
+    "RdsMultipleAvailabilityZone": {
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Default": "true",
+      "Description": "BitBucket RDS EC2 multiple Avaibility zone flag",
+      "Type": "String"
+    },
+    "BambooRdsPostgresEngineVersion": {
+      "Type": "String",
+      "Default": "12.19",
+      "AllowedValues": [
+        "9.4.11",
+        "9.6.9",
+        "9.6.10",
+        "9.6.11",
+        "9.6.12",
+        "9.6.13",
+        "9.6.14",
+        "9.6.22",
+        "12.7",
+        "12.19"
+      ],
+      "Description": "Postgres engine version number for Atlassian RDS"
+    },
+    "RdsInstanceType": {
+      "Type": "String",
+      "AllowedValues": [
+        "db.t2.micro",
+        "db.t2.small",
+        "db.t2.medium",
+        "db.t2.large",
+        "db.t2.xlarge",
+        "db.t2.2xlarge",
+        "db.t3.micro",
+        "db.t3.small",
+        "db.t3.medium",
+        "db.t3.large",
+        "db.t3.xlarge",
+        "db.t3.2xlarge",
+        "db.m4.large",
+        "db.m4.xlarge",
+        "db.m4.2xlarge",
+        "db.m4.4xlarge",
+        "db.m4.10xlarge",
+        "db.m4.16xlarge",
+        "db.m5.large",
+        "db.m5.xlarge",
+        "db.m5.2xlarge",
+        "db.m5.4xlarge",
+        "db.m5.24xlarge"
+      ],
+      "Description": "Atlassian RDS EC2 instance type. db.t2.micro is Free Tier eligible"
+    },
+    "RdsAllocatedStorage": {
+      "Type": "String",
+      "Default":20,
+      "Description": "Atlassian RDS EC2 instance type volume size. Upto 20 is Free Tier eligible"
+    },
+    "BambooV8Ec2InstanceAmi": {
+      "Default": "ami-04469649190159c95",
+      "Type": "String"
+    },
+    "VpcNetworkPrefix": {
+      "Default": "",
+      "Type": "String"
+    }
+  },
+  "Mappings": {
+    "RegionToAmiMapOfBambooV8Instance": {
+      "eu-west-1": {
+        "production": "ami-04469649190159c95"
+      }
+    },
+    "Ec2InstanceStateMap": {
+      "All": {
+        "Enabled": true
+      },
+      "BambooEc2Instance": {
+        "Enabled": true
+      },
+      "BambooDockerEc2Instance":{
+        "Enabled": true
+      },
+      "1": {
+        "Enabled": false
+      },
+      "BambooDockerArm64Ec2Instance": {
+        "Enabled": true
+      }
+    },
+    "BambooV8Ec2InstanceStateMap": {
+      "All": {
+        "Enabled": true
+      },
+      "BambooV8Ec2Instance": {
+        "Enabled": true
+      }
+    }
+  },
+  "Conditions": {
+    "IsBambooEc2InstanceEnabled": {
+      "Fn::And": [
+        {
+          "Fn::Equals": [
+            {
+              "Fn::FindInMap": [
+                "Ec2InstanceStateMap",
+                "BambooEc2Instance",
+                "Enabled"
+              ]
+            },
+            true
+          ]
+        },
+        {
+          "Fn::Equals": [
+            {
+              "Fn::FindInMap": [
+                "Ec2InstanceStateMap",
+                "All",
+                "Enabled"
+              ]
+            },
+            true
+          ]
+        }
+      ]
+    },
+    "IsBambooV8Ec2InstanceEnabled": {
+      "Fn::And": [
+        {
+          "Fn::Equals": [
+            {
+              "Fn::FindInMap": [
+                "BambooV8Ec2InstanceStateMap",
+                "BambooV8Ec2Instance",
+                "Enabled"
+              ]
+            },
+            true
+          ]
+        },
+        {
+          "Fn::Equals": [
+            {
+              "Fn::FindInMap": [
+                "BambooV8Ec2InstanceStateMap",
+                "All",
+                "Enabled"
+              ]
+            },
+            true
+          ]
+        }
+      ]
+    },
+    "IsBambooDockerEc2InstanceEnabled": {
+      "Fn::And": [
+        {
+          "Fn::Equals": [
+            {
+              "Fn::FindInMap": [
+                "Ec2InstanceStateMap",
+                "BambooDockerEc2Instance",
+                "Enabled"
+              ]
+            },
+            false
+          ]
+        },
+        {
+          "Fn::Equals": [
+            {
+              "Fn::FindInMap": [
+                "Ec2InstanceStateMap",
+                "All",
+                "Enabled"
+              ]
+            },
+            true
+          ]
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "EcsCluster": {
+      "Type": "AWS::ECS::Cluster",
+      "Properties": {}
+    },
+    "BambooEc2InstanceIamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "Ec2InstanceIamRole"
+            ]
+          ]
+        }
+      }
+    },
+    "BambooEc2InstanceIamPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "Ec2InstanceIamPolicy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Sid": "AllowInteractionWithEcsCluster",
+              "Effect": "Allow",
+              "Action": [
+                "ecs:DeregisterContainerInstance",
+                "ecs:DiscoverPollEndpoint",
+                "ecs:Poll",
+                "ecs:RegisterContainerInstance",
+                "ecs:StartTelemetrySession",
+                "ecs:Submit*"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowEcrRegistryPushAccess",
+              "Effect": "Allow",
+              "Action": [
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:PutImage",
+                "ecr:InitiateLayerUpload",
+                "ecr:UploadLayerPart",
+                "ecr:CompleteLayerUpload",
+                "ecr:GetAuthorizationToken",
+                "ecr:GetRepositoryPolicy",
+                "ecr:DescribeRepositories",
+                "ecr:ListImages"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "WriteLogsToCloudWatchLogs",
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowSSMAgentToFunction",
+              "Effect": "Allow",
+              "Action": [
+                "ssm:DescribeAssociation",
+                "ssm:GetDeployablePatchSnapshotForInstance",
+                "ssm:GetDocument",
+                "ssm:GetManifest",
+                "ssm:GetParameters",
+                "ssm:ListAssociations",
+                "ssm:ListInstanceAssociations",
+                "ssm:PutInventory",
+                "ssm:PutComplianceItems",
+                "ssm:PutConfigurePackageResult",
+                "ssm:UpdateAssociationStatus",
+                "ssm:UpdateInstanceAssociationStatus",
+                "ssm:UpdateInstanceInformation"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowSsmAgentToCommunicateWithSystemsManagerApiService",
+              "Effect": "Allow",
+              "Action": [
+                "ec2messages:AcknowledgeMessage",
+                "ec2messages:DeleteMessage",
+                "ec2messages:FailMessage",
+                "ec2messages:GetEndpoint",
+                "ec2messages:GetMessages",
+                "ec2messages:SendReply"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowSsmManagerToBeAbleToDescribeInstanceStatus",
+              "Effect": "Allow",
+              "Action": [
+                "ec2:DescribeInstanceStatus"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:DescribeLogGroups",
+                "logs:DescribeLogStreams",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowSSMAgentToGetKMSGeneratedDataKeyWhenAccessingS3Bucket",
+              "Effect": "Allow",
+              "Action": [
+                "kms:GenerateDataKey",
+                "kms:Decrypt"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowSsmAgentToPushAndDeleteObjectFromS3",
+              "Effect": "Allow",
+              "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObjects",
+                "s3:AbortMultipartUpload",
+                "s3:ListMultipartUploadParts",
+                "s3:ListBucket",
+                "s3:ListBucketMultipartUploads",
+                "s3:GetBucketLocation",
+                "s3:ListObjectsV2"
+              ],
+              "Resource": "arn:aws:s3:::*sharedresources-staticimagess3bucket*"
+            },
+            {
+              "Sid": "AllowTwoWayWebsocketChannelComminicationBetweenTheClientBrowserOrCliAndRemoteManagedInstance",
+              "Effect": "Allow",
+              "Action": [
+                "ssmmessages:*",
+                "ssm:UpdateInstanceInformation"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowSsmToGetS3EncryptionConfiguration",
+              "Effect": "Allow",
+              "Action": [
+                "s3:GetEncryptionConfiguration"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowBootstrapViaCloudInitToBeAbleToDescribeTags",
+              "Effect": "Allow",
+              "Action": [
+                "ec2:DescribeTags"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowBambooToUploadHtmlFilesToS3Bucket",
+              "Effect": "Allow",
+              "Action": [
+                "s3:PutObject"
+              ],
+              "Resource": [
+                "arn:aws:s3:::*-sharedresources-unsubscribeclevertappagess3bu-*",
+                "arn:aws:s3:::*-sharedresources-unsubscribeclevertappagess3bu-*/*"
+              ]
+            },
+            {
+              "Sid": "AllowsPackerEc2ActionsToBambooAgent",
+              "Effect": "Allow",
+              "Action": [
+                "ec2:DescribeInstanceStatus",
+                "ec2:AttachVolume",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:CopyImage",
+                "ec2:CreateImage",
+                "ec2:CreateKeypair",
+                "ec2:CreateSecurityGroup",
+                "ec2:CreateSnapshot",
+                "ec2:CreateTags",
+                "ec2:CreateVolume",
+                "ec2:DeleteKeyPair",
+                "ec2:DeleteSecurityGroup",
+                "ec2:DeleteSnapshot",
+                "ec2:DeleteVolume",
+                "ec2:DeregisterImage",
+                "ec2:DescribeImageAttribute",
+                "ec2:DescribeImages",
+                "ec2:DescribeInstances",
+                "ec2:DescribeRegions",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSnapshots",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeTags",
+                "ec2:DescribeVolumes",
+                "ec2:DetachVolume",
+                "ec2:GetPasswordData",
+                "ec2:ModifyImageAttribute",
+                "ec2:ModifyInstanceAttribute",
+                "ec2:ModifySnapshotAttribute",
+                "ec2:RegisterImage",
+                "ec2:RunInstances",
+                "ec2:StopInstances",
+                "ec2:TerminateInstances"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowBambooToCreateTags",
+              "Effect": "Allow",
+              "Action": "ec2:CreateTags",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      "arn:aws:ec2:eu-west-1",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      "instance/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "BambooEc2InstanceIamRole"
+          }
+        ]
+      }
+    },
+    "BambooEcsTaskDefinitionIamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "BambooEcsTaskDefinitionIamRole"
+            ]
+          ]
+        }
+      }
+    },
+    "BambooEcsTaskDefinitionIamPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "BambooEcsTaskDefinitionIamPolicy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Sid": "AllowCloudformationActions",
+              "Effect": "Allow",
+              "Action": [
+                "cloudformation:CreateStack",
+                "cloudformation:DeleteStack",
+                "cloudformation:DescribeStacks",
+                "cloudformation:DescribeStackResource",
+                "cloudformation:UpdateStack",
+                "cloudformation:CreateChangeSet",
+                "cloudformation:DeleteChangeSet",
+                "cloudformation:DescribeChangeSet",
+                "cloudformation:ExecuteChangeSet",
+                "cloudformation:GetStackPolicy",
+                "cloudformation:SetStackPolicy",
+                "cloudformation:ValidateTemplate",
+                "iam:PassRole"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "PolicyForAccessToCfstackBucket",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::cfstack-init-templatess3bucket-*",
+                "arn:aws:s3:::cfstack-init-templatess3bucket-*/*",
+                "arn:aws:s3:::cfstack-init-sources3bucket-*",
+                "arn:aws:s3:::cfstack-init-sources3bucket-*/*"
+              ],
+              "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion",
+                "s3:GetBucketVersioning",
+                "s3:PutObject"
+              ]
+            },
+            {
+              "Sid": "AllowAccessForScaleUp",
+              "Effect": "Allow",
+              "Action": [
+                "ecs:DescribeServices",
+                "ecs:DescribeTaskDefinition",
+                "ecs:DescribeClusters",
+                "autoscaling:DescribeAutoScalingGroups",
+                "autoscaling:SetDesiredCapacity"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowEcrRegistryPushAccess",
+              "Effect": "Allow",
+              "Action": [
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:PutImage",
+                "ecr:InitiateLayerUpload",
+                "ecr:UploadLayerPart",
+                "ecr:CompleteLayerUpload",
+                "ecr:GetAuthorizationToken"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "TempAllowCompleteAccess",
+              "Effect": "Allow",
+              "Action": "*",
+              "Resource": "*"
+            },
+            {
+              "Sid": "PolicyForAccessToAjsBucket",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::static.wizrocket.com*",
+                "arn:aws:s3:::static.wizrocket.com*/*"
+              ],
+              "Action": [
+                "s3:PutObject"
+              ]
+            },
+            {
+              "Sid": "PolicyForCloudfronInvalidateCacheAccess",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:cloudfront:::distribution/E1OCAMMKX0F1A1",
+                "arn:aws:cloudfront:::distribution/EKGZYRKF68ULB",
+                "arn:aws:cloudfront:::distribution/E1H35A48W4IT9W",
+                "arn:aws:cloudfront:::distribution/E3SE1A29DF9NBL",
+                "arn:aws:cloudfront:::distribution/E1EDCLUARHYURF",
+                "arn:aws:cloudfront:::distribution/E1HY5OE99CLFNB",
+                "arn:aws:cloudfront:::distribution/EKDV89PCWN5NH",
+                "arn:aws:cloudfront:::distribution/E5IL9VSEWS2UO"
+              ],
+              "Action": [
+                "cloudfront:CreateInvalidation"
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "BambooEcsTaskDefinitionIamRole"
+          }
+        ]
+      }
+    },
+    "BambooEc2InstanceIamProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "BambooEc2InstanceIamRole"
+          }
+        ]
+      }
+    },
+    "BambooEcsTaskExecutionIamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "BambooEcsTaskExecutionIamRole"
+            ]
+          ]
+        }
+      }
+    },
+    "BambooEcsTaskExecutionIamPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "BambooEcsTaskExecutionIamPolicy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Sid": "AllowSecretsRetreiveValue",
+              "Effect": "Allow",
+              "Action": [
+                "secretsmanager:GetSecretValue"
+              ],
+              "Resource": [
+                {
+                  "Ref": "CloudflareTunnelTokenSecretsManagerSecret"
+                }
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "BambooEcsTaskExecutionIamRole"
+          }
+        ]
+      }
+    },
+    "Ec2VolumeDlmLifecyclePolicy": {
+      "Type": "AWS::DLM::LifecyclePolicy",
+      "Properties": {
+        "Description": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "Ec2VolumeDlmLifecyclePolicy"
+            ]
+          ]
+        },
+        "ExecutionRoleArn": {
+          "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/service-role/AWSDataLifecycleManagerServiceRole"
+        },
+        "PolicyDetails": {
+          "ResourceTypes": [
+            "VOLUME"
+          ],
+          "TargetTags": [
+            {
+              "Key": "SnapshotIdentifier",
+              "Value": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "AWS::StackName"
+                    },
+                    "BambooEncryptedEc2Volume"
+                  ]
+                ]
+              }
+            }
+          ],
+          "Schedules": [
+            {
+              "Name": "Daily Snapshots",
+              "CreateRule": {
+                "Interval": 4,
+                "IntervalUnit": "HOURS",
+                "Times": [
+                  "00:00"
+                ]
+              },
+              "RetainRule": {
+                "Count": 84
+              },
+              "CopyTags": true
+            }
+          ]
+        },
+        "State": "ENABLED"
+      }
+    },
+    "RdsAzAEc2Subnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "a"
+            ]
+          ]
+        },
+        "CidrBlock": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Ref": "VpcNetworkPrefix"
+              },
+              "19.64/27"
+            ]
+          ]
+        },
+        "MapPublicIpOnLaunch": false,
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-Network-AppVPCId"
+          }
+        }
+      }
+    },
+    "RdsAzBEc2Subnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "b"
+            ]
+          ]
+        },
+        "CidrBlock": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Ref": "VpcNetworkPrefix"
+              },
+              "97.0/27"
+            ]
+          ]
+        },
+        "MapPublicIpOnLaunch": false,
+        "VpcId":{
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-Network-AppVPCId"
+          }
+        }
+      }
+    },
+    "RdsDbSubnetGroup": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "rds db subnet group",
+        "SubnetIds": [
+          {
+            "Ref": "RdsAzAEc2Subnet"
+          },
+          {
+            "Ref": "RdsAzBEc2Subnet"
+          }
+        ]
+      }
+    },
+    "BambooRdsSecretsManagerSecret": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "This is a Secrets Manager secret for Bamboo Atlassian RDS instance"
+        },
+        "GenerateSecretString": {
+          "SecretStringTemplate": "{\"username\": \"postgres\"}",
+          "GenerateStringKey": "password",
+          "PasswordLength": 20,
+          "ExcludeCharacters": "\"@/\\'`(){}[]:!$"
+        }
+      }
+    },
+    "BambooRdsDbInstance": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "AllocatedStorage": {
+          "Ref": "RdsAllocatedStorage"
+        },
+        "AllowMajorVersionUpgrade": true,
+        "AutoMinorVersionUpgrade": true,
+        "BackupRetentionPeriod": 30,
+        "CopyTagsToSnapshot": true,
+        "DBSnapshotIdentifier": "bamboo-rds-data-snapshot",
+        "DBInstanceClass": {
+          "Ref": "RdsInstanceType"
+        },
+        "DBSubnetGroupName": {
+          "Ref": "RdsDbSubnetGroup"
+        },
+        "Engine": "postgres",
+        "EngineVersion": {
+          "Ref": "BambooRdsPostgresEngineVersion"
+        },
+        "MultiAZ": {
+          "Ref": "RdsMultipleAvailabilityZone"
+        },
+        "MasterUsername": {
+          "Fn::Join": [
+            "",
+            [
+              "{{resolve:secretsmanager:",
+              {
+                "Ref": "BambooRdsSecretsManagerSecret"
+              },
+              ":SecretString:username}}"
+            ]
+          ]
+        },
+        "MasterUserPassword": {
+          "Fn::Join": [
+            "",
+            [
+              "{{resolve:secretsmanager:",
+              {
+                "Ref": "BambooRdsSecretsManagerSecret"
+              },
+              ":SecretString:password}}"
+            ]
+          ]
+        },
+        "Port": "5432",
+        "PubliclyAccessible": false,
+        "StorageType": "gp2",
+        "StorageEncrypted": true,
+        "KmsKeyId":"arn:aws:kms:eu-west-1:736548753645:key/b399ce49-2412-4fb8-b564-5cafc73b251f",
+        "VPCSecurityGroups": [
+          {
+              "Fn::ImportValue": 
+                  {
+                      "Fn::Sub": "${NetworkStack}-SecurityGroup-DS2SecurityGroupId"
+                  }
+          }
+        ]
+      },
+      "DeletionPolicy": "Snapshot"
+    },
+    "BambooV8EncryptedV2Ec2Volume": {
+      "Type": "AWS::EC2::Volume",
+      "Properties": {
+        "Size": "16",
+        "AvailabilityZone": "eu-west-1a",
+        "VolumeType": "gp3",
+        "Iops": "5000",
+        "Encrypted": true,
+        "SnapshotId": "snap-01b81f3fc0d43f1d2",
+        "KmsKeyId": "7f81c9c0-fd85-49d1-9307-aba1a0290a01",
+        "Tags": [
+          {
+            "Key": "SnapshotIdentifier",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "BambooEncryptedEc2Volume"
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "BambooEncryptedHomeEc2Volume": {
+      "Type": "AWS::EC2::Volume",
+      "Properties": {
+        "Size": "8",
+        "AvailabilityZone": "eu-west-1a",
+        "VolumeType": "gp2",
+        "Encrypted": true,
+        "SnapshotId": "snap-0bb1d1b0fd7a903d1",
+        "KmsKeyId":"7f81c9c0-fd85-49d1-9307-aba1a0290a01",
+        "Tags": [
+          {
+            "Key": "SnapshotIdentifier",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "BambooEncryptedHomeEc2Volume"
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "BambooV8Ec2Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Condition": "IsBambooV8Ec2InstanceEnabled",
+      "Properties": {
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeSize": "50",
+              "VolumeType": "standard",
+              "Encrypted": true
+            }
+          }
+        ],
+        "DisableApiTermination": false,
+        "IamInstanceProfile": {
+          "Ref": "BambooEc2InstanceIamProfile"
+        },
+        "ImageId": {
+          "Fn::FindInMap": [
+            "RegionToAmiMapOfBambooV8Instance",
+            {
+              "Ref": "AWS::Region"
+            },
+            "production"
+          ]
+        },
+        "KeyName":"bamboo",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "InstanceType": "t2.2xlarge",
+        "Monitoring": true,
+        "Volumes": [
+          {
+            "VolumeId": {
+              "Ref": "BambooV8EncryptedV2Ec2Volume"
+            },
+            "Device": "/dev/sdf"
+          },
+          {
+            "VolumeId": {
+              "Ref": "BambooEncryptedHomeEc2Volume"
+            },
+            "Device": "/dev/sdp"
+          }
+        ],
+        "NetworkInterfaces": [ {
+          "AssociatePublicIpAddress": "true",
+          "DeviceIndex": "0",
+          "GroupSet": [ {
+            "Fn::ImportValue": 
+                {
+                    "Fn::Sub": "${NetworkStack}-SecurityGroup-DS2SecurityGroupId"
+                }
+        }],
+          "SubnetId": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${NetworkStack}-Network-AppPublicSubnet1Id"
+            }
+          }
+        } ],
+        "Tags": [
+          {
+            "Key": "customer",
+            "Value": "clevertap"
+          },
+          {
+            "Key": "role",
+            "Value": "bamboo"
+          },
+          {
+            "Key": "ecs_cluster",
+            "Value": {
+              "Ref": "EcsCluster"
+            }
+          }
+        ]
+      }
+    },
+    "CloudflareTunnelTokenSecretsManagerSecret": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "This is a Secrets Manager secret for build.wizrocket.net"
+        },
+        "SecretString": "<replaceme>"
+      }
+    }
+  },
+  "Outputs": {
+    "BambooV8EcsCluster": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-BambooV8EcsCluster"
+        }
+      },
+      "Value": {
+        "Ref": "EcsCluster"
+      }
+    },
+    "CloudflareTunnelTokenSecretsManagerSecretName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-CloudflareTunnelTokenSecretsManagerSecretName"
+        }
+      },
+      "Value": {
+        "Ref": "CloudflareTunnelTokenSecretsManagerSecret"
+      }
+    }
+  }
+}
