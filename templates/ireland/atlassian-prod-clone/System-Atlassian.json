@@ -972,6 +972,31 @@
         ]
       }
     },
+    "BambooOptEc2Volume": {
+      "Type": "AWS::EC2::Volume",
+      "Properties": {
+        "Size": "8",
+        "AvailabilityZone": "eu-west-1a",
+        "VolumeType": "gp2",
+        "Encrypted": true,
+        "Tags": [
+          {
+            "Key": "SnapshotIdentifier",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "BambooEncryptedHomeEc2Volume"
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
     "BambooV8Ec2Instance": {
       "Type": "AWS::EC2::Instance",
       "Condition": "IsBambooV8Ec2InstanceEnabled",
@@ -1016,6 +1041,12 @@
               "Ref": "BambooEncryptedHomeEc2Volume"
             },
             "Device": "/dev/sdp"
+          },
+          {
+            "VolumeId":{
+              "Ref":"BambooOptEc2Volume"
+            },
+            "Device":"/dev/sdg"
           }
         ],
         "NetworkInterfaces": [ {

@@ -419,6 +419,10 @@
               {
                 "SourceVolume": "bamboo-home",
                 "ContainerPath": "/home/bamboo"
+              },
+              {
+                "SourceVolume": "bamboo-opt",
+                "ContainerPath": "/opt/atlassian/bamboo/logs"
               }
             ],
             "LinuxParameters": {
@@ -532,6 +536,12 @@
             "Name": "bamboo-home",
             "Host": {
               "SourcePath": "/home/bamboo"
+            }
+          },
+          {
+            "Name": "bamboo-opt",
+            "Host": {
+              "SourcePath": "/home/opt"
             }
           }
         ],
