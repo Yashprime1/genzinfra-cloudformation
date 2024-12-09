@@ -1,0 +1,592 @@
+{
+  "Description": "Template to provision hosted Atlassian components",
+  "Parameters": {
+    "CloudflareTunnelLogLevel": {
+      "Description": "Cloudflare tunnel logging level {debug, info, warn, error, fatal}. At debug level cloudflared will log request URL, method, protocol, content length, as well as, all request and response headers. This can expose sensitive information in your logs",
+      "Default": "info",
+      "AllowedValues": [
+        "debug",
+        "info",
+        "warn",
+        "error",
+        "fatal"
+      ],
+      "Type": "String"
+    },
+    "VpcNetworkPrefix": {
+      "Default": "",
+      "Type": "String"
+    },
+    "Subdomain": {
+      "Default": "",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "BambooEcsTaskDefinitionIamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "BambooEcsTaskDefinitionIamRole"
+            ]
+          ]
+        }
+      }
+    },
+    "BambooEcsTaskDefinitionIamPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "BambooEcsTaskDefinitionIamPolicy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Sid": "AllowCloudformationActions",
+              "Effect": "Allow",
+              "Action": [
+                "cloudformation:CreateStack",
+                "cloudformation:DeleteStack",
+                "cloudformation:DescribeStacks",
+                "cloudformation:DescribeStackResource",
+                "cloudformation:UpdateStack",
+                "cloudformation:CreateChangeSet",
+                "cloudformation:DeleteChangeSet",
+                "cloudformation:DescribeChangeSet",
+                "cloudformation:ExecuteChangeSet",
+                "cloudformation:GetStackPolicy",
+                "cloudformation:SetStackPolicy",
+                "cloudformation:ValidateTemplate",
+                "iam:PassRole"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "PolicyForAccessToCfstackBucket",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::cfstack-init-templatess3bucket-*",
+                "arn:aws:s3:::cfstack-init-templatess3bucket-*/*",
+                "arn:aws:s3:::cfstack-init-sources3bucket-*",
+                "arn:aws:s3:::cfstack-init-sources3bucket-*/*"
+              ],
+              "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion",
+                "s3:GetBucketVersioning",
+                "s3:PutObject"
+              ]
+            },
+            {
+              "Sid": "GrantPermsToMigrateKeys",
+              "Effect": "Allow",
+              "Action": [
+                "kms:ListGrants",
+                "kms:CreateGrant",
+                "kms:RevokeGrant"
+              ],
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowAccessForScaleUp",
+              "Effect": "Allow",
+              "Action": [
+                "ecs:DescribeServices",
+                "ecs:DescribeTaskDefinition",
+                "ecs:DescribeClusters",
+                "autoscaling:DescribeAutoScalingGroups",
+                "autoscaling:SetDesiredCapacity"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowEcrRegistryPushAccess",
+              "Effect": "Allow",
+              "Action": [
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:PutImage",
+                "ecr:InitiateLayerUpload",
+                "ecr:UploadLayerPart",
+                "ecr:CompleteLayerUpload",
+                "ecr:GetAuthorizationToken"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "TempAllowCompleteAccess",
+              "Effect": "Allow",
+              "Action": "*",
+              "Resource": "*"
+            },
+            {
+              "Sid": "PolicyForAccessToAjsBucket",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::static.wizrocket.com*",
+                "arn:aws:s3:::static.wizrocket.com*/*"
+              ],
+              "Action": [
+                "s3:PutObject"
+              ]
+            },
+            {
+              "Sid": "PolicyForCloudfronInvalidateCacheAccess",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:cloudfront:::distribution/E1OCAMMKX0F1A1"
+              ],
+              "Action": [
+                "cloudfront:CreateInvalidation"
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "BambooEcsTaskDefinitionIamRole"
+          }
+        ]
+      }
+    },
+    "BambooEcsTaskExecutionIamPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "BambooEcsTaskExecutionIamPolicy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Sid": "AllowSecretsRetreiveValue",
+              "Effect": "Allow",
+              "Action": [
+                "secretsmanager:GetSecretValue"
+              ],
+              "Resource": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${AWS::StackName}-CloudflareTunnelTokenSecretsManagerSecretName"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "BambooEcsTaskExecutionIamRole"
+          }
+        ]
+      }
+    },
+    "CloudFormationServiceIamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "cloudformation.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "CloudFormationServiceIamPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": "*",
+              "Resource": "*"
+            }
+          ]
+        },
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "CloudFormationServiceIamPolicy"
+            ]
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "CloudFormationServiceIamRole"
+          }
+        ]
+      }
+    },
+    "BambooEcsTaskExecutionIamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "BambooEcsTaskExecutionIamRole"
+            ]
+          ]
+        }
+      }
+    },
+    "BambooV8V2EcsTaskDefinition": {
+      "Type": "AWS::ECS::TaskDefinition",
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Name": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "BambooV8"
+                ]
+              ]
+            },
+            "Image": "yashprime07/bamboo-server:github-master-35",
+            "Environment": [
+              {
+                "Name": "CATALINA_CONNECTOR_SECURE",
+                "Value": "true"
+              },
+              {
+                "Name": "ATL_TOMCAT_CONNECTIONTIMEOUT",
+                "Value": "120000"
+              },
+              {
+                "Name":"CATALINA_TMPDIR",
+                "Value":"/var/atlassian/application-data/bamboo/temp"
+              },
+              {
+                "Name": "CATALINA_CONNECTOR_SCHEME",
+                "Value": "https"
+              },
+              {
+                "Name": "CATALINA_CONNECTOR_PROXYPORT",
+                "Value": "443"
+              },
+              {
+                "Name": "CATALINA_CONNECTOR_PROXYNAME",
+                "Value": {
+                  "Fn::Join": [
+                    ".",
+                    [
+                     {
+                      "Ref":"Subdomain"
+                     },
+                     "yashprime.ninja"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "CLOUDFORMATION_SERVICE_ROLE_ARN",
+                "Value": {
+                  "Fn::GetAtt": [
+                    "CloudFormationServiceIamRole",
+                    "Arn"
+                  ]
+                }
+              },
+              {
+                "Name": "DOCKER_HOST",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "tcp://",
+                      {
+                        "Fn::Join": [
+                          ".",
+                          [
+                            {
+                              "Ref": "VpcNetworkPrefix"
+                            },
+                            "20.100"
+                          ]
+                        ]
+                      },
+                      ":2375"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "JVM_MINIMUM_MEMORY",
+                "Value": "1024m"
+              },
+              {
+                "Name": "JVM_MAXIMUM_MEMORY",
+                "Value": "8192m"
+              }
+            ],
+            "PortMappings": [
+              {
+                "ContainerPort": "8085",
+                "HostPort": "8085",
+                "Protocol": "tcp"
+              }
+            ],
+            "MemoryReservation": 256,
+            "Ulimits": [
+              {
+                "HardLimit": 900000,
+                "Name": "nofile",
+                "SoftLimit": 900000
+              }
+            ],
+            "MountPoints": [
+              {
+                "SourceVolume": "bamboo-application-data",
+                "ContainerPath": "/var/atlassian/application-data/bamboo"
+              },
+              {
+                "SourceVolume": "bamboo-home",
+                "ContainerPath": "/home/bamboo"
+              }
+            ],
+            "LinuxParameters": {
+              "InitProcessEnabled": true
+            }
+          },
+          {
+            "Essential": true,
+            "Image": "cloudflare/cloudflared:2023.3.1",
+            "Name": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "Cloudflare"
+                ]
+              ]
+
+            },
+            "Environment": [
+              {
+                "Name": "TUNNEL_LOGLEVEL",
+                "Value": {
+                  "Ref": "CloudflareTunnelLogLevel"
+                }
+              }
+            ],
+            "ReadonlyRootFilesystem": false,
+            "Ulimits": [
+              {
+                "HardLimit": 900000,
+                "Name": "nofile",
+                "SoftLimit": 900000
+              }
+            ],
+            "MemoryReservation": "256",
+            "EntryPoint": [
+              "cloudflared",
+              "tunnel",
+              "--url",
+              "http://localhost:8085",
+              "--no-autoupdate",
+              "run"
+            ],
+            "Secrets": [
+              {
+                "Name": "TUNNEL_TOKEN",
+                "ValueFrom": {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${AWS::StackName}-CloudflareTunnelTokenSecretsManagerSecretName"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "Family": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "BambooV8EcsTaskDefinition"
+            ]
+          ]
+        },
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "BambooEcsTaskDefinitionIamRole",
+            "Arn"
+          ]
+        },
+        "NetworkMode": "host",
+        "PlacementConstraints": [
+          {
+            "Type": "memberOf",
+            "Expression": {
+              "Fn::Join": [
+                "",
+                [
+                  "attribute:cluster.instance-identifier == ",
+                  {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${AWS::StackName}-BambooV8EcsCluster"
+                          }
+                        },
+                        "BambooV8Ec2Instance"
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            }
+          }
+        ],
+        "Volumes": [
+          {
+            "Name": "bamboo-application-data",
+            "Host": {
+              "SourcePath": "/var/atlassian/application-data/bamboo"
+            }
+          },
+          {
+            "Name": "bamboo-home",
+            "Host": {
+              "SourcePath": "/home/bamboo"
+            }
+          }
+        ],
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "BambooEcsTaskDefinitionIamRole",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "BambooV8V2EcsService": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-BambooV8EcsCluster"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "DesiredCount": 1,
+        "LaunchType": "EC2",
+        "PlacementConstraints": [
+          {
+            "Expression": {
+              "Fn::Join": [
+                "",
+                [
+                  "attribute:cluster.instance-identifier == ",
+                  {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${AWS::StackName}-BambooV8EcsCluster"
+                          }
+                        },
+                        "BambooV8Ec2Instance"
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            },
+            "Type": "memberOf"
+          }
+        ],
+        "TaskDefinition": {
+          "Ref": "BambooV8V2EcsTaskDefinition"
+        }
+      }
+    }
+  }
+}

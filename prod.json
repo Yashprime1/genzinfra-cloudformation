@@ -59,6 +59,24 @@
                 },
                 "SkipUpdate": false,
                 "TemplatePath": "./templates/ireland/atlassian-demo-2/System-Atlassian-Service.json"
+            },
+            "Eu-Bamboo-Prod-Clone": {
+                "Parameters": {
+                    "NetworkStack":"Eu",
+                    "VpcNetworkPrefix":"10.17",
+                    "RdsInstanceType": "db.m5.large",
+                    "RdsAllocatedStorage": "16"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/ireland/atlassian-prod-clone/System-Atlassian.json"
+            },
+            "Eu-Bamboo-Prod-Clone-Service": {
+                "Parameters": { 
+                    "VpcNetworkPrefix":"10.17",
+                    "Subdomain":"bamboo-prod-clone"
+                },
+                "SkipUpdate": false,
+                "TemplatePath": "./templates/ireland/atlassian-prod-clone/System-Atlassian-Service.json"
             }
         }
 
