@@ -780,7 +780,7 @@
               {
                 "Ref": "VpcNetworkPrefix"
               },
-              "20.64/27"
+              "25.0/27"
             ]
           ]
         },
@@ -813,7 +813,7 @@
               {
                 "Ref": "VpcNetworkPrefix"
               },
-              "98.0/27"
+              "26.0/27"
             ]
           ]
         },
@@ -853,127 +853,69 @@
         }
       }
     },
-    "BambooDockerEc2Instance": {
-      "Type": "AWS::EC2::Instance",
+    "BambooRdsDbInstance": {
+      "Type": "AWS::RDS::DBInstance",
       "Properties": {
-        "BlockDeviceMappings": [
-          {
-            "DeviceName": "/dev/xvdcy",
-            "Ebs": {
-              "DeleteOnTermination": true,
-              "VolumeSize": "128",
-              "VolumeType": "gp2"
-            }
-          },
-          {
-            "DeviceName": "/dev/xvda",
-            "Ebs": {
-              "DeleteOnTermination": true,
-              "VolumeSize": "200",
-              "VolumeType": "gp3"
-            }
-          }
-        ],
-        "DisableApiTermination": false,
-        "IamInstanceProfile": {
-          "Ref": "BambooEc2InstanceIamProfile"
+        "AllocatedStorage": {
+          "Ref": "RdsAllocatedStorage"
         },
-        "ImageId": "ami-04469649190159c95",
-        "InstanceInitiatedShutdownBehavior": "stop",
-        "InstanceType": "c5.xlarge",
-        "Monitoring": true,
-        "PrivateIpAddress": {
+        "AllowMajorVersionUpgrade": true,
+        "AutoMinorVersionUpgrade": true,
+        "BackupRetentionPeriod": 30,
+        "CopyTagsToSnapshot": true,
+        "DBSnapshotIdentifier": "bamboo-rds-data-snapshot",
+        "DBInstanceClass": {
+          "Ref": "RdsInstanceType"
+        },
+        "DBSubnetGroupName": {
+          "Ref": "RdsDbSubnetGroup"
+        },
+        "Engine": "postgres",
+        "EngineVersion": {
+          "Ref": "BambooRdsPostgresEngineVersion"
+        },
+        "MultiAZ": {
+          "Ref": "RdsMultipleAvailabilityZone"
+        },
+        "MasterUsername": {
           "Fn::Join": [
-            ".",
+            "",
             [
+              "{{resolve:secretsmanager:",
               {
-                "Ref": "VpcNetworkPrefix"
+                "Ref": "BambooRdsSecretsManagerSecret"
               },
-              "3.1"
+              ":SecretString:username}}"
             ]
           ]
         },
-        "SecurityGroupIds": [
-          {
-            "Fn::ImportValue": 
-                {
-                    "Fn::Sub": "${NetworkStack}-SecurityGroup-DS2SecurityGroupId"
-                }
-          }
-        ],
-        "SubnetId": {
-          "Fn::ImportValue": {
-            "Fn::Sub": "${SystemStack}-Network-PrivateEc2SubnetId"
-          }
-        },
-        "Tags": [
-          {
-            "Key": "customer",
-            "Value": "clevertap"
-          },
-          {
-            "Key": "role",
-            "Value": "docker"
-          }
-        ]
-      }
-    },
-    "BambooDockerArm64Ec2Instance": {
-      "Type": "AWS::EC2::Instance",
-      "Properties": {
-        "BlockDeviceMappings": [
-          {
-            "DeviceName": "/dev/xvda",
-            "Ebs": {
-              "DeleteOnTermination": true,
-              "VolumeSize": "128",
-              "VolumeType": "gp3"
-            }
-          }
-        ],
-        "DisableApiTermination": false,
-        "IamInstanceProfile": {
-          "Ref": "BambooEc2InstanceIamProfile"
-        },
-        "ImageId": "ami-0520a53f9020f3942",
-        "InstanceInitiatedShutdownBehavior": "stop",
-        "InstanceType": "c6g.xlarge",
-        "Monitoring": true,
-        "PrivateIpAddress": {
+        "MasterUserPassword": {
           "Fn::Join": [
-            ".",
+            "",
             [
+              "{{resolve:secretsmanager:",
               {
-                "Ref": "VpcNetworkPrefix"
+                "Ref": "BambooRdsSecretsManagerSecret"
               },
-              "3.2"
+              ":SecretString:password}}"
             ]
           ]
         },
-        "SecurityGroupIds": [
-        {
-          "Fn::ImportValue": 
-              {
-                  "Fn::Sub": "${NetworkStack}-SecurityGroup-DS2SecurityGroupId"
-              }
-        }
-        ],
-        "SubnetId": {
-          "Fn::ImportValue": {
-            "Fn::Sub": "${NetworkStack}-Network-AppPrivateSubnet1Id"
-          }
-        },
-        "Tags": [
+        "Port": "5432",
+        "PubliclyAccessible": false,
+        "StorageType": "gp2",
+        "StorageEncrypted": true,
+        "KmsKeyId":"arn:aws:kms:eu-west-1:736548753645:key/b399ce49-2412-4fb8-b564-5cafc73b251f",
+        "VPCSecurityGroups": [
           {
-            "Key": "customer",
-            "Value": "clevertap"
-          },
-          {
-            "Key": "role",
-            "Value": "docker"
+              "Fn::ImportValue": 
+                  {
+                      "Fn::Sub": "${NetworkStack}-SecurityGroup-DS2SecurityGroupId"
+                  }
           }
         ]
-      }
+      },
+      "DeletionPolicy": "Snapshot"
     },
     "BambooV8EncryptedV2Ec2Volume": {
       "Type": "AWS::EC2::Volume",
@@ -983,8 +925,8 @@
         "VolumeType": "gp3",
         "Iops": "5000",
         "Encrypted": true,
-        "SnapshotId": "snap-0b3ad58b1ff5baf39",
-        "KmsKeyId": "arn:aws:kms:eu-west-1:062484260092:key/fa409a23-ed73-4116-a118-1aac9fc31941",
+        "SnapshotId": "snap-01b81f3fc0d43f1d2",
+        "KmsKeyId": "7f81c9c0-fd85-49d1-9307-aba1a0290a01",
         "Tags": [
           {
             "Key": "SnapshotIdentifier",
@@ -1010,8 +952,8 @@
         "AvailabilityZone": "eu-west-1a",
         "VolumeType": "gp2",
         "Encrypted": true,
-        "SnapshotId": "snap-04023430ec532de0f",
-        "KmsKeyId":"arn:aws:kms:eu-west-1:062484260092:key/443d79ca-e933-4940-81cf-8589b20fc0be",
+        "SnapshotId": "snap-0bb1d1b0fd7a903d1",
+        "KmsKeyId":"7f81c9c0-fd85-49d1-9307-aba1a0290a01",
         "Tags": [
           {
             "Key": "SnapshotIdentifier",
