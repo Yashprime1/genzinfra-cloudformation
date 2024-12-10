@@ -839,20 +839,6 @@
         ]
       }
     },
-    "BambooRdsSecretsManagerSecret": {
-      "Type": "AWS::SecretsManager::Secret",
-      "Properties": {
-        "Description": {
-          "Fn::Sub": "This is a Secrets Manager secret for Bamboo Atlassian RDS instance"
-        },
-        "GenerateSecretString": {
-          "SecretStringTemplate": "{\"username\": \"postgres\",\"password\":\"bamboo\"}",
-          "GenerateStringKey": "password",
-          "PasswordLength": 5,
-          "ExcludeCharacters": "<>\"@/\\'`(){}[]:!$"
-        }
-      }
-    },
     "BambooRdsDbInstance": {
       "Type": "AWS::RDS::DBInstance",
       "Properties": {
@@ -863,7 +849,7 @@
         "AutoMinorVersionUpgrade": true,
         "BackupRetentionPeriod": 30,
         "CopyTagsToSnapshot": true,
-        "DBSnapshotIdentifier": "bamboo-rds-data-snapshot",
+        "DBSnapshotIdentifier": "bamboosnapshot",
         "DBInstanceClass": {
           "Ref": "RdsInstanceType"
         },
@@ -876,30 +862,6 @@
         },
         "MultiAZ": {
           "Ref": "RdsMultipleAvailabilityZone"
-        },
-        "MasterUsername": {
-          "Fn::Join": [
-            "",
-            [
-              "{{resolve:secretsmanager:",
-              {
-                "Ref": "BambooRdsSecretsManagerSecret"
-              },
-              ":SecretString:username}}"
-            ]
-          ]
-        },
-        "MasterUserPassword": {
-          "Fn::Join": [
-            "",
-            [
-              "{{resolve:secretsmanager:",
-              {
-                "Ref": "BambooRdsSecretsManagerSecret"
-              },
-              ":SecretString:password}}"
-            ]
-          ]
         },
         "Port": "5432",
         "PubliclyAccessible": false,
