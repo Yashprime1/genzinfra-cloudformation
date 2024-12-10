@@ -975,7 +975,7 @@
     "BambooV8Ec2Instance": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
-        "AvailabilityZone": "eu-west-1c",
+        "AvailabilityZone": "eu-west-1a",
         "BlockDeviceMappings": [
           {
             "DeviceName": "/dev/xvda",
@@ -1018,19 +1018,21 @@
             "Device": "/dev/sdp"
           }
         ],
-        "SecurityGroupIds": [
-          {
-              "Fn::ImportValue": 
-                  {
-                      "Fn::Sub": "${NetworkStack}-SecurityGroup-DS2SecurityGroupId"
-                  }
+        "NetworkInterfaces": [ {
+          "AssociatePublicIpAddress": "true",
+          "DeviceIndex": "0",
+          "GroupSet": [ {
+            "Fn::ImportValue": 
+                {
+                    "Fn::Sub": "${NetworkStack}-SecurityGroup-DS2SecurityGroupId"
+                }
+        }],
+          "SubnetId": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${NetworkStack}-Network-AppPublicSubnet1Id"
+            }
           }
-        ],
-        "SubnetId": {
-          "Fn::ImportValue": {
-            "Fn::Sub": "${NetworkStack}-Network-AppPrivateSubnet1Id"
-          }
-        },
+        } ],
         "Tags": [
           {
             "Key": "customer",
