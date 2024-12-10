@@ -846,8 +846,7 @@
           "Fn::Sub": "This is a Secrets Manager secret for Bamboo Atlassian RDS instance"
         },
         "GenerateSecretString": {
-          "SecretStringTemplate": "{\"username\": \"postgres\"}",
-          "GenerateStringKey": "password",
+          "SecretStringTemplate": "{\"username\": \"postgres\",\"password\":\"bamboo\"}",
           "PasswordLength": 20,
           "ExcludeCharacters": "\"@/\\'`(){}[]:!$"
         }
