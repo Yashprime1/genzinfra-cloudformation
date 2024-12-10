@@ -975,7 +975,6 @@
     "BambooV8Ec2Instance": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
-        "AvailabilityZone": "eu-west-1a",
         "BlockDeviceMappings": [
           {
             "DeviceName": "/dev/xvda",
