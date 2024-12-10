@@ -903,7 +903,7 @@
         ],
         "SubnetId": {
           "Fn::ImportValue": {
-            "Fn::Sub": "${SystemStack}-Network-PrivateEc2SubnetId"
+            "Fn::Sub": "${NetworkStack}-Network-AppPrivateSubnet1Id"
           }
         },
         "Tags": [
