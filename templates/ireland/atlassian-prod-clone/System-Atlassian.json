@@ -917,6 +917,262 @@
       },
       "DeletionPolicy": "Snapshot"
     },
+    "BambooV8EncryptedV2Ec2Volume": {
+      "Type": "AWS::EC2::Volume",
+      "Properties": {
+        "Size": "16",
+        "AvailabilityZone": "eu-west-1a",
+        "VolumeType": "gp3",
+        "Iops": "5000",
+        "Encrypted": true,
+        "SnapshotId": "snap-01b81f3fc0d43f1d2",
+        "KmsKeyId": "7f81c9c0-fd85-49d1-9307-aba1a0290a01",
+        "Tags": [
+          {
+            "Key": "SnapshotIdentifier",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "BambooEncryptedEc2Volume"
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "BambooEncryptedHomeEc2Volume": {
+      "Type": "AWS::EC2::Volume",
+      "Properties": {
+        "Size": "8",
+        "AvailabilityZone": "eu-west-1a",
+        "VolumeType": "gp2",
+        "Encrypted": true,
+        "SnapshotId": "snap-0bb1d1b0fd7a903d1",
+        "KmsKeyId":"7f81c9c0-fd85-49d1-9307-aba1a0290a01",
+        "Tags": [
+          {
+            "Key": "SnapshotIdentifier",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "BambooEncryptedHomeEc2Volume"
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "BambooV8Ec2Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "AvailabilityZone": "eu-west-1a",
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeSize": "50",
+              "VolumeType": "standard",
+              "Encrypted": true
+            }
+          }
+        ],
+        "DisableApiTermination": false,
+        "IamInstanceProfile": {
+          "Ref": "BambooEc2InstanceIamProfile"
+        },
+        "ImageId": {
+          "Fn::FindInMap": [
+            "RegionToAmiMapOfBambooV8Instance",
+            {
+              "Ref": "AWS::Region"
+            },
+            "production"
+          ]
+        },
+        "KeyName":"bamboo",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "InstanceType": "t2.2xlarge",
+        "Monitoring": true,
+        "Volumes": [
+          {
+            "VolumeId": {
+              "Ref": "BambooV8EncryptedV2Ec2Volume"
+            },
+            "Device": "/dev/sdf"
+          },
+          {
+            "VolumeId": {
+              "Ref": "BambooEncryptedHomeEc2Volume"
+            },
+            "Device": "/dev/sdp"
+          }
+        ],
+        "NetworkInterfaces": [ {
+          "AssociatePublicIpAddress": "true",
+          "DeviceIndex": "0",
+          "GroupSet": [ {
+            "Fn::ImportValue": 
+                {
+                    "Fn::Sub": "${NetworkStack}-SecurityGroup-DS2SecurityGroupId"
+                }
+        }],
+          "SubnetId": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${NetworkStack}-Network-AppPublicSubnet1Id"
+            }
+          }
+        } ],
+        "Tags": [
+          {
+            "Key": "customer",
+            "Value": "clevertap"
+          },
+          {
+            "Key": "role",
+            "Value": "bamboo"
+          },
+          {
+            "Key": "ecs_cluster",
+            "Value": {
+              "Ref": "EcsCluster"
+            }
+          }
+        ]
+      }
+    },
+    "BambooDockerEc2Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "AvailabilityZone": "eu-west-1c",
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvdcy",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeSize": "128",
+              "VolumeType": "gp2"
+            }
+          },
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeSize": "200",
+              "VolumeType": "gp3"
+            }
+          }
+        ],
+        "DisableApiTermination": false,
+        "IamInstanceProfile": {
+          "Ref": "BambooEc2InstanceIamProfile"
+        },
+        "ImageId": "ami-04469649190159c95",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "InstanceType": "c5.xlarge",
+        "Monitoring": true,
+        "PrivateIpAddress": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Ref": "VpcNetworkPrefix"
+              },
+              "20.100"
+            ]
+          ]
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${NetworkStack}-SecurityGroup-DS2SecurityGroupId"
+            }
+          }
+        ],
+        "SubnetId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-Network-AppPrivateSubnet1Id"
+          }
+        },
+        "Tags": [
+          {
+            "Key": "customer",
+            "Value": "clevertap"
+          },
+          {
+            "Key": "role",
+            "Value": "docker"
+          }
+        ]
+      }
+    },
+    "BambooDockerArm64Ec2Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeSize": "128",
+              "VolumeType": "gp3"
+            }
+          }
+        ],
+        "AvailabilityZone": "eu-west-1c",
+        "DisableApiTermination": false,
+        "IamInstanceProfile": {
+          "Ref": "BambooEc2InstanceIamProfile"
+        },
+        "ImageId": "ami-0520a53f9020f3942",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "InstanceType": "c6g.xlarge",
+        "Monitoring": true,
+        "PrivateIpAddress": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Ref": "VpcNetworkPrefix"
+              },
+              "20.101"
+            ]
+          ]
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${NetworkStack}-SecurityGroup-DS2SecurityGroupId"
+            }
+          }
+        ],
+        "SubnetId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-Network-AppPrivateSubnet1Id"
+          }
+        },
+        "Tags": [
+          {
+            "Key": "customer",
+            "Value": "clevertap"
+          },
+          {
+            "Key": "role",
+            "Value": "docker"
+          }
+        ]
+      }
+    },
     "CloudflareTunnelTokenSecretsManagerSecret": {
       "Type": "AWS::SecretsManager::Secret",
       "Properties": {
