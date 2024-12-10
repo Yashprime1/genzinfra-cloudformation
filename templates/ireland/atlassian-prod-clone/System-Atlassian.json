@@ -987,7 +987,7 @@
             }
           }
         ],
-        "AvailabilityZone":"eu-west-1a"
+        "AvailabilityZone":"eu-west-1a",
         "DisableApiTermination": false,
         "IamInstanceProfile": {
           "Ref": "BambooEc2InstanceIamProfile"
