@@ -855,7 +855,6 @@
     },
     "BambooDockerEc2Instance": {
       "Type": "AWS::EC2::Instance",
-      "Condition": "IsBambooDockerEc2InstanceEnabled",
       "Properties": {
         "BlockDeviceMappings": [
           {
