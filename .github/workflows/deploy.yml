@@ -20,6 +20,12 @@ jobs:
           app_id: ${{ secrets.DUMMY_BOT_ID }}
           private_key: ${{ secrets.DUMMY_BOT_PRIVATE_ACCESS_KEY }}
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
+        with:
+          role-to-assume: arn:aws:iam::736548753645:role/GithubRole
+          aws-region: eu-west-1
+          
       - name: Download Asset
         uses: robinraju/release-downloader@v1.8
         with:
