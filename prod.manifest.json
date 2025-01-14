@@ -72,6 +72,19 @@
                         "CatalinaConnectorProxyName":"bamboo-prod-clone.yashprime.ninja",
                         "BambooContainerTag": "{{ BambooContainerTag }}"
                     }
+                },
+                {
+                    "StackName": "eu1",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/network/network.json",
+                    "Parameters": {
+                      "VPCNetworkPrefix": "10.11",
+                      "StackProvisioningMode": "prod",
+                      "EnableReservedZeroNATGatewayConfiguration": "true",
+                      "EnableDataScienceUploadS3bucketAccess": "true",
+                      "NatInstanceAmiId": "ami-085252d6cf1b51097"
+                    },
+                    "StackPolicy": {}
                 }
             ]
         }
