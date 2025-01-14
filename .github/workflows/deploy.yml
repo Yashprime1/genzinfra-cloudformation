@@ -4,7 +4,8 @@ on:
   release:
     types: [published]
 
-    
+permissions:
+  id-token: write    
 
 jobs:
   deploy:
@@ -25,7 +26,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::736548753645:role/GithubRole
           aws-region: eu-west-1
-          
+
       - name: Download Asset
         uses: robinraju/release-downloader@v1.8
         with:
