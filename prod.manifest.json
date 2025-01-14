@@ -1,0 +1,79 @@
+{
+    "ParallelDeployment": false,
+    "Regions": [
+        {
+            "Name": "eu-west-1",
+            "Stacks": [
+                {
+                    "StackName": "Devtools-Network",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/network/network.json",
+                    "Parameters": {
+                        "NetworkPrefix": "10.20",
+                        "NetworkStack":"eu1",
+                        "VpcCidr": "10.20.0.0/16",
+                        "NatInstanceAmiId":"ami-0f9f15428c9ec17db"
+                    },
+                    "StackPolicy": {}
+                },
+                {
+                    "StackName": "Devtools-Secrets",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/secrets/secrets.json",
+                    "Parameters": {
+                    },
+                    "StackPolicy": {}
+                },
+                {
+                    "StackName": "Devtools-SecurityGroup",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/security-groups/security-groups.json",
+                    "Parameters": {
+                        "NetworkStack": "eu1"
+                    }
+                },
+                {
+                    "StackName": "Devtools-Bamboo-Docker-Instance-Ec2-SecurityGroup-Ingress",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/security-groups/ingress/BambooDockerInstanceEc2SecurityGroup.json",
+                    "Parameters": {
+                        "NetworkStack": "eu1"
+                    }
+                },
+                {
+                    "StackName": "Devtools-Bamboo-Docker-BambooRdsDbInstance-Ec2-SecurityGroup-Ingress",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/security-groups/ingress/BambooRdsDbInstanceEc2SecurityGroup.json",
+                    "Parameters": {
+                        "NetworkStack": "eu1"
+                    }
+                },
+                {
+                    "StackName": "Devtools-Bamboo",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/bamboo/bamboo.json",
+                    "Parameters": {
+                        "NetworkStack": "eu1",
+                        "RdsMultipleAvailabilityZone": "true",
+                        "BambooRdsPostgresEngineVersion": "12.19",
+                        "RdsInstanceType": "db.t3.medium",
+                        "RdsAllocatedStorage": "20",
+                        "VpcNetworkPrefix": "10.20",
+                        "BambooV8Ec2InstanceAmi": "ami-04469649190159c95"
+                    }
+                },
+                {
+                    "StackName": "Devtools-Bamboo-Service",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/bamboo/bamboo-service.json",
+                    "Parameters": {
+                        "NetworkStack": "eu1",
+                        "VpcNetworkPrefix": "10.20",
+                        "CatalinaConnectorProxyName":"bamboo-prod-clone.yashprime.ninja",
+                        "BambooContainerTag": "{{ BambooContainerTag }}"
+                    }
+                }
+            ]
+        }
+    ]
+}
