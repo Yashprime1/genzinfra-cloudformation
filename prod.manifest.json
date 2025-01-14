@@ -79,7 +79,7 @@
                     "TemplatePath": "templates/network/network.json",
                     "Parameters": {
                       "VPCNetworkPrefix": "10.11",
-                      "StackProvisioningMode": "dev",
+                      "StackProvisioningMode": "prod",
                       "EnableReservedZeroNATGatewayConfiguration": "true",
                       "EnableDataScienceUploadS3bucketAccess": "true",
                       "NatInstanceAmiId": "ami-085252d6cf1b51097"
