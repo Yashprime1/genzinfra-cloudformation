@@ -16,7 +16,7 @@
                       "NatInstanceAmiId": "ami-085252d6cf1b51097"
                     },
                     "StackPolicy": {}
-                }
+                  }
             ]
         }
     ]
