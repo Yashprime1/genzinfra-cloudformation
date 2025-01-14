@@ -1,0 +1,119 @@
+name: build
+
+run-name: ${{ github.ref_name }}-${{ github.run_number }}
+
+on:
+  workflow_dispatch:
+
+env:
+  CF_STACK_VERSION: 0.2.17
+
+jobs:
+  diff:
+    concurrency:
+      group: diff-${{ github.ref_name }}
+    runs-on: 'ubuntu-latest'
+    if: (github.event_name != 'workflow_dispatch' 
+        || (github.event_name == 'workflow_dispatch' && !startsWith(github.ref, 'refs/tags/'))) 
+        && (github.ref != 'refs/heads/master' || (github.ref == 'refs/heads/master' && github.run_attempt == 1))
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v1.8.0
+        with:
+          app_id: ${{ secrets.DUMMY_BOT_ID }}
+          private_key: ${{ secrets.DUMMY_BOT_PRIVATE_ACCESS_KEY }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::736548753645:role/GithubRole
+          aws-region: ap-northeast-2
+
+      - name: Checkout Genzinfra-Cloudformation
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.19
+
+      - name: Install Python Requirements
+        run: |
+          python3 -m venv prod-venv
+          source prod-venv/bin/activate
+          pip3 install pytablewriter pyyaml
+
+      
+      - name: Make cfstack executable
+        run: aws s3 cp s3://bamboo-packages/cfstack11 cfstack && chmod +x ./cfstack
+
+      - name: Generate Summary
+        if: always()
+        run: |
+          echo "# Workflow Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## Python Code Execution" >> $GITHUB_STEP_SUMMARY
+          if [ -f output.log ]; then
+              echo "### Output from the script:" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              cat output.log >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+              echo "The script did not produce any output." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Generate cfstack diff
+        run: ./cfstack diff --manifest prod.manifest.json --values configuration/values.json --role ${{ secrets.AWS_CLOUDFORMATION_SERVICE_IAM_ROLE }}
+        env:
+          GITHUB_APP_TOKEN: ${{ steps.generate_token.outputs.token }}
+
+      - name: Parse comment out of diff.json
+        id: parse_comment
+        run: |
+          source prod-venv/bin/activate
+          ./scripts/parse-comment
+
+      - name: Get current date
+        if: github.ref == 'refs/heads/master' 
+        id: get-date
+        run: echo "::set-output name=date::$(date +'%Y%m%d')"
+
+      - name: Create Asset
+        if: github.ref == 'refs/heads/master'
+        run: zip -r devtools-cloudformation-build.zip .
+
+      - name: Create Draft Release
+        if: github.ref == 'refs/heads/master'
+        id: create_release
+        uses: actions/create-release@v1.1.4
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+        with:
+          tag_name: v${{ steps.get-date.outputs.date }}.${{ github.run_number }}
+          release_name: v${{ steps.get-date.outputs.date }}.${{ github.run_number }}
+          draft: true
+          prerelease: false
+
+      - name: Upload assets to the release
+        if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master'
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: devtools-cloudformation-build.zip
+          asset_name: devtools-cloudformation-build.zip
+          asset_content_type: application/zip
+
+      - name: Delete older drafted releases
+        uses: sgpublic/delete-release-action@v1.1
+        if: github.ref == 'refs/heads/master'
+        with:
+          draft-drop: true
+          draft-drop-count: 0
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+
+      - name: Publish Release
+        if: github.ref == 'refs/heads/master'
+        run: echo "You can publish release from here - ${{ steps.create_release.outputs.html_url }}"

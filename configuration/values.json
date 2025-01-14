@@ -1,0 +1,7 @@
+{
+    "eu-west-1":{
+        "Devtools-Bamboo-Service": {
+            "BambooContainerTag": "github-master-35"
+        }
+    }
+}

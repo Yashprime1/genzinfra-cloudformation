@@ -1,0 +1,46 @@
+name: deploy
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    concurrency: release
+    runs-on: 'ubuntu-latest'
+    environment: 'production'
+    if: github.run_attempt == 1
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v1.8.0
+        with:
+          app_id: ${{ secrets.DUMMY_BOT_ID }}
+          private_key: ${{ secrets.DUMMY_BOT_PRIVATE_ACCESS_KEY }}
+
+      - name: Download Asset
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: Yashprime1/genzinfra-cloudformation
+          tag: ${{ github.event.release.name }}
+          fileName: genzinfra-cloudformation-build.zip
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Unzip Asset
+        run: unzip genzinfra-cloudformation-build.zip && rm -rf genzinfra-cloudformation-build.zip
+
+      - name: Make cfstack executable
+        run: chmod +x ./cfstack
+
+      - name: Install Python Requirements
+        run: |
+          python3 -m venv prod-venv
+          source prod-venv/bin/activate
+          pip3 install boto3 requests
+
+      - name: Deploy cfstack diff
+        run: |
+          source prod-venv/bin/activate
+          ./cfstack deploy --manifest diff.json --values configuration/values.json --role ${{ secrets.AWS_CLOUDFORMATION_SERVICE_IAM_ROLE }}
+        env:
+          GITHUB_APP_TOKEN: ${{ steps.generate_token.outputs.token }}

@@ -1,0 +1,25 @@
+{
+    "Parameters":{
+        "NetworkStack": {
+            "Type": "String",
+            "Default": "",
+            "Description": "Name of the stack that acts as the bases for all stacks in network"
+        }
+    },
+    "Resources": {
+        "BambooEc2InterElasticBambooJmsPortSecurityGroupIngress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "IpProtocol": "tcp",
+                "FromPort": "54663",
+                "ToPort": "54663",
+                "SourceSecurityGroupName": "elasticbamboo",
+                "GroupId": {
+                    "Fn::ImportValue": {
+                        "Fn::Sub":"${NetworkStack}-BambooEc2InstanceSecurityGroupId"
+                    }
+                }
+            }
+        }
+    }
+}

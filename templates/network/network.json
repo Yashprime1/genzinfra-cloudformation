@@ -1,0 +1,916 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Provisions networking resources (dedicated VPC, subnets, routing, gateways)",
+    "Parameters": {
+      "NetworkStack": {
+        "Description": "Network stack name",
+        "Type": "String"
+      },
+      "NetworkPrefix": {
+        "Description": "Network Prefix",
+        "Type": "String"
+      },
+      "AvailabilityZoneASuffix": {
+        "Default": "a",
+        "Description": "The suffix to be used for Availability Zone A",
+        "Type": "String"
+      },
+      "AvailabilityZoneBSuffix": {
+        "Default": "b",
+        "Description": "The suffix to be used for Availability Zone B",
+        "Type": "String"
+      },
+      "AvailabilityZoneCSuffix": {
+        "Default": "c",
+        "Description": "The suffix to be used for Availability Zone C",
+        "Type": "String"
+      },
+      "NatInstanceAmiId": {
+        "Description": "The AMI Id for FckNat Instance",
+        "Type": "AWS::EC2::Image::Id"
+      },
+      "NatInstanceType": {
+        "Description": "The Instance Type for FckNat Instance",
+        "Default":"t4g.nano",
+        "Type": "String"
+      },
+      "VpcCidr": {
+        "Description": "The CIDR block for the VPC",
+        "Type": "String"
+      }
+    },
+    "Resources": {
+        "Ec2VPC": {
+            "Properties": {
+              "CidrBlock": {
+                "Ref": "VpcCidr"
+              },
+              "EnableDnsHostnames": true,
+              "EnableDnsSupport": true,
+              "Tags": [
+                {
+                  "Key": "Name",
+                  "Value": "Ec2VPC"
+                }
+              ]
+            },
+            "Type": "AWS::EC2::VPC"
+        },
+        "Ec2InternetGateway": {
+            "Properties": {},
+            "Type": "AWS::EC2::InternetGateway"
+        },
+        "Ec2VpcInternetGatewayAttachment": {
+            "Properties": {
+              "InternetGatewayId": {
+                "Fn::GetAtt": [
+                  "Ec2InternetGateway",
+                  "InternetGatewayId"
+                ]
+              },
+              "VpcId": {
+                "Ref": "Ec2VPC"
+              }
+            },
+            "Type": "AWS::EC2::VPCGatewayAttachment"
+        },
+        "NatEc2InstanceIamRole": {
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Statement": [
+                  {
+                    "Action": "sts:AssumeRole",
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": "ec2.amazonaws.com"
+                    }
+                  }
+                ]
+              },
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "AWS::StackName"
+                    },
+                    "NatEc2InstanceIamRole"
+                  ]
+                ]
+              }
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "NatEc2InstanceIamPolicy": {
+            "Properties": {
+              "PolicyDocument": {
+                "Statement": [
+                  {
+                    "Action": [
+                      "ssm:DescribeAssociation",
+                      "ssm:GetDeployablePatchSnapshotForInstance",
+                      "ssm:GetDocument",
+                      "ssm:DescribeDocument",
+                      "ssm:GetManifest",
+                      "ssm:GetParameters",
+                      "ssm:GetParameter",
+                      "ssm:ListAssociations",
+                      "ssm:ListInstanceAssociations",
+                      "ssm:PutInventory",
+                      "ssm:PutComplianceItems",
+                      "ssm:PutConfigurePackageResult",
+                      "ssm:UpdateAssociationStatus",
+                      "ssm:UpdateInstanceAssociationStatus",
+                      "ssm:UpdateInstanceInformation"
+                    ],
+                    "Effect": "Allow",
+                    "Resource": "*"
+                  },
+                  {
+                    "Action": [
+                      "ssmmessages:CreateControlChannel",
+                      "ssmmessages:CreateDataChannel",
+                      "ssmmessages:OpenControlChannel",
+                      "ssmmessages:OpenDataChannel"
+                    ],
+                    "Effect": "Allow",
+                    "Resource": "*"
+                  },
+                  {
+                    "Action": [
+                      "ec2messages:AcknowledgeMessage",
+                      "ec2messages:DeleteMessage",
+                      "ec2messages:FailMessage",
+                      "ec2messages:GetEndpoint",
+                      "ec2messages:GetMessages",
+                      "ec2messages:SendReply"
+                    ],
+                    "Effect": "Allow",
+                    "Resource": "*"
+                  },
+                  {
+                    "Action": [
+                      "cloudwatch:PutMetricData",
+                      "cloudwatch:GetMetricStatistics"
+                    ],
+                    "Effect": "Allow",
+                    "Resource": "*"
+                  },
+                  {
+                    "Action": [
+                      "ec2:DescribeInstanceStatus",
+                      "ec2:ModifyNetworkInterfaceAttribute",
+                      "ec2:AssociateAddress",
+                      "ec2:AssociateAddress",
+                      "ec2:DescribeInstanceTypes"
+                    ],
+                    "Effect": "Allow",
+                    "Resource": "*"
+                  },
+                  {
+                    "Action": [
+                      "ds:CreateComputer",
+                      "ds:DescribeDirectories"
+                    ],
+                    "Effect": "Allow",
+                    "Resource": "*"
+                  },
+                  {
+                    "Action": [
+                      "logs:CreateLogGroup",
+                      "logs:CreateLogStream",
+                      "logs:DescribeLogGroups",
+                      "logs:DescribeLogStreams",
+                      "logs:PutLogEvents"
+                    ],
+                    "Effect": "Allow",
+                    "Resource": "*"
+                  },
+                  {
+                    "Action": [
+                      "s3:GetBucketLocation",
+                      "s3:PutObject",
+                      "s3:GetObject",
+                      "s3:GetEncryptionConfiguration",
+                      "s3:AbortMultipartUpload",
+                      "s3:ListMultipartUploadParts",
+                      "s3:ListBucket",
+                      "s3:ListBucketMultipartUploads"
+                    ],
+                    "Effect": "Allow",
+                    "Resource": "*"
+                  },
+                  {
+                    "Action": [
+                      "ec2:CreateRoute",
+                      "ec2:ReplaceRoute",
+                      "ec2:DescribeNatGateways",
+                      "ec2:DescribeRouteTables",
+                      "ec2:DescribeSubnets",
+                      "ec2:DescribeTags"
+                    ],
+                    "Effect": "Allow",
+                    "Resource": "*"
+                  },
+                  {
+                    "Action": [
+                      "kms:GenerateDataKey",
+                      "kms:Decrypt"
+                    ],
+                    "Effect": "Allow",
+                    "Resource": "*"
+                  }
+                ]
+              },
+              "PolicyName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "AWS::StackName"
+                    },
+                    "NatEc2InstanceIamPolicy"
+                  ]
+                ]
+              },
+              "Roles": [
+                {
+                  "Ref": "NatEc2InstanceIamRole"
+                }
+              ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "NatEc2InstanceIamInstanceProfile": {
+            "Properties": {
+              "Path": "/",
+              "Roles": [
+                {
+                  "Ref": "NatEc2InstanceIamRole"
+                }
+              ]
+            },
+            "Type": "AWS::IAM::InstanceProfile"
+        },
+        "NatInstanceEC2SecurityGroup": {
+            "Properties": {
+              "GroupDescription": "NAT Instance Security Group",
+              "SecurityGroupIngress": [
+                {
+                  "CidrIp" : {
+                    "Fn::GetAtt": [
+                      "Ec2VPC",
+                      "CidrBlock"
+                    ]
+                  },
+                  "IpProtocol" : "-1"
+                }
+              ],
+              "VpcId": {
+                "Ref": "Ec2VPC"
+              }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "Nat1aEc2Instance": {
+            "Properties": {
+              "IamInstanceProfile": {
+                "Ref": "NatEc2InstanceIamInstanceProfile"
+              },
+              "ImageId": {
+                "Ref": "NatInstanceAmiId"
+              },
+              "InstanceInitiatedShutdownBehavior": "stop",
+              "InstanceType":{
+                "Ref": "NatInstanceType"
+              },
+              "NetworkInterfaces": [
+                {
+                  "AssociatePublicIpAddress": true,
+                  "DeleteOnTermination": true,
+                  "DeviceIndex": 0,
+                  "GroupSet": [
+                    {
+                      "Fn::GetAtt": [
+                        "NatInstanceEC2SecurityGroup",
+                        "GroupId"
+                      ]
+                    }
+                  ],
+                  "SubnetId": {
+                    "Ref": "PublicEc2Subnet1a"
+                  }
+                }
+              ],
+              "SourceDestCheck": "false",
+              "UserData": {
+                "Fn::Base64": {
+                  "Fn::Join": [
+                    "\n",
+                    [
+                      "#!/bin/bash -xe",
+                      "EC2_METADATA_TOKEN=$(curl -X PUT \"http://169.254.169.254/latest/api/token\" -H \"X-aws-ec2-metadata-token-ttl-seconds: 600\")",
+                      "OUTBOUND_MAC=\"$(curl -H \"X-aws-ec2-metadata-token: $EC2_METADATA_TOKEN\" http://169.254.169.254/latest/meta-data/mac)\"",
+                      "OUTBOUND_ENI_ID=\"$(curl -H \"X-aws-ec2-metadata-token: $EC2_METADATA_TOKEN\" http://169.254.169.254/latest/meta-data/network/interfaces/macs/$OUTBOUND_MAC/interface-id)\"",
+                      "echo \"eni_id=$OUTBOUND_ENI_ID\" >> /etc/fck-nat.conf",
+                      "echo \"ip_local_port_range=\\\"1024 65535\\\"\" >> /etc/fck-nat.conf",
+                      "nf_conntrack_max_current_value=$(sudo sysctl -n net.netfilter.nf_conntrack_max)",
+                      "nf_conntrack_max_expected_value=$((nf_conntrack_max_current_value * 10))",
+                      "echo \"nf_conntrack_max=$nf_conntrack_max_expected_value\" >> /etc/fck-nat.conf",
+                      "sudo systemctl restart fck-nat.service"
+                    ]
+                  ]
+                }
+              }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "Nat1bEc2Instance": {
+            "Properties": {
+              "IamInstanceProfile": {
+                "Ref": "NatEc2InstanceIamInstanceProfile"
+              },
+              "ImageId": {
+                "Ref": "NatInstanceAmiId"
+              },
+              "InstanceInitiatedShutdownBehavior": "stop",
+              "InstanceType":{
+                "Ref": "NatInstanceType"
+              },
+              "NetworkInterfaces": [
+                {
+                  "AssociatePublicIpAddress": true,
+                  "DeleteOnTermination": true,
+                  "DeviceIndex": 0,
+                  "GroupSet": [
+                    {
+                      "Fn::GetAtt": [
+                        "NatInstanceEC2SecurityGroup",
+                        "GroupId"
+                      ]
+                    }
+                  ],
+                  "SubnetId": {
+                    "Ref": "PublicEc2Subnet1b"
+                  }
+                }
+              ],
+              "SourceDestCheck": "false",
+              "UserData": {
+                "Fn::Base64": {
+                  "Fn::Join": [
+                    "\n",
+                    [
+                      "#!/bin/bash -xe",
+                      "EC2_METADATA_TOKEN=$(curl -X PUT \"http://169.254.169.254/latest/api/token\" -H \"X-aws-ec2-metadata-token-ttl-seconds: 600\")",
+                      "OUTBOUND_MAC=\"$(curl -H \"X-aws-ec2-metadata-token: $EC2_METADATA_TOKEN\" http://169.254.169.254/latest/meta-data/mac)\"",
+                      "OUTBOUND_ENI_ID=\"$(curl -H \"X-aws-ec2-metadata-token: $EC2_METADATA_TOKEN\" http://169.254.169.254/latest/meta-data/network/interfaces/macs/$OUTBOUND_MAC/interface-id)\"",
+                      "echo \"eni_id=$OUTBOUND_ENI_ID\" >> /etc/fck-nat.conf",
+                      "echo \"ip_local_port_range=\\\"1024 65535\\\"\" >> /etc/fck-nat.conf",
+                      "nf_conntrack_max_current_value=$(sudo sysctl -n net.netfilter.nf_conntrack_max)",
+                      "nf_conntrack_max_expected_value=$((nf_conntrack_max_current_value * 10))",
+                      "echo \"nf_conntrack_max=$nf_conntrack_max_expected_value\" >> /etc/fck-nat.conf",
+                      "sudo systemctl restart fck-nat.service"
+                    ]
+                  ]
+                }
+              }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "Nat1cEc2Instance": {
+            "Properties": {
+              "IamInstanceProfile": {
+                "Ref": "NatEc2InstanceIamInstanceProfile"
+              },
+              "ImageId": {
+                "Ref": "NatInstanceAmiId"
+              },
+              "InstanceInitiatedShutdownBehavior": "stop",
+              "InstanceType":{
+                "Ref": "NatInstanceType"
+              },
+              "NetworkInterfaces": [
+                {
+                  "AssociatePublicIpAddress": true,
+                  "DeleteOnTermination": true,
+                  "DeviceIndex": 0,
+                  "GroupSet": [
+                    {
+                      "Fn::GetAtt": [
+                        "NatInstanceEC2SecurityGroup",
+                        "GroupId"
+                      ]
+                    }
+                  ],
+                  "SubnetId": {
+                    "Ref": "PublicEc2Subnet1c"
+                  }
+                }
+              ],
+              "SourceDestCheck": "false",
+              "UserData": {
+                "Fn::Base64": {
+                  "Fn::Join": [
+                    "\n",
+                    [
+                      "#!/bin/bash -xe",
+                      "EC2_METADATA_TOKEN=$(curl -X PUT \"http://169.254.169.254/latest/api/token\" -H \"X-aws-ec2-metadata-token-ttl-seconds: 600\")",
+                      "OUTBOUND_MAC=\"$(curl -H \"X-aws-ec2-metadata-token: $EC2_METADATA_TOKEN\" http://169.254.169.254/latest/meta-data/mac)\"",
+                      "OUTBOUND_ENI_ID=\"$(curl -H \"X-aws-ec2-metadata-token: $EC2_METADATA_TOKEN\" http://169.254.169.254/latest/meta-data/network/interfaces/macs/$OUTBOUND_MAC/interface-id)\"",
+                      "echo \"eni_id=$OUTBOUND_ENI_ID\" >> /etc/fck-nat.conf",
+                      "echo \"ip_local_port_range=\\\"1024 65535\\\"\" >> /etc/fck-nat.conf",
+                      "nf_conntrack_max_current_value=$(sudo sysctl -n net.netfilter.nf_conntrack_max)",
+                      "nf_conntrack_max_expected_value=$((nf_conntrack_max_current_value * 10))",
+                      "echo \"nf_conntrack_max=$nf_conntrack_max_expected_value\" >> /etc/fck-nat.conf",
+                      "sudo systemctl restart fck-nat.service"
+                    ]
+                  ]
+                }
+              }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "BambooPrivateSubnet1a": {
+            "Properties": {
+                "AvailabilityZone": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        "a"
+                      ]
+                    ]
+                },
+                "CidrBlock": {
+                    "Fn::Join":[
+                        ".",
+                        [{
+                            "Ref":"NetworkPrefix"
+                        },
+                        "0.0/27" ]
+                    ]
+                },
+                "VpcId": {
+                    "Ref": "Ec2VPC"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "BambooPrivateSubnet1b": {
+            "Properties": {
+                "AvailabilityZone": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        "b"
+                      ]
+                    ]
+                },
+                "CidrBlock": {
+                    "Fn::Join":[
+                        ".",
+                        [{
+                            "Ref":"NetworkPrefix"
+                        },
+                        "0.32/27" ]
+                    ]
+                },
+                "VpcId": {
+                    "Ref": "Ec2VPC"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "BambooPrivateSubnet1c": {
+            "Properties": {
+                "AvailabilityZone": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        "c"
+                      ]
+                    ]
+                },
+                "CidrBlock": {
+                    "Fn::Join":[
+                        ".",
+                        [{
+                            "Ref":"NetworkPrefix"
+                        },
+                        "0.64/27" ]
+                    ]
+                },
+                "VpcId": {
+                    "Ref": "Ec2VPC"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "BambooRdsAzAEc2Subnet": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+              "AvailabilityZone": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "a"
+                  ]
+                ]
+              },
+              "CidrBlock": {
+                "Fn::Join": [
+                  ".",
+                  [
+                    {
+                      "Ref": "NetworkPrefix"
+                    },
+                    "0.96/27"
+                  ]
+                ]
+              },
+              "MapPublicIpOnLaunch": false,
+              "VpcId": {
+                "Ref":"Ec2VPC"
+              }
+            }
+        },
+        "BambooRdsAzBEc2Subnet": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+              "AvailabilityZone": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "b"
+                  ]
+                ]
+              },
+              "CidrBlock": {
+                "Fn::Join": [
+                  ".",
+                  [
+                    {
+                      "Ref": "NetworkPrefix"
+                    },
+                    "0.128/27"
+                  ]
+                ]
+              },
+              "MapPublicIpOnLaunch": false,
+              "VpcId": {
+                "Ref":"Ec2VPC"
+              }
+            }
+        },
+        "PublicEc2Subnet1a": {
+            "Properties": {
+                "AvailabilityZone": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        "a"
+                      ]
+                    ]
+                },
+                "CidrBlock": {
+                    "Fn::Join":[
+                        ".",
+                        [{
+                            "Ref":"NetworkPrefix"
+                        },
+                        "1.0/24" ]
+                    ]
+                },
+                "VpcId": {
+                    "Ref": "Ec2VPC"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "PublicEc2Subnet1b": {
+            "Properties": {
+                "AvailabilityZone": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        "b"
+                      ]
+                    ]
+                },
+                "CidrBlock": {
+                    "Fn::Join":[
+                        ".",
+                        [{
+                            "Ref":"NetworkPrefix"
+                        },
+                        "2.0/24" ]
+                    ]
+                },
+                "VpcId": {
+                    "Ref": "Ec2VPC"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "PublicEc2Subnet1c": {
+            "Properties": {
+                "AvailabilityZone": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        "c"
+                      ]
+                    ]
+                },
+                "CidrBlock": {
+                    "Fn::Join":[
+                        ".",
+                        [{
+                            "Ref":"NetworkPrefix"
+                        },
+                        "3.0/24" ]
+                    ]
+                },
+                "VpcId": {
+                    "Ref": "Ec2VPC"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "BambooPrivateSubnet1aEc2RouteTable": {
+            "Properties": {
+              "VpcId": {
+                "Ref": "Ec2VPC"
+              }
+            },
+            "Type": "AWS::EC2::RouteTable"
+        },
+        "BambooPrivateSubnet1bEc2RouteTable": {
+            "Properties": {
+              "VpcId": {
+                "Ref": "Ec2VPC"
+              }
+            },
+            "Type": "AWS::EC2::RouteTable"
+        },
+        "BambooPrivateSubnet1cEc2RouteTable": {
+            "Properties": {
+              "VpcId": {
+                "Ref": "Ec2VPC"
+              }
+            },
+            "Type": "AWS::EC2::RouteTable"
+        },
+        "PublicSubnetEc2RouteTable": {
+            "Properties": {
+              "VpcId": {
+                "Ref": "Ec2VPC"
+              }
+            },
+            "Type": "AWS::EC2::RouteTable"
+        },
+        "BambooPrivateSubnet1aEc2SubnetRouteTableAssociation": {
+            "Properties": {
+              "RouteTableId": {
+                "Ref": "BambooPrivateSubnet1aEc2RouteTable"
+              },
+              "SubnetId": {
+                "Ref": "BambooPrivateSubnet1a"
+              }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "BambooPrivateSubnet1bEc2SubnetRouteTableAssociation": {
+            "Properties": {
+              "RouteTableId": {
+                "Ref": "BambooPrivateSubnet1bEc2RouteTable"
+              },
+              "SubnetId": {
+                "Ref": "BambooPrivateSubnet1b"
+              }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "BambooPrivateSubnet1cEc2SubnetRouteTableAssociation": {
+            "Properties": {
+              "RouteTableId": {
+                "Ref": "BambooPrivateSubnet1cEc2RouteTable"
+              },
+              "SubnetId": {
+                "Ref": "BambooPrivateSubnet1c"
+              }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "PublicSubnet1aEc2SubnetRouteTableAssociation": {
+            "Properties": {
+              "RouteTableId": {
+                "Ref": "PublicSubnetEc2RouteTable"
+              },
+              "SubnetId": {
+                "Ref": "PublicEc2Subnet1a"
+              }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "PublicSubnet1bEc2SubnetRouteTableAssociation": {
+            "Properties": {
+              "RouteTableId": {
+                "Ref": "PublicSubnetEc2RouteTable"
+              },
+              "SubnetId": {
+                "Ref": "PublicEc2Subnet1b"
+              }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "PublicSubnet1cEc2SubnetRouteTableAssociation": {
+            "Properties": {
+              "RouteTableId": {
+                "Ref": "PublicSubnetEc2RouteTable"
+              },
+              "SubnetId": {
+                "Ref": "PublicEc2Subnet1c"
+              }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "PublicSubnetEc2RouteTableToIGEc2Route": {
+            "Properties": {
+            "DestinationCidrBlock": "0.0.0.0/0",
+            "GatewayId": {
+                "Fn::GetAtt": [
+                "Ec2InternetGateway",
+                "InternetGatewayId"
+                ]
+            },
+            "RouteTableId": {
+                "Ref": "PublicSubnetEc2RouteTable"
+            }
+            },
+            "Type": "AWS::EC2::Route"
+        },
+        "BambooPrivateSubnet1aEc2ToNat1aEc2InstanceEc2Route": {
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "InstanceId": {
+                    "Ref": "Nat1aEc2Instance"
+                },
+                "RouteTableId": {
+                    "Ref": "BambooPrivateSubnet1aEc2RouteTable"
+                }
+            },
+            "Type": "AWS::EC2::Route"
+        },
+        "BambooPrivateSubnet1bEc2ToNat1bEc2InstanceEc2Route": {
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "InstanceId": {
+                    "Ref": "Nat1bEc2Instance"
+                },
+                "RouteTableId": {
+                    "Ref": "BambooPrivateSubnet1bEc2RouteTable"
+                }
+            },
+            "Type": "AWS::EC2::Route"
+        },
+        "BambooPrivateSubnet1cEc2ToNat1cEc2InstanceEc2Route": {
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "InstanceId": {
+                    "Ref": "Nat1cEc2Instance"
+                },
+                "RouteTableId": {
+                    "Ref": "BambooPrivateSubnet1cEc2RouteTable"
+                }
+            },
+            "Type": "AWS::EC2::Route"
+        }
+    },
+    "Outputs": {
+        "PublicEc2Subnet1aId": {
+          "Description": "PublicEc2Subnet1a Id",
+          "Export": {
+            "Name": {
+              "Fn::Sub": "${NetworkStack}-PublicEc2Subnet1aId"
+            }
+          },
+          "Value": {
+            "Ref": "PublicEc2Subnet1a"
+          }
+        },
+        "PublicEc2Subnet1bId": {
+            "Description": "PublicEc2Subnet1b Id",
+            "Export": {
+              "Name": {
+                "Fn::Sub": "${NetworkStack}-PublicEc2Subnet1bId"
+              }
+            },
+            "Value": {
+              "Ref": "PublicEc2Subnet1b"
+            }
+        },
+        "PublicEc2Subnet1cId": {
+            "Description": "PublicEc2Subnet1c Id",
+            "Export": {
+              "Name": {
+                "Fn::Sub": "${NetworkStack}-PublicEc2Subnet1cId"
+              }
+            },
+            "Value": {
+              "Ref": "PublicEc2Subnet1c"
+            }
+        },
+        "BambooPrivateSubnet1aId": {
+            "Description": "BambooPrivateSubnet1a Id",
+            "Export": {
+              "Name": {
+                "Fn::Sub": "${NetworkStack}-BambooPrivateSubnet1aId"
+              }
+            },
+            "Value": {
+              "Ref": "BambooPrivateSubnet1a"
+            }
+        },
+        "BambooPrivateSubnet1bId": {
+            "Description": "BambooPrivateSubnet1b Id",
+            "Export": {
+              "Name": {
+                "Fn::Sub": "${NetworkStack}-BambooPrivateSubnet1bId"
+              }
+            },
+            "Value": {
+              "Ref": "BambooPrivateSubnet1b"
+            }
+        },
+        "BambooPrivateSubnet1cId": {
+            "Description": "BambooPrivateSubnet1c Id",
+            "Export": {
+              "Name": {
+                "Fn::Sub": "${NetworkStack}-BambooPrivateSubnet1cId"
+              }
+            },
+            "Value": {
+              "Ref": "BambooPrivateSubnet1c"
+            }
+        },
+        "BambooRdsAzAEc2SubnetId": {
+            "Description": "BambooRdsAzAEc2Subnet Id",
+            "Export": {
+              "Name": {
+                "Fn::Sub": "${NetworkStack}-BambooRdsAzAEc2SubnetId"
+              }
+            },
+            "Value": {
+              "Ref": "BambooRdsAzAEc2Subnet"
+            }
+        },
+        "BambooRdsAzBEc2SubnetId": {
+            "Description": "BambooRdsAzBEc2Subnet Id",
+            "Export": {
+              "Name": {
+                "Fn::Sub": "${NetworkStack}-BambooRdsAzBEc2SubnetId"
+              }
+            },
+            "Value": {
+              "Ref": "BambooRdsAzBEc2Subnet"
+            }
+        },
+        "Ec2VPCId": {
+          "Description": "Ec2VPC Id",
+          "Export": {
+            "Name": {
+              "Fn::Sub": "${NetworkStack}-AppVPCId"
+            }
+          },
+          "Value": {
+            "Ref": "Ec2VPC"
+          }
+        }
+      }
+}

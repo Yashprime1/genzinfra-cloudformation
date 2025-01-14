@@ -1,0 +1,76 @@
+{
+    "Parameters": {
+        "NetworkStack": {
+            "Type": "String",
+            "Default": "",
+            "Description": "Name of the stack that acts as the bases for all stacks in network"
+        }
+    },
+    "Resources": {
+        "BambooEc2InstanceSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Bamboo security group",
+                "VpcId": {
+                    "Fn::ImportValue": {
+                        "Fn::Sub": "${NetworkStack}-AppVPCId"
+                    }
+                }
+            }
+        },
+        "BambooDockerInstanceEc2SecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Bamboo Docker Instance security group",
+                "VpcId": {
+                    "Fn::ImportValue": {
+                        "Fn::Sub": "${NetworkStack}-AppVPCId"
+                    }
+                }
+            }
+        },
+        "BambooRdsDbInstanceEc2SecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Bamboo RDS Instance security group",
+                "VpcId": {
+                    "Fn::ImportValue": {
+                        "Fn::Sub": "${NetworkStack}-AppVPCId"
+                    }
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "BambooEc2InstanceSecurityGroupId": {
+                "Export": {
+                    "Name":{ 
+                        "Fn::Sub": "${NetworkStack}-BambooEc2InstanceSecurityGroupId"
+                    }
+                },
+                "Value": {
+                    "Ref": "BambooEc2InstanceSecurityGroup"
+                }
+        },
+        "BambooDockerInstanceEc2SecurityGroupId": {
+            "Export": {
+                    "Name": {
+                        "Fn::Sub": "${NetworkStack}-BambooDockerInstanceEc2SecurityGroupId"
+                    }
+            },
+            "Value": {
+                "Ref": "BambooDockerInstanceEc2SecurityGroup"
+            }
+        },
+        "BambooRdsDbInstanceEc2SecurityGroupId": {
+                "Export": {
+                    "Name": {
+                        "Fn::Sub": "${NetworkStack}-BambooRdsDbInstanceEc2SecurityGroupId"
+                    }
+                },
+                "Value": {
+                    "Ref": "BambooRdsDbInstanceEc2SecurityGroup"
+                }
+        }
+    }
+}

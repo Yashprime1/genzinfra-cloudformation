@@ -1,0 +1,29 @@
+{
+    "Parameters":{
+        "NetworkStack": {
+            "Type": "String",
+            "Default": "",
+            "Description": "Name of the stack that acts as the bases for all stacks in network"
+        }
+    },
+    "Resources": {
+        "BambooDockerEc2InstanceSecurityGroupIngress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "IpProtocol": "tcp",
+                "FromPort": "2375",
+                "ToPort": "2375",
+                "SourceSecurityGroupId": {
+                    "Fn::ImportValue": {
+                        "Fn::Sub": "${NetworkStack}-BambooEc2InstanceSecurityGroupId"
+                    }
+                },
+                "GroupId": {
+                    "Fn::ImportValue": {
+                        "Fn::Sub":"${NetworkStack}-BambooDockerInstanceEc2SecurityGroupId"
+                    }
+                }
+            }
+        }
+    }
+}
