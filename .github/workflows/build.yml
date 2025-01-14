@@ -109,15 +109,6 @@ jobs:
           asset_name: genzinfra-cloudformation-build.zip
           asset_content_type: application/zip
 
-      - name: Delete older drafted releases
-        uses: sgpublic/delete-release-action@v1.1
-        if: github.ref == 'refs/heads/master'
-        with:
-          draft-drop: true
-          draft-drop-count: 0
-        env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
-
       - name: Publish Release
         if: github.ref == 'refs/heads/master'
         run: echo "You can publish release from here - ${{ steps.create_release.outputs.html_url }}"
