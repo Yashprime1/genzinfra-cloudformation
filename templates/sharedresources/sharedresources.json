@@ -64,6 +64,20 @@
       },
       "Type": "AWS::S3::Bucket"
     },
+    "SsmOutputLoggingS3Bucket": {
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        }
+      },
+      "Type": "AWS::S3::Bucket"
+    },
     "SsmOutputLoggingS3BucketPolicy": {
       "Properties": {
         "Bucket": {
