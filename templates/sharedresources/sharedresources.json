@@ -65,7 +65,6 @@
       "Type": "AWS::S3::Bucket"
     },
     "SsmOutputLoggingS3BucketPolicy": {
-      "Condition": "IsSsmOutputLoggingS3BucketEnabled",
       "Properties": {
         "Bucket": {
           "Ref": "SsmOutputLoggingS3Bucket"
