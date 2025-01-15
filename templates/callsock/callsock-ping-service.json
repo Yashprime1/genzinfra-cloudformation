@@ -591,31 +591,6 @@
       }
     },
     "Outputs": {
-      "CallSockM2PEcsServiceArn": {
-        "Condition": "IsM2pSignedCallServiceEnabled",
-        "Export": {
-          "Name": {
-            "Fn::Sub": "${NetworkStack}-M2p-SignedCall-1-Service-CallSockM2PEcsServiceArn"
-          }
-        },
-        "Value": {
-          "Ref": "CallSockM2PEcsService"
-        }
-      },
-      "CallSockM2PEcsServiceName": {
-        "Condition": "IsM2pSignedCallServiceEnabled",
-        "Export": {
-          "Name": {
-            "Fn::Sub": "${NetworkStack}-M2p-SignedCall-1-Service-CallSockM2PEcsServiceName"
-          }
-        },
-        "Value": {
-          "Fn::GetAtt": [
-            "CallSockM2PEcsService",
-            "Name"
-          ]
-        }
-      }
     }
   }
   
