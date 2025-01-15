@@ -377,6 +377,16 @@
                     }
                   }
                 ]
+              },
+              {
+                "Sid": "AllowSecretsRetreiveValue",
+                "Effect": "Allow",
+                "Action": [
+                  "secretsmanager:GetSecretValue"
+                ],
+                "Resource": [
+                  "arn:aws:secretsmanager:eu-west-1:736548753645:secret:pingtest-e5d7yt"
+                ]
               }
             ]
           },
@@ -421,6 +431,12 @@
                  "-c"
               ],
               "Essential": true,
+              "Secrets": [
+                {
+                  "Name": "PING_TEST",
+                  "ValueFrom": "arn:aws:secretsmanager:eu-west-1:736548753645:secret:pingtest-e5d7yt:ding::"
+                }
+              ],
               "Image": "httpd:2.4",
               "Name": "sample-fargate-app",
               "PortMappings": [ 
