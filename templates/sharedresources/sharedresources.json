@@ -33,14 +33,6 @@
       },
       "Type": "AWS::SQS::Queue"
     },
-    "CallsockToAdminSwiggySignedCallSqsQueue": {
-      "Properties": {
-        "QueueName": {
-          "Fn::Sub": "${AWS::StackName}-callsock-to-admin-swiggy-signedcall-sqs-queue"
-        }
-      },
-      "Type": "AWS::SQS::Queue"
-    },
     "SignedCallsRSAPrivateSecretsManagerSecret": {
       "Properties": {
         "Description": {
@@ -262,40 +254,6 @@
       },
       "Type": "AWS::KMS::Key"
     },
-    "SwiggyVoipSqsUploadSQSPolicy": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "SQS:SendMessage",
-                "SQS:ReceiveMessage"
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "s3.amazonaws.com"
-              },
-              "Resource": {
-                "Fn::GetAtt": [
-                  "SwiggyVoipSqsUploadSqsQueue",
-                  "Arn"
-                ]
-              }
-            }
-          ]
-        },
-        "Queues": [
-          {
-            "Ref": "SwiggyVoipSqsUploadSqsQueue"
-          }
-        ]
-      },
-      "Type": "AWS::SQS::QueuePolicy"
-    },
-    "SwiggyVoipSqsUploadSqsQueue": {
-      "Properties": {},
-      "Type": "AWS::SQS::Queue"
-    },
     "VoipSqsUploadSQSPolicy": {
       "Properties": {
         "PolicyDocument": {
@@ -363,42 +321,6 @@
       },
       "Value": {
         "Ref": "CallsockToAdminSignedCallStandardSqsQueue"
-      }
-    },
-    "CallsockToAdminSwiggySignedCallSqsQueueArn": {
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-CallsockToAdminSwiggySignedCallSqsQueueArn"
-        }
-      },
-      "Value": {
-        "Fn::GetAtt": [
-          "CallsockToAdminSwiggySignedCallSqsQueue",
-          "Arn"
-        ]
-      }
-    },
-    "CallsockToAdminSwiggySignedCallSqsQueueName": {
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-CallsockToAdminSwiggySignedCallSqsQueueName"
-        }
-      },
-      "Value": {
-        "Fn::GetAtt": [
-          "CallsockToAdminSwiggySignedCallSqsQueue",
-          "QueueName"
-        ]
-      }
-    },
-    "CallsockToAdminSwiggySignedCallSqsQueueUrl": {
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-CallsockToAdminSwiggySignedCallSqsQueueUrl"
-        }
-      },
-      "Value": {
-        "Ref": "CallsockToAdminSwiggySignedCallSqsQueue"
       }
     },
     "SignedCallsRSAPrivateSecretsManagerSecretName": {
@@ -475,29 +397,6 @@
       },
       "Value": {
         "Ref": "SsmS3Bucket"
-      }
-    },
-    "SwiggyVoipSqsUploadSQSQueueArn": {
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-SwiggyVoipSqsUploadSQSQueueArn"
-        }
-      },
-      "Value": {
-        "Fn::GetAtt": [
-          "SwiggyVoipSqsUploadSqsQueue",
-          "Arn"
-        ]
-      }
-    },
-    "SwiggyVoipSqsUploadSQSQueueurl": {
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-SwiggyVoipSqsUploadSQSQueueurl"
-        }
-      },
-      "Value": {
-        "Ref": "SwiggyVoipSqsUploadSqsQueue"
       }
     },
     "VoipSqsUploadSQSQueueArn": {
