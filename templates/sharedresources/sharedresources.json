@@ -34,7 +34,6 @@
       "Type": "AWS::SQS::Queue"
     },
     "CallsockToAdminSwiggySignedCallSqsQueue": {
-      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
       "Properties": {
         "QueueName": {
           "Fn::Sub": "${AWS::StackName}-callsock-to-admin-swiggy-signedcall-sqs-queue"
@@ -264,7 +263,6 @@
       "Type": "AWS::KMS::Key"
     },
     "SwiggyVoipSqsUploadSQSPolicy": {
-      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -295,7 +293,6 @@
       "Type": "AWS::SQS::QueuePolicy"
     },
     "SwiggyVoipSqsUploadSqsQueue": {
-      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
       "Properties": {},
       "Type": "AWS::SQS::Queue"
     },
@@ -369,7 +366,6 @@
       }
     },
     "CallsockToAdminSwiggySignedCallSqsQueueArn": {
-      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
       "Export": {
         "Name": {
           "Fn::Sub": "${AWS::StackName}-CallsockToAdminSwiggySignedCallSqsQueueArn"
@@ -383,7 +379,6 @@
       }
     },
     "CallsockToAdminSwiggySignedCallSqsQueueName": {
-      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
       "Export": {
         "Name": {
           "Fn::Sub": "${AWS::StackName}-CallsockToAdminSwiggySignedCallSqsQueueName"
@@ -397,7 +392,6 @@
       }
     },
     "CallsockToAdminSwiggySignedCallSqsQueueUrl": {
-      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
       "Export": {
         "Name": {
           "Fn::Sub": "${AWS::StackName}-CallsockToAdminSwiggySignedCallSqsQueueUrl"
@@ -497,7 +491,6 @@
       }
     },
     "SwiggyVoipSqsUploadSQSQueueArn": {
-      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
       "Export": {
         "Name": {
           "Fn::Sub": "${AWS::StackName}-SwiggyVoipSqsUploadSQSQueueArn"
@@ -511,7 +504,6 @@
       }
     },
     "SwiggyVoipSqsUploadSQSQueueurl": {
-      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
       "Export": {
         "Name": {
           "Fn::Sub": "${AWS::StackName}-SwiggyVoipSqsUploadSQSQueueurl"
