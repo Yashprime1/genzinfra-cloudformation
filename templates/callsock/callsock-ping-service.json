@@ -107,8 +107,7 @@
                   "secretsmanager:GetSecretValue"
                 ],
                 "Resource": "*"
-              },
-              
+              }
             ]
           },
           "Roles": [
