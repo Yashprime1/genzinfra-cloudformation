@@ -22,7 +22,8 @@
                     "Action": "CREATE",
                     "TemplatePath": "templates/sharedresources/sharedresources.json",
                     "Parameters": {
-                      "NetworkStack": "eu1"
+                      "NetworkStack": "eu1",
+                      "StackProvisioningMode": "dev"
                     },
                     "StackPolicy": {}
                   }
