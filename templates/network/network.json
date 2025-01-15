@@ -879,14 +879,6 @@
         }
       },
       "Type": "AWS::EC2::SubnetRouteTableAssociation"
-    },
-    "RouteTableNat": {
-      "Properties": {
-        "VpcId": {
-          "Ref": "Vpc"
-        }
-      },
-      "Type": "AWS::EC2::RouteTable"
     }
   },
   "Outputs": {
