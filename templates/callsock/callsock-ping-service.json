@@ -1,0 +1,621 @@
+{
+    "Parameters": {
+      "NetworkStack": {
+        "Description": "Name of the stack that this stack references for networking and shared resources",
+        "Type": "String"
+      },
+      "CPU": {
+        "Default": "8192",
+        "Type": "String"
+      },
+      "Memory": {
+        "Default": "16384",
+        "Type": "String"
+      },
+      "MinTasks": {
+        "Type": "String",
+        "Default": "0"
+      },
+      "MaxTasks": {
+        "Type": "String",
+        "Default": "10"
+      }
+    },
+    "Resources": {
+      "CallSockPostgresSecretsManagerSecret": {
+        "Type": "AWS::SecretsManager::Secret",
+        "Properties": {
+          "Description": {
+            "Fn::Sub": "This is a Secrets Manager secret for ${NetworkStack}-callsock postgres"
+          },
+          "GenerateSecretString": {
+            "SecretStringTemplate": "{\"username\": \"postgres\"}",
+            "GenerateStringKey": "password",
+            "PasswordLength": 20,
+            "ExcludeCharacters": "\"@/\\'`(){}[]:!$"
+          }
+        }
+      },
+      "CallSockEcsTaskExecutionIamRole": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "ecs-tasks.amazonaws.com"
+                  ]
+                },
+                "Action": [
+                  "sts:AssumeRole"
+                ]
+              }
+            ]
+          },
+          "Path": "/"
+        }
+      },
+      "CallSockIamPolicy": {
+        "Type": "AWS::IAM::Policy",
+        "Properties": {
+          "PolicyName": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "CallSockIamPolicy"
+              ]
+            ]
+          },
+          "PolicyDocument": {
+            "Statement": [
+              {
+                "Sid": "AllowSecretsRetreiveValue",
+                "Effect": "Allow",
+                "Action": [
+                  "secretsmanager:GetSecretValue"
+                ],
+                "Resource": [
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                    }
+                  },
+                  {
+                    "Ref": "CallSockPostgresSecretsManagerSecret"
+                  },
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${AWS::StackName}-CallsockSignedCallMongoPasswordSecretsManagerSecretName"
+                    }
+                  },
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${AWS::StackName}-CallsockSignedCallAmiPasswordSecretsManagerSecretName"
+                    }
+                  }
+                ]
+              },
+              {
+                "Sid": "AllowSecretsRetreiveSplunkToken",
+                "Effect": "Allow",
+                "Action": [
+                  "secretsmanager:GetSecretValue"
+                ],
+                "Resource": [
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-SharedResources-SplunkTokenSecretsManagerSecret"
+                    }
+                  },
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-SharedResources-SignedCallsRSAPrivateSecretsManagerSecretName"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "Roles": [
+            {
+              "Ref": "CallSockEcsTaskExecutionIamRole"
+            }
+          ]
+        }
+      },
+      "CallSockTaskIamPolicy": {
+        "Type": "AWS::IAM::Policy",
+        "Properties": {
+          "PolicyName": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "CallSockTaskIamPolicy"
+              ]
+            ]
+          },
+          "PolicyDocument": {
+            "Statement": [
+              {
+                "Action": [
+                  "ssmmessages:CreateControlChannel",
+                  "ssmmessages:CreateDataChannel",
+                  "ssmmessages:OpenControlChannel",
+                  "ssmmessages:OpenDataChannel"
+                ],
+                "Effect": "Allow",
+                "Resource": "*",
+                "Sid": "AllowRunCommandsToExecuteECSCommandsInFargate"
+              },
+              {
+                "Sid": "AllowScaleInProtection",
+                "Action": [
+                  "ecs:GetTaskProtection",
+                  "ecs:UpdateTaskProtection"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              },
+              {
+                "Sid": "AutoscalingGroup",
+                "Effect": "Allow",
+                "Action": [
+                  "autoscaling:DescribeAutoScalingGroups",
+                  "autoscaling:SetDesiredCapacity"
+                ],
+                "Resource": "*"
+              },
+              {
+                "Sid": "WriteLogsToCloudWatchLogs",
+                "Effect": "Allow",
+                "Action": [
+                  "logs:CreateLogStream",
+                  "logs:PutLogEvents"
+                ],
+                "Resource": "*"
+              },
+              {
+                "Sid": "AllowBootstrapViaCloudInitToBeAbleToDescribeTags",
+                "Effect": "Allow",
+                "Action": [
+                  "ec2:DescribeTags"
+                ],
+                "Resource": "*"
+              },
+              {
+                "Sid": "AllowInteractionWithEcsCluster",
+                "Effect": "Allow",
+                "Action": [
+                  "ecs:DeregisterContainerInstance",
+                  "ecs:DiscoverPollEndpoint",
+                  "ecs:Poll",
+                  "ecs:RegisterContainerInstance",
+                  "ecs:StartTelemetrySession",
+                  "ecs:Submit*"
+                ],
+                "Resource": "*"
+              },
+              {
+                "Sid": "AllowSsmAgentToFunction",
+                "Effect": "Allow",
+                "Action": [
+                  "ec2messages:*",
+                  "ssm:ListAssociations",
+                  "ssm:ListInstanceAssociations"
+                ],
+                "Resource": "*"
+              },
+              {
+                "Sid": "AllowTwoWayWebsocketChannelComminicationBetweenTheClientBrowserOrCliAndRemoteManagedInstance",
+                "Effect": "Allow",
+                "Action": [
+                  "ssmmessages:*",
+                  "ssm:UpdateInstanceInformation"
+                ],
+                "Resource": "*"
+              },
+              {
+                "Sid": "AllowSsmAccessToCloudWatchLogGroup",
+                "Effect": "Allow",
+                "Action": [
+                  "logs:CreateLogStream",
+                  "logs:PutLogEvents"
+                ],
+                "Resource": {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-SharedResources-SsmLogsLogGroupArn"
+                  }
+                }
+              },
+              {
+                "Sid": "AllowSsmAgentToPutLogsToS3",
+                "Effect": "Allow",
+                "Action": [
+                  "s3:PutObject",
+                  "s3:AbortMultipartUpload",
+                  "s3:ListMultipartUploadParts",
+                  "s3:ListBucket",
+                  "s3:ListBucketMultipartUploads"
+                ],
+                "Resource": [
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-SharedResources-SsmS3BucketArn"
+                    }
+                  },
+                  {
+                    "Fn::Join": [
+                      "/",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-SharedResources-SsmS3BucketArn"
+                          }
+                        },
+                        "*"
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "Sid": "AllowAccessFromCallsockInstancesToWritetoApiDirectcallUploadCallRecordingsS3Bucket",
+                "Effect": "Allow",
+                "Action": [
+                  "s3:ListBucket",
+                  "s3:PutObject",
+                  "s3:PutObjectAcl",
+                  "s3:CreateMultipartUpload",
+                  "s3:ListMultipartUploadParts",
+                  "s3:ListBucketMultipartUploads"
+                ],
+                "Resource": [
+                  {
+                    "Fn::Sub": "arn:aws:s3:::${NetworkStack}-api-directcall-1-apidirectcalluploadcallrecor-*"
+                  },
+                  {
+                    "Fn::Join": [
+                      "/",
+                      [
+                        {
+                          "Fn::Sub": "arn:aws:s3:::${NetworkStack}-api-directcall-1-apidirectcalluploadcallrecor-*"
+                        },
+                        "*"
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "Sid": "AllowPollerToDescribeEc2Instances",
+                "Effect": "Allow",
+                "Action": [
+                  "ec2:DescribeInstances"
+                ],
+                "Resource": "*"
+              },
+              {
+                "Sid": "AllowAccesstoVoipSqsQueue",
+                "Effect": "Allow",
+                "Action": [
+                  "SQS:SendMessage",
+                  "SQS:ReceiveMessage"
+                ],
+                "Resource": "arn:aws:sqs:*:062484260092:*-SharedResources-VoipSqsUploadSqsQueue-*"
+              },
+              {
+                "Sid": "AllowCallsockAgentToGetKMSGeneratedDataKeyWhenAccessingS3Bucket",
+                "Effect": "Allow",
+                "Action": [
+                  "kms:GenerateDataKey",
+                  "kms:Decrypt"
+                ],
+                "Resource": "*"
+              },
+              {
+                "Sid": "AllowInstanceToDownloadFilesFromM2pS3Bucket",
+                "Effect": "Allow",
+                "Action": [
+                  "s3:GetObject",
+                  "s3:ListBucket",
+                  "s3:HeadObject"
+                ],
+                "Resource": [
+                  {
+                    "Fn::Sub": "arn:aws:s3:::${NetworkStack}-m2p-signedcall-1-m2psignedcalls3bucket-*"
+                  },
+                  {
+                    "Fn::Join": [
+                      "/",
+                      [
+                        {
+                          "Fn::Sub": "arn:aws:s3:::${NetworkStack}-m2p-signedcall-1-m2psignedcalls3bucket-*"
+                        },
+                        "*"
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "Sid": "AllowSecretsRetreiveValue",
+                "Effect": "Allow",
+                "Action": [
+                  "secretsmanager:GetSecretValue"
+                ],
+                "Resource": [
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                    }
+                  },
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-SharedResources-SignedCallsRSAPrivateSecretsManagerSecretName"
+                    }
+                  }
+                ]
+              },
+              {
+                "Sid": "AllowCallsockToPublishToCallsockToAdminSignedCallStandardSqsQueue",
+                "Effect": "Allow",
+                "Action": [
+                  "sqs:SendMessage"
+                ],
+                "Resource": [
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-SharedResources-CallsockToAdminSignedCallStandardSqsQueueArn"
+                    }
+                  },
+                  {
+                    "Fn::If": [
+                      "ArePermissionsForCallSockToAdminSwiggySignedCallSqsQueueEnabled",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${NetworkStack}-SharedResources-CallsockToAdminSwiggySignedCallSqsQueueArn"
+                        }
+                      },
+                      {
+                        "Ref": "AWS::NoValue"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "Fn::If": [
+                  "IsPutObjectPermissionsForCsRecordingsSignedCallTestS3BucketEnabled",
+                  {
+                    "Sid": "AllowCallSockTaskToPutLogsToNiyosS3Bucket",
+                    "Effect": "Allow",
+                    "Action": [
+                      "s3:PutObject"
+                    ],
+                    "Resource": [
+                      "arn:aws:s3:::cs-recordings-signed-call-test",
+                      "arn:aws:s3:::cs-recordings-signed-call-test/*"
+                    ]
+                  },
+                  {
+                    "Ref": "AWS::NoValue"
+                  }
+                ]
+              },
+              {
+                "Fn::If": [
+                  "ArePermissionsToAssumeClevertapS3PushIamRoleEnabled",
+                  {
+                    "Sid": "PermissionToAssumeRoleS3PushIamRole",
+                    "Effect": "Allow",
+                    "Action": "sts:AssumeRole",
+                    "Resource": "arn:aws:iam::062484260092:role/clevertap-s3-push"
+                  },
+                  {
+                    "Ref": "AWS::NoValue"
+                  }
+                ]
+              }
+            ]
+          },
+          "Roles": [
+            {
+              "Ref": "CallSockEcsTaskIamRole"
+            }
+          ]
+        }
+      },
+      "CallSockEcsTaskIamRole": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "ecs-tasks.amazonaws.com"
+                  ]
+                },
+                "Action": [
+                  "sts:AssumeRole"
+                ]
+              }
+            ]
+          },
+          "Path": "/"
+        }
+      },
+      "CallSockV3EcsTaskDefinition": {
+        "Type": "AWS::ECS::TaskDefinition",
+        "Properties": {
+          "ContainerDefinitions": [
+            { 
+              "Command": [
+                 "/bin/sh -c \"echo '<html> <head> <title>Amazon ECS Sample App</title> <style>body {margin-top: 40px; background-color: #333;} </style> </head><body> <div style=color:white;text-align:center> <h1>Amazon ECS Sample App</h1> <h2>Congratulations!</h2> <p>Your application is now running on a container in Amazon ECS.</p> </div></body></html>' >  /usr/local/apache2/htdocs/index.html && httpd-foreground\""
+              ],
+              "EntryPoint": [
+                 "sh",
+                 "-c"
+              ],
+              "Essential": true,
+              "Image": "httpd:2.4",
+              "Name": "sample-fargate-app",
+              "PortMappings": [ 
+                 { 
+                    "ContainerPort": 80,
+                    "HostPort": 80,
+                    "Protocol": "tcp"
+                 }
+              ]
+           }
+          ],
+          "ExecutionRoleArn": {
+            "Fn::GetAtt": [
+              "CallSockEcsTaskExecutionIamRole",
+              "Arn"
+            ]
+          },
+          "TaskRoleArn": {
+            "Fn::GetAtt": [
+              "CallSockEcsTaskIamRole",
+              "Arn"
+            ]
+          },
+          "Family": {
+            "Ref": "AWS::StackName"
+          },
+          "NetworkMode": "awsvpc",
+          "Volumes": [
+            {
+              "Name": "stack-name-file"
+            },
+            {
+              "Name": "root-recordings"
+            },
+            {
+              "Name": "root-dialplans"
+            },
+            {
+              "Name": "logs"
+            }
+          ],
+          "Cpu": {
+            "Ref": "CPU"
+          },
+          "Memory": {
+            "Ref": "Memory"
+          },
+          "RequiresCompatibilities": [
+            "FARGATE"
+          ]
+        }
+      },
+      "CallSockEcsService": {
+        "Type": "AWS::ECS::Service",
+        "Properties": {
+          "Cluster": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
+            }
+          },
+          "DeploymentConfiguration": {
+            "Fn::If": [
+              "IsDeploymentCircuitBreakerConfigurationEnabled",
+              {
+                "MaximumPercent": "200",
+                "MinimumHealthyPercent": "100",
+                "DeploymentCircuitBreaker": {
+                  "Enable": true,
+                  "Rollback": true
+                }
+              },
+              {
+                "MaximumPercent": "200",
+                "MinimumHealthyPercent": "100"
+              }
+            ]
+          },
+          "DesiredCount": "1"
+          "LaunchType": "FARGATE",
+          "EnableExecuteCommand": true,
+          "SchedulingStrategy": "REPLICA",
+          "TaskDefinition": {
+            "Ref": "CallSockV3EcsTaskDefinition"
+          },
+          "PropagateTags": "SERVICE",
+          "ServiceName": {
+            "Ref": "AWS::StackName"
+          },
+          "Tags": [
+            {
+              "Key": "ct-aws:cloudformation:stack-name",
+              "Value": {
+                "Ref": "AWS::StackName"
+              }
+            }
+          ],
+          "NetworkConfiguration": {
+            "AwsvpcConfiguration": {
+              "AssignPublicIp": "ENABLED",
+              "SecurityGroups": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+                  }
+                }
+              ],
+              "Subnets": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-CallSocksAzAEc2SubnetId"
+                  }
+                },
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-CallSocksAzBEc2SubnetId"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "Outputs": {
+      "CallSockM2PEcsServiceArn": {
+        "Condition": "IsM2pSignedCallServiceEnabled",
+        "Export": {
+          "Name": {
+            "Fn::Sub": "${NetworkStack}-M2p-SignedCall-1-Service-CallSockM2PEcsServiceArn"
+          }
+        },
+        "Value": {
+          "Ref": "CallSockM2PEcsService"
+        }
+      },
+      "CallSockM2PEcsServiceName": {
+        "Condition": "IsM2pSignedCallServiceEnabled",
+        "Export": {
+          "Name": {
+            "Fn::Sub": "${NetworkStack}-M2p-SignedCall-1-Service-CallSockM2PEcsServiceName"
+          }
+        },
+        "Value": {
+          "Fn::GetAtt": [
+            "CallSockM2PEcsService",
+            "Name"
+          ]
+        }
+      }
+    }
+  }
+  
