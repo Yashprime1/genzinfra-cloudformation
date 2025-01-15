@@ -454,19 +454,6 @@
         ]
       }
     },
-    "SsmOutputS3BucketArn": {
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-SsmOutputS3BucketArn"
-        }
-      },
-      "Value": {
-        "Fn::GetAtt": [
-          "SsmOutputS3Bucket",
-          "Arn"
-        ]
-      }
-    },
     "SsmS3BucketArn": {
       "Export": {
         "Name": {
