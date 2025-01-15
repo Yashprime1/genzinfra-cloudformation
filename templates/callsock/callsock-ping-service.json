@@ -379,7 +379,7 @@
                 ]
               },
               {
-                "Sid": "AllowSecretsRetreiveValue",
+                "Sid": "AllowSecretsRetreiveValueCallsock",
                 "Effect": "Allow",
                 "Action": [
                   "secretsmanager:GetSecretValue"
