@@ -1,0 +1,2093 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters": {
+    "CadvisorImageName": {
+      "Type": "String"
+    },
+    "CadvisorImageTag": {
+      "Type": "String"
+    },
+    "ContainerTag": {
+      "Type": "String"
+    },
+    "MongoContainerTag101113132": {
+      "Type": "String"
+    },
+    "MongoContainerTag101113148": {
+      "Type": "String"
+    },
+    "MongoContainerTag101113164": {
+      "Type": "String"
+    },
+    "SensuClientContainerTag": {
+      "Type": "String"
+    },
+    "SensuClientImageName": {
+      "Type": "String"
+    },
+    "SensuClientImageTag": {
+      "Type": "String"
+    },
+    "SensuV2BackendUrl": {
+      "Default": "wss://sensu-v2-backend.clevertap.net",
+      "Type": "String"
+    },
+    "SplunkForwarderImageName": {
+      "Type": "String"
+    },
+    "SplunkForwarderImageTag": {
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "CadvisorEcsService": {
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "SchedulingStrategy": "DAEMON",
+        "TaskDefinition": {
+          "Ref": "CadvisorEcsTaskDefinition"
+        }
+      },
+      "Type": "AWS::ECS::Service"
+    },
+    "CadvisorEcsTaskDefinition": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Command": [
+              "--logtostderr=true",
+              "--enable_metrics=cpu,cpuLoad,disk,diskIO,memory,memory_numa,network,process,tcp,udp"
+            ],
+            "Essential": true,
+            "Image": "eu1.registry.clevertap-internal.io/clevertap/cadvisor:v0.49.1",
+            "MemoryReservation": 128,
+            "MountPoints": [
+              {
+                "ContainerPath": "/rootfs",
+                "ReadOnly": true,
+                "SourceVolume": "source-rootfs"
+              },
+              {
+                "ContainerPath": "/var/run",
+                "SourceVolume": "run-dir"
+              },
+              {
+                "ContainerPath": "/sys",
+                "ReadOnly": true,
+                "SourceVolume": "system-folder"
+              },
+              {
+                "ContainerPath": "/var/lib/docker",
+                "ReadOnly": true,
+                "SourceVolume": "docker-folder"
+              },
+              {
+                "ContainerPath": "/sys/fs/cgroup",
+                "ReadOnly": true,
+                "SourceVolume": "cgroup-mount"
+              },
+              {
+                "ContainerPath": "/dev/mapper",
+                "ReadOnly": true,
+                "SourceVolume": "volume-mount"
+              }
+            ],
+            "Name": "cadvisor",
+            "PortMappings": [
+              {
+                "ContainerPort": 8080,
+                "HostPort": 8090,
+                "Protocol": "tcp"
+              }
+            ],
+            "Privileged": true,
+            "ReadonlyRootFilesystem": true,
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+              }
+            }
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "CadvisorEcsTaskIamRole",
+            "Arn"
+          ]
+        },
+        "Volumes": [
+          {
+            "Host": {
+              "SourcePath": "/"
+            },
+            "Name": "source-rootfs"
+          },
+          {
+            "Host": {
+              "SourcePath": "/var/run"
+            },
+            "Name": "run-dir"
+          },
+          {
+            "Host": {
+              "SourcePath": "/sys"
+            },
+            "Name": "system-folder"
+          },
+          {
+            "Host": {
+              "SourcePath": "/var/lib/docker"
+            },
+            "Name": "docker-folder"
+          },
+          {
+            "Host": {
+              "SourcePath": "/sys/fs/cgroup"
+            },
+            "Name": "cgroup-mount"
+          },
+          {
+            "Host": {
+              "SourcePath": "/dev/mapper"
+            },
+            "Name": "volume-mount"
+          }
+        ]
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    },
+    "CadvisorEcsTaskIamPolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::ImportValue": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                }
+              ],
+              "Sid": "AllowSecretsRetrieveValue"
+            }
+          ]
+        },
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "CadvisorEcsTaskIamPolicy"
+            ]
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "CadvisorEcsTaskIamRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "CadvisorEcsTaskIamRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com"
+              },
+              "Sid": "AllowEcsTaskRole"
+            }
+          ]
+        },
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "CadvisorEcsTaskIamRole"
+            ]
+          ]
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "CloudflareTunnelEcsService": {
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "SchedulingStrategy": "DAEMON",
+        "TaskDefinition": {
+          "Ref": "CloudflareTunnelEcsTaskDefinition"
+        }
+      },
+      "Type": "AWS::ECS::Service"
+    },
+    "CloudflareTunnelEcsTaskDefinition": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "EntryPoint": [
+              "cloudflared",
+              "tunnel",
+              "--url",
+              "tcp://localhost:27018",
+              "--no-autoupdate",
+              "run"
+            ],
+            "Essential": true,
+            "Image": "artifactory.clevertap.net/clevertap/cloudflare:2023.3.1",
+            "LogConfiguration": {
+              "LogDriver": "splunk",
+              "Options": {
+                "splunk-format": "raw",
+                "splunk-index": "mongo",
+                "splunk-source": {
+                  "Ref": "AWS::StackName"
+                },
+                "splunk-url": "https://eu1.splunk-hec.clevertap-internal.io",
+                "splunk-verify-connection": "false"
+              },
+              "SecretOptions": [
+                {
+                  "Name": "splunk-token",
+                  "ValueFrom": {
+                    "Fn::Join": [
+                      ":",
+                      [
+                        {
+                          "Fn::ImportValue": "eu1-SharedResources-SplunkTokenSecretsManagerSecret"
+                        },
+                        "splunk-token::"
+                      ]
+                    ]
+                  }
+                }
+              ]
+            },
+            "MemoryReservation": 256,
+            "MountPoints": [
+              {
+                "ContainerPath": "/etc/cfn_stackname",
+                "ReadOnly": true,
+                "SourceVolume": "stack-name-file"
+              },
+              {
+                "ContainerPath": "/rootfs",
+                "ReadOnly": true,
+                "SourceVolume": "root-fs"
+              }
+            ],
+            "Name": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "Cloudflare"
+                ]
+              ]
+            },
+            "Privileged": false,
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+              }
+            },
+            "Secrets": [
+              {
+                "Name": "TUNNEL_TOKEN",
+                "ValueFrom": {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${AWS::StackName}-CloudflareTunnelTokenSecretsManagerSecretName"
+                  }
+                }
+              }
+            ],
+            "Ulimits": [
+              {
+                "HardLimit": 900000,
+                "Name": "nofile",
+                "SoftLimit": 900000
+              }
+            ]
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "MongoEcsTaskIamRole",
+            "Arn"
+          ]
+        },
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "NetworkMode": "host",
+        "Volumes": [
+          {
+            "Host": {
+              "SourcePath": "/etc/cfn_stackname"
+            },
+            "Name": "stack-name-file"
+          },
+          {
+            "Host": {
+              "SourcePath": "/"
+            },
+            "Name": "root-fs"
+          }
+        ]
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    },
+    "MongoEcsService013132": {
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "DesiredCount": 1,
+        "LaunchType": "EC2",
+        "PlacementConstraints": [
+          {
+            "Expression": {
+              "Fn::Join": [
+                "",
+                [
+                  "attribute:cluster.instance-identifier == ",
+                  {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+                          }
+                        },
+                        "MongoReplicaSetInstance013132"
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            },
+            "Type": "memberOf"
+          }
+        ],
+        "TaskDefinition": {
+          "Ref": "MongoEcsTaskDefinition013132"
+        }
+      },
+      "Type": "AWS::ECS::Service"
+    },
+    "MongoEcsService013148": {
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "DesiredCount": 1,
+        "LaunchType": "EC2",
+        "PlacementConstraints": [
+          {
+            "Expression": {
+              "Fn::Join": [
+                "",
+                [
+                  "attribute:cluster.instance-identifier == ",
+                  {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+                          }
+                        },
+                        "MongoReplicaSetInstance013148"
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            },
+            "Type": "memberOf"
+          }
+        ],
+        "TaskDefinition": {
+          "Ref": "MongoEcsTaskDefinition013148"
+        }
+      },
+      "Type": "AWS::ECS::Service"
+    },
+    "MongoEcsService013164": {
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "DesiredCount": 1,
+        "LaunchType": "EC2",
+        "PlacementConstraints": [
+          {
+            "Expression": {
+              "Fn::Join": [
+                "",
+                [
+                  "attribute:cluster.instance-identifier == ",
+                  {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+                          }
+                        },
+                        "MongoReplicaSetInstance013164"
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            },
+            "Type": "memberOf"
+          }
+        ],
+        "TaskDefinition": {
+          "Ref": "MongoEcsTaskDefinition013164"
+        }
+      },
+      "Type": "AWS::ECS::Service"
+    },
+    "MongoEcsTaskDefinition013132": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Command": [
+              "--dbpath",
+              "/var/lib/mongo",
+              "--replSet",
+              "dc-rs0",
+              "--logpath",
+              "/var/log/mongodb/mongod.log",
+              "--logappend",
+              "--auth",
+              "--oplogSize",
+              "2048",
+              "--keyFile",
+              "/var/lib/mongo/mongodb-keyfile",
+              "--wiredTigerCollectionBlockCompressor",
+              "zstd",
+              "--networkMessageCompressors",
+              "zstd"
+            ],
+            "DependsOn": [
+              {
+                "Condition": "COMPLETE",
+                "ContainerName": "set-key-file-permissions-helper"
+              }
+            ],
+            "Essential": true,
+            "Image": {
+              "Fn::Join": [
+                ":",
+                [
+                  {
+                    "Fn::Sub": "eu1.registry.clevertap-internal.io/clevertap/mongo"
+                  },
+                  {
+                    "Ref": "MongoContainerTag101113132"
+                  }
+                ]
+              ]
+            },
+            "MemoryReservation": 250,
+            "MountPoints": [
+              {
+                "ContainerPath": "/var/lib/mongo",
+                "SourceVolume": "data"
+              },
+              {
+                "ContainerPath": "/var/log/mongodb",
+                "SourceVolume": "logs"
+              },
+              {
+                "ContainerPath": "/var/run",
+                "SourceVolume": "shared-process-volume"
+              }
+            ],
+            "Name": {
+              "Ref": "AWS::StackName"
+            },
+            "PortMappings": [
+              {
+                "ContainerPort": 27017,
+                "HostPort": 27017,
+                "Protocol": "tcp"
+              }
+            ],
+            "Privileged": true,
+            "ReadonlyRootFilesystem": false,
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+              }
+            },
+            "Ulimits": [
+              {
+                "HardLimit": 983362,
+                "Name": "nofile",
+                "SoftLimit": 983362
+              },
+              {
+                "HardLimit": 983362,
+                "Name": "nproc",
+                "SoftLimit": 983362
+              },
+              {
+                "HardLimit": 983362,
+                "Name": "sigpending",
+                "SoftLimit": 983362
+              }
+            ],
+            "User": "mongodb"
+          },
+          {
+            "EntryPoint": [
+              "/bin/bash",
+              "-c",
+              "aws secretsmanager get-secret-value --secret-id ${SecretKeyArn} --region ${REGION} --query SecretString --output text \u003e /var/lib/mongo/mongodb-keyfile"
+            ],
+            "Environment": [
+              {
+                "Name": "SecretKeyArn",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Ref": "AWS::StackName"
+                        },
+                        "MongoDbKeySecretManagerSecretArn"
+                      ]
+                    ]
+                  }
+                }
+              },
+              {
+                "Name": "REGION",
+                "Value": {
+                  "Ref": "AWS::Region"
+                }
+              }
+            ],
+            "Essential": false,
+            "Image": "amazon/aws-cli:2.22.5",
+            "MemoryReservation": 128,
+            "MountPoints": [
+              {
+                "ContainerPath": "/var/lib/mongo",
+                "SourceVolume": "data"
+              },
+              {
+                "ContainerPath": "/var/log/mongodb",
+                "SourceVolume": "logs"
+              },
+              {
+                "ContainerPath": "/var/run",
+                "SourceVolume": "shared-process-volume"
+              }
+            ],
+            "Name": "get-key-file-helper",
+            "Privileged": true,
+            "ReadonlyRootFilesystem": false
+          },
+          {
+            "Command": [
+              "/bin/bash",
+              "-c",
+              "useradd --uid 999 --user-group mongodb \u0026\u0026 chown -R mongodb:mongodb /var/lib/mongo/mongodb-keyfile \u0026\u0026 chmod 400 /var/lib/mongo/mongodb-keyfile \u0026\u0026 install -d -m 0755 -o mongodb -g mongodb /var/run/mongodb \u0026\u0026 touch /var/run/mongodb/mongod.pid \u0026\u0026 chown -R mongodb:mongodb /var/run/mongodb/mongod.pid"
+            ],
+            "DependsOn": [
+              {
+                "Condition": "COMPLETE",
+                "ContainerName": "get-key-file-helper"
+              }
+            ],
+            "Essential": false,
+            "Image": "debian:12.8",
+            "MemoryReservation": 128,
+            "MountPoints": [
+              {
+                "ContainerPath": "/var/lib/mongo",
+                "SourceVolume": "data"
+              },
+              {
+                "ContainerPath": "/var/log/mongodb",
+                "SourceVolume": "logs"
+              },
+              {
+                "ContainerPath": "/var/run",
+                "SourceVolume": "shared-process-volume"
+              }
+            ],
+            "Name": "set-key-file-permissions-helper",
+            "Privileged": true,
+            "ReadonlyRootFilesystem": false
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "MongoEcsTaskIamRole",
+            "Arn"
+          ]
+        },
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "NetworkMode": "host",
+        "PlacementConstraints": [
+          {
+            "Expression": {
+              "Fn::Join": [
+                "",
+                [
+                  "attribute:cluster.instance-identifier == ",
+                  {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+                          }
+                        },
+                        "MongoReplicaSetInstance013132"
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            },
+            "Type": "memberOf"
+          }
+        ],
+        "Volumes": [
+          {
+            "Host": {
+              "SourcePath": "/var/lib/mongo"
+            },
+            "Name": "data"
+          },
+          {
+            "Host": {
+              "SourcePath": "/var/log/mongodb"
+            },
+            "Name": "logs"
+          },
+          {
+            "Name": "shared-process-volume"
+          }
+        ]
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    },
+    "MongoEcsTaskDefinition013148": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Command": [
+              "--dbpath",
+              "/var/lib/mongo",
+              "--replSet",
+              "dc-rs0",
+              "--logpath",
+              "/var/log/mongodb/mongod.log",
+              "--logappend",
+              "--auth",
+              "--oplogSize",
+              "2048",
+              "--keyFile",
+              "/var/lib/mongo/mongodb-keyfile",
+              "--wiredTigerCollectionBlockCompressor",
+              "zstd",
+              "--networkMessageCompressors",
+              "zstd"
+            ],
+            "DependsOn": [
+              {
+                "Condition": "COMPLETE",
+                "ContainerName": "set-key-file-permissions-helper"
+              }
+            ],
+            "Essential": true,
+            "Image": {
+              "Fn::Join": [
+                ":",
+                [
+                  "artifactory.clevertap.net/clevertap/mongo",
+                  {
+                    "Ref": "MongoContainerTag101113148"
+                  }
+                ]
+              ]
+            },
+            "MemoryReservation": 250,
+            "MountPoints": [
+              {
+                "ContainerPath": "/var/lib/mongo",
+                "SourceVolume": "data"
+              },
+              {
+                "ContainerPath": "/var/log/mongodb",
+                "SourceVolume": "logs"
+              },
+              {
+                "ContainerPath": "/var/run",
+                "SourceVolume": "shared-process-volume"
+              }
+            ],
+            "Name": {
+              "Ref": "AWS::StackName"
+            },
+            "PortMappings": [
+              {
+                "ContainerPort": 27017,
+                "HostPort": 27017,
+                "Protocol": "tcp"
+              }
+            ],
+            "Privileged": true,
+            "ReadonlyRootFilesystem": false,
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+              }
+            },
+            "Ulimits": [
+              {
+                "HardLimit": 983362,
+                "Name": "nofile",
+                "SoftLimit": 983362
+              },
+              {
+                "HardLimit": 983362,
+                "Name": "nproc",
+                "SoftLimit": 983362
+              },
+              {
+                "HardLimit": 983362,
+                "Name": "sigpending",
+                "SoftLimit": 983362
+              }
+            ],
+            "User": "mongodb"
+          },
+          {
+            "EntryPoint": [
+              "/bin/bash",
+              "-c",
+              "aws secretsmanager get-secret-value --secret-id ${SecretKeyArn} --region ${REGION} --query SecretString --output text \u003e /var/lib/mongo/mongodb-keyfile"
+            ],
+            "Environment": [
+              {
+                "Name": "SecretKeyArn",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Ref": "AWS::StackName"
+                        },
+                        "MongoDbKeySecretManagerSecretArn"
+                      ]
+                    ]
+                  }
+                }
+              },
+              {
+                "Name": "REGION",
+                "Value": {
+                  "Ref": "AWS::Region"
+                }
+              }
+            ],
+            "Essential": false,
+            "Image": "amazon/aws-cli:2.22.5",
+            "MemoryReservation": 128,
+            "MountPoints": [
+              {
+                "ContainerPath": "/var/lib/mongo",
+                "SourceVolume": "data"
+              },
+              {
+                "ContainerPath": "/var/log/mongodb",
+                "SourceVolume": "logs"
+              },
+              {
+                "ContainerPath": "/var/run",
+                "SourceVolume": "shared-process-volume"
+              }
+            ],
+            "Name": "get-key-file-helper",
+            "Privileged": true,
+            "ReadonlyRootFilesystem": false
+          },
+          {
+            "Command": [
+              "/bin/bash",
+              "-c",
+              "useradd --uid 999 --user-group mongodb \u0026\u0026 chown -R mongodb:mongodb /var/lib/mongo/mongodb-keyfile \u0026\u0026 chmod 400 /var/lib/mongo/mongodb-keyfile \u0026\u0026 install -d -m 0755 -o mongodb -g mongodb /var/run/mongodb \u0026\u0026 touch /var/run/mongodb/mongod.pid \u0026\u0026 chown -R mongodb:mongodb /var/run/mongodb/mongod.pid"
+            ],
+            "DependsOn": [
+              {
+                "Condition": "COMPLETE",
+                "ContainerName": "get-key-file-helper"
+              }
+            ],
+            "Essential": false,
+            "Image": "debian:12.8",
+            "MemoryReservation": 128,
+            "MountPoints": [
+              {
+                "ContainerPath": "/var/lib/mongo",
+                "SourceVolume": "data"
+              },
+              {
+                "ContainerPath": "/var/log/mongodb",
+                "SourceVolume": "logs"
+              },
+              {
+                "ContainerPath": "/var/run",
+                "SourceVolume": "shared-process-volume"
+              }
+            ],
+            "Name": "set-key-file-permissions-helper",
+            "Privileged": true,
+            "ReadonlyRootFilesystem": false
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "MongoEcsTaskIamRole",
+            "Arn"
+          ]
+        },
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "NetworkMode": "host",
+        "PlacementConstraints": [
+          {
+            "Expression": {
+              "Fn::Join": [
+                "",
+                [
+                  "attribute:cluster.instance-identifier == ",
+                  {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+                          }
+                        },
+                        "MongoReplicaSetInstance013148"
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            },
+            "Type": "memberOf"
+          }
+        ],
+        "Volumes": [
+          {
+            "Host": {
+              "SourcePath": "/var/lib/mongo"
+            },
+            "Name": "data"
+          },
+          {
+            "Host": {
+              "SourcePath": "/var/log/mongodb"
+            },
+            "Name": "logs"
+          },
+          {
+            "Name": "shared-process-volume"
+          }
+        ]
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    },
+    "MongoEcsTaskDefinition013164": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Command": [
+              "--dbpath",
+              "/var/lib/mongo",
+              "--replSet",
+              "dc-rs0",
+              "--logpath",
+              "/var/log/mongodb/mongod.log",
+              "--logappend",
+              "--auth",
+              "--oplogSize",
+              "2048",
+              "--keyFile",
+              "/var/lib/mongo/mongodb-keyfile",
+              "--wiredTigerCollectionBlockCompressor",
+              "zstd",
+              "--networkMessageCompressors",
+              "zstd"
+            ],
+            "DependsOn": [
+              {
+                "Condition": "COMPLETE",
+                "ContainerName": "set-key-file-permissions-helper"
+              }
+            ],
+            "Essential": true,
+            "Image": {
+              "Fn::Join": [
+                ":",
+                [
+                  {
+                    "Fn::Sub": "eu1.registry.clevertap-internal.io/clevertap/mongo"
+                  },
+                  {
+                    "Ref": "MongoContainerTag101113164"
+                  }
+                ]
+              ]
+            },
+            "MemoryReservation": 250,
+            "MountPoints": [
+              {
+                "ContainerPath": "/var/lib/mongo",
+                "SourceVolume": "data"
+              },
+              {
+                "ContainerPath": "/var/log/mongodb",
+                "SourceVolume": "logs"
+              },
+              {
+                "ContainerPath": "/var/run",
+                "SourceVolume": "shared-process-volume"
+              }
+            ],
+            "Name": {
+              "Ref": "AWS::StackName"
+            },
+            "PortMappings": [
+              {
+                "ContainerPort": 27017,
+                "HostPort": 27017,
+                "Protocol": "tcp"
+              }
+            ],
+            "Privileged": true,
+            "ReadonlyRootFilesystem": false,
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+              }
+            },
+            "Ulimits": [
+              {
+                "HardLimit": 983362,
+                "Name": "nofile",
+                "SoftLimit": 983362
+              },
+              {
+                "HardLimit": 983362,
+                "Name": "nproc",
+                "SoftLimit": 983362
+              },
+              {
+                "HardLimit": 983362,
+                "Name": "sigpending",
+                "SoftLimit": 983362
+              }
+            ],
+            "User": "mongodb"
+          },
+          {
+            "EntryPoint": [
+              "/bin/bash",
+              "-c",
+              "aws secretsmanager get-secret-value --secret-id ${SecretKeyArn} --region ${REGION} --query SecretString --output text \u003e /var/lib/mongo/mongodb-keyfile"
+            ],
+            "Environment": [
+              {
+                "Name": "SecretKeyArn",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Ref": "AWS::StackName"
+                        },
+                        "MongoDbKeySecretManagerSecretArn"
+                      ]
+                    ]
+                  }
+                }
+              },
+              {
+                "Name": "REGION",
+                "Value": {
+                  "Ref": "AWS::Region"
+                }
+              }
+            ],
+            "Essential": false,
+            "Image": "amazon/aws-cli:2.22.5",
+            "MemoryReservation": 128,
+            "MountPoints": [
+              {
+                "ContainerPath": "/var/lib/mongo",
+                "SourceVolume": "data"
+              },
+              {
+                "ContainerPath": "/var/log/mongodb",
+                "SourceVolume": "logs"
+              },
+              {
+                "ContainerPath": "/var/run",
+                "SourceVolume": "shared-process-volume"
+              }
+            ],
+            "Name": "get-key-file-helper",
+            "Privileged": true,
+            "ReadonlyRootFilesystem": false
+          },
+          {
+            "Command": [
+              "/bin/bash",
+              "-c",
+              "useradd --uid 999 --user-group mongodb \u0026\u0026 chown -R mongodb:mongodb /var/lib/mongo/mongodb-keyfile \u0026\u0026 chmod 400 /var/lib/mongo/mongodb-keyfile \u0026\u0026 install -d -m 0755 -o mongodb -g mongodb /var/run/mongodb \u0026\u0026 touch /var/run/mongodb/mongod.pid \u0026\u0026 chown -R mongodb:mongodb /var/run/mongodb/mongod.pid"
+            ],
+            "DependsOn": [
+              {
+                "Condition": "COMPLETE",
+                "ContainerName": "get-key-file-helper"
+              }
+            ],
+            "Essential": false,
+            "Image": "debian:12.8",
+            "MemoryReservation": 128,
+            "MountPoints": [
+              {
+                "ContainerPath": "/var/lib/mongo",
+                "SourceVolume": "data"
+              },
+              {
+                "ContainerPath": "/var/log/mongodb",
+                "SourceVolume": "logs"
+              },
+              {
+                "ContainerPath": "/var/run",
+                "SourceVolume": "shared-process-volume"
+              }
+            ],
+            "Name": "set-key-file-permissions-helper",
+            "Privileged": true,
+            "ReadonlyRootFilesystem": false
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "MongoEcsTaskIamRole",
+            "Arn"
+          ]
+        },
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "NetworkMode": "host",
+        "PlacementConstraints": [
+          {
+            "Expression": {
+              "Fn::Join": [
+                "",
+                [
+                  "attribute:cluster.instance-identifier == ",
+                  {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+                          }
+                        },
+                        "MongoReplicaSetInstance013164"
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            },
+            "Type": "memberOf"
+          }
+        ],
+        "Volumes": [
+          {
+            "Host": {
+              "SourcePath": "/var/lib/mongo"
+            },
+            "Name": "data"
+          },
+          {
+            "Host": {
+              "SourcePath": "/var/log/mongodb"
+            },
+            "Name": "logs"
+          },
+          {
+            "Name": "shared-process-volume"
+          }
+        ]
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    },
+    "MongoEcsTaskIamPolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::ImportValue": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                },
+                {
+                  "Fn::ImportValue": "eu1-SharedResources-SplunkTokenSecretsManagerSecret"
+                },
+                {
+                  "Fn::ImportValue": "eu1-SharedResources-MongoLoggerSplunkTokenSecretsManagerSecretName"
+                },
+                {
+                  "Fn::ImportValue": "eu1-SharedResources-SolarwindsSecretsManagerSecretName"
+                },
+                {
+                  "Fn::ImportValue": "eu1-SharedResources-MongoUserCredentialsSecretsManagerSecretName"
+                },
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${AWS::StackName}-CloudflareTunnelTokenSecretsManagerSecretName"
+                  }
+                }
+              ],
+              "Sid": "AllowSecretsRetreiveValue"
+            },
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:GetObjectAcl",
+                "s3:GetBucketLocation",
+                "s3:ListObjects",
+                "s3:ListObjectsV2",
+                "s3:ListBucket"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::ImportValue": "eu1-SharedResources-FluentBitConfigS3BucketArn"
+                },
+                {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::ImportValue": "eu1-SharedResources-FluentBitConfigS3BucketArn"
+                      },
+                      "*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "AllowFluentbitConfigurationS3Bucket"
+            }
+          ]
+        },
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "MongoEcsTaskIamPolicy"
+            ]
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "MongoEcsTaskIamRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "MongoEcsTaskIamRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com"
+              },
+              "Sid": "RoleForECSTaskExecution"
+            }
+          ]
+        },
+        "Path": "/"
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "MongoLoggerEcsService": {
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "SchedulingStrategy": "DAEMON",
+        "TaskDefinition": {
+          "Ref": "MongoLoggerEcsTaskdefinition"
+        }
+      },
+      "Type": "AWS::ECS::Service"
+    },
+    "MongoLoggerEcsTaskdefinition": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Command": [
+              "-R",
+              "/fluent-bit/etc/parsers.conf",
+              "-i",
+              "tail",
+              "-p",
+              "parser=json",
+              "-p",
+              "path=/var/log/mongodb/mongod.log",
+              "-F",
+              "lua",
+              "-p",
+              "script=/fluent-bit/etc/scripts/script.lua",
+              "-p",
+              "call=process_record",
+              "-p",
+              "match=*",
+              "-F",
+              "modify",
+              "-p",
+              "Match=*",
+              "-p",
+              "Rename=s severity",
+              "-p",
+              "Rename=t timestamp",
+              "-p",
+              "Rename=c component",
+              "-o",
+              "splunk",
+              "-p",
+              "host=http-inputs.clevertap.splunkcloud.com",
+              "-p",
+              "port=443",
+              "-p",
+              "tls=on",
+              "-p",
+              "tls.verify=on",
+              "-p",
+              "event_host=${HOSTNAME}",
+              "-p",
+              "event_source=${STACK_NAME}",
+              "-p",
+              "splunk_token=${SPLUNK_TOKEN}",
+              "-m",
+              "*",
+              "-F",
+              "record_modifier",
+              "-p",
+              "Record=hostname ${HOSTNAME}",
+              "-p",
+              "match=*"
+            ],
+            "DependsOn": [
+              {
+                "Condition": "COMPLETE",
+                "ContainerName": "fluentbit-lua-script-provider"
+              }
+            ],
+            "Environment": [
+              {
+                "Name": "NETWORK_STACK",
+                "Value": "eu1"
+              },
+              {
+                "Name": "FLB_LOG_LEVEL",
+                "Value": "warn"
+              },
+              {
+                "Name": "STACK_NAME",
+                "Value": {
+                  "Ref": "AWS::StackName"
+                }
+              }
+            ],
+            "Image": "artifactory.clevertap.net/clevertap/fluent-bit:3.0.4",
+            "LogConfiguration": {
+              "LogDriver": "splunk",
+              "Options": {
+                "mode": "non-blocking",
+                "splunk-format": "raw",
+                "splunk-index": "mongo-fluentbit-stdout",
+                "splunk-source": {
+                  "Ref": "AWS::StackName"
+                },
+                "splunk-sourcetype": "format_v1",
+                "splunk-url": "https://eu1.splunk-hec.clevertap-internal.io",
+                "splunk-verify-connection": "false"
+              },
+              "SecretOptions": [
+                {
+                  "Name": "splunk-token",
+                  "ValueFrom": {
+                    "Fn::Join": [
+                      ":",
+                      [
+                        {
+                          "Fn::ImportValue": "eu1-SharedResources-SplunkTokenSecretsManagerSecret"
+                        },
+                        "splunk-token::"
+                      ]
+                    ]
+                  }
+                }
+              ]
+            },
+            "MemoryReservation": 128,
+            "MountPoints": [
+              {
+                "ContainerPath": "/var/log/mongodb/",
+                "SourceVolume": "var-log-mongodb"
+              },
+              {
+                "ContainerPath": "/etc/cfn_stackname",
+                "SourceVolume": "stack-name-file"
+              },
+              {
+                "ContainerPath": "/fluent-bit/etc/scripts",
+                "ReadOnly": false,
+                "SourceVolume": "fluentbit-lua-scripts"
+              }
+            ],
+            "Name": "mongo-fluent-bit-logger",
+            "Privileged": false,
+            "ReadonlyRootFilesystem": false,
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                }
+              }
+            },
+            "Secrets": [
+              {
+                "Name": "SPLUNK_TOKEN",
+                "ValueFrom": {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      {
+                        "Fn::ImportValue": "eu1-SharedResources-MongoLoggerSplunkTokenSecretsManagerSecretName"
+                      },
+                      "splunk-token::"
+                    ]
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "Command": [
+              "/bin/sh",
+              "-c",
+              "cat \u003c\u003c-EOF \u003e /fluent-bit/etc/scripts/script.lua\nfunction process_record(tag, timestamp, record)\n    local component = record[\"c\"]\n    local msValue = nil\n    if record[\"durationMillis\"] then\n        msValue = tonumber(record[\"durationMillis\"])\n    end\n    if record[\"attr\"] and record[\"attr\"][\"durationMillis\"] then\n        msValue = tonumber(record[\"attr\"][\"durationMillis\"])\n    end\n    local message = record[\"msg\"]\n    if component == \"NETWORK\" or component == \"ACCESS\" or component == \"STORAGE\" or component == \"-\" or component == \"JOURNAL\" or (component == \"COMMAND\" and msValue and msValue \u003c 1000) or (component == \"WRITE\" and msValue and msValue \u003c 1000 and not (message and string.find(message, \"COLLSCAN\"))) then\n        return -1, 0, nil\n    end\n    if (component == \"COMMAND\" or component == \"WRITE\") then\n        if msValue and msValue \u003e 1000 then\n            return 1, timestamp, record\n        end\n        if message and string.find(message, \"COLLSCAN\") then\n            return 1, timestamp, record\n        end\n    end\n    return 1, timestamp, record\nend\nEOF"
+            ],
+            "Essential": false,
+            "Image": "redhat/ubi9:9.1.0-1646.1669627755",
+            "LogConfiguration": {
+              "LogDriver": "splunk",
+              "Options": {
+                "splunk-format": "raw",
+                "splunk-index": "mongo-fluentbit-stdout",
+                "splunk-source": {
+                  "Ref": "AWS::StackName"
+                },
+                "splunk-sourcetype": "format_v1",
+                "splunk-url": "https://eu1.splunk-hec.clevertap-internal.io",
+                "splunk-verify-connection": "false"
+              },
+              "SecretOptions": [
+                {
+                  "Name": "splunk-token",
+                  "ValueFrom": {
+                    "Fn::Join": [
+                      ":",
+                      [
+                        {
+                          "Fn::ImportValue": "eu1-SharedResources-SplunkTokenSecretsManagerSecret"
+                        },
+                        "splunk-token::"
+                      ]
+                    ]
+                  }
+                }
+              ]
+            },
+            "MemoryReservation": 128,
+            "MountPoints": [
+              {
+                "ContainerPath": "/fluent-bit/etc/scripts",
+                "ReadOnly": false,
+                "SourceVolume": "fluentbit-lua-scripts"
+              }
+            ],
+            "Name": "fluentbit-lua-script-provider",
+            "Privileged": false,
+            "ReadonlyRootFilesystem": false,
+            "Secrets": [
+              {
+                "Name": "SPLUNK_TOKEN",
+                "ValueFrom": {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      {
+                        "Fn::ImportValue": "eu1-SharedResources-MongoLoggerSplunkTokenSecretsManagerSecretName"
+                      },
+                      "splunk-token::"
+                    ]
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "MongoEcsTaskIamRole",
+            "Arn"
+          ]
+        },
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "NetworkMode": "host",
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "MongoEcsTaskIamRole",
+            "Arn"
+          ]
+        },
+        "Volumes": [
+          {
+            "Host": {
+              "SourcePath": "/var/log/mongodb/"
+            },
+            "Name": "var-log-mongodb"
+          },
+          {
+            "Host": {
+              "SourcePath": "/etc/cfn_stackname"
+            },
+            "Name": "stack-name-file"
+          },
+          {
+            "Name": "fluentbit-lua-scripts"
+          }
+        ]
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    },
+    "MongoProxyEcsService": {
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "SchedulingStrategy": "DAEMON",
+        "TaskDefinition": {
+          "Ref": "MongoProxyEcsTaskDefinition"
+        }
+      },
+      "Type": "AWS::ECS::Service"
+    },
+    "MongoProxyEcsTaskDefinition": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Essential": true,
+            "Image": "artifactory.clevertap.net/clevertap/mongo-proxy:3.0.0",
+            "MemoryReservation": 256,
+            "MountPoints": [
+              {
+                "ContainerPath": "/etc/cfn_stackname",
+                "ReadOnly": true,
+                "SourceVolume": "stack-name-file"
+              }
+            ],
+            "Name": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "MongoProxy"
+                ]
+              ]
+            },
+            "PortMappings": [
+              {
+                "ContainerPort": 27018,
+                "HostPort": 27018,
+                "Protocol": "tcp"
+              }
+            ],
+            "Privileged": false,
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+              }
+            }
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "MongoEcsTaskIamRole",
+            "Arn"
+          ]
+        },
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "NetworkMode": "host",
+        "Volumes": [
+          {
+            "Host": {
+              "SourcePath": "/etc/cfn_stackname"
+            },
+            "Name": "stack-name-file"
+          }
+        ]
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    },
+    "SensuAgentV3EcsService": {
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "SchedulingStrategy": "DAEMON",
+        "TaskDefinition": {
+          "Ref": "SensuAgentV3EcsTaskDefinition"
+        }
+      },
+      "Type": "AWS::ECS::Service"
+    },
+    "SensuAgentV3EcsTaskDefinition": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "EntryPoint": [
+              "sh",
+              "-c",
+              {
+                "Fn::Join": [
+                  " ",
+                  [
+                    "sensu-agent",
+                    "start",
+                    "--labels",
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "stackname=",
+                          {
+                            "Ref": "AWS::StackName"
+                          }
+                        ]
+                      ]
+                    },
+                    "--labels",
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "region=",
+                          {
+                            "Ref": "AWS::Region"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ],
+            "Environment": [
+              {
+                "Name": "SENSU_BACKEND_URL",
+                "Value": {
+                  "Ref": "SensuV2BackendUrl"
+                }
+              },
+              {
+                "Name": "SENSU_LOG_LEVEL",
+                "Value": "warn"
+              },
+              {
+                "Name": "SENSU_DISABLE_API",
+                "Value": "true"
+              },
+              {
+                "Name": "SENSU_DISABLE_SOCKETS",
+                "Value": "true"
+              },
+              {
+                "Name": "SENSU_STATSD_DISABLE",
+                "Value": "true"
+              },
+              {
+                "Name": "SENSU_CACHE_DIR",
+                "Value": "/var/lib/sensu"
+              },
+              {
+                "Name": "SENSU_NAMESPACE",
+                "Value": "default"
+              },
+              {
+                "Name": "SENSU_SUBSCRIPTIONS",
+                "Value": "mongo all"
+              },
+              {
+                "Name": "SENSU_DETECT_CLOUD_PROVIDER",
+                "Value": "true"
+              },
+              {
+                "Name": "SENSU_KEEPALIVE_CRITICAL_TIMEOUT",
+                "Value": "180"
+              },
+              {
+                "Name": "SENSU_KEEPALIVE_WARNING_TIMEOUT",
+                "Value": "90"
+              },
+              {
+                "Name": "SENSU_AGENT_MANAGED_ENTITY",
+                "Value": "true"
+              },
+              {
+                "Name": "SENSU_KEEPALIVE_HANDLERS",
+                "Value": "pagerdutyKeepaliveV2"
+              },
+              {
+                "Name": "MONGO_USER",
+                "Value": "root"
+              },
+              {
+                "Name": "MONGO_PASSWORD",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Fn::ImportValue": "eu1-SharedResources-MongoUserCredentialsSecretsManagerSecretName"
+                      },
+                      ":SecretString:password}}"
+                    ]
+                  ]
+                }
+              }
+            ],
+            "Essential": true,
+            "Image": "eu1.registry.clevertap-internal.io/clevertap/sensu:6.12.0",
+            "LogConfiguration": {
+              "LogDriver": "awsfirelens",
+              "Options": {
+                "Host": "eu1.splunk-hec.clevertap-internal.io",
+                "Name": "splunk",
+                "Port": "443",
+                "Splunk_Send_Raw": "Off",
+                "event_host": "${HOSTNAME}",
+                "event_index": "sensu",
+                "event_source": "sensu-stdout",
+                "event_sourcetype": "_json",
+                "tls": "on",
+                "tls.verify": "off"
+              },
+              "SecretOptions": [
+                {
+                  "Name": "Splunk_Token",
+                  "ValueFrom": {
+                    "Fn::Join": [
+                      ":",
+                      [
+                        {
+                          "Fn::ImportValue": "eu1-SharedResources-SplunkTokenSecretsManagerSecret"
+                        },
+                        "splunk-token::"
+                      ]
+                    ]
+                  }
+                }
+              ]
+            },
+            "MemoryReservation": 256,
+            "MountPoints": [
+              {
+                "ContainerPath": "/etc/cfn_stackname",
+                "ReadOnly": true,
+                "SourceVolume": "stack-name-file"
+              },
+              {
+                "ContainerPath": "/var/lib/mongo",
+                "ReadOnly": true,
+                "SourceVolume": "mongo-dir-path"
+              },
+              {
+                "ContainerPath": "/rootfs",
+                "ReadOnly": true,
+                "SourceVolume": "root-fs"
+              },
+              {
+                "ContainerPath": "/var/lib/sensu",
+                "SourceVolume": "cache-dir"
+              }
+            ],
+            "Name": "Sensu-Agent",
+            "Privileged": false,
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+              }
+            }
+          },
+          {
+            "Cpu": 0,
+            "Environment": [
+              {
+                "Name": "STACK_NAME",
+                "Value": {
+                  "Ref": "AWS::StackName"
+                }
+              },
+              {
+                "Name": "FLB_LOG_LEVEL",
+                "Value": "warn"
+              },
+              {
+                "Name": "aws_fluent_bit_init_s3_parsers",
+                "Value": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "eu1-SharedResources-FluentBitConfigS3BucketArn"
+                        }
+                      },
+                      "master/sensu-agent-parser.conf"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "aws_fluent_bit_init_s3_filters",
+                "Value": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "eu1-SharedResources-FluentBitConfigS3BucketArn"
+                        }
+                      },
+                      "master/sensu-agent-filter.conf"
+                    ]
+                  ]
+                }
+              }
+            ],
+            "Essential": true,
+            "FirelensConfiguration": {
+              "Type": "fluentbit"
+            },
+            "Image": "eu1.registry.clevertap-internal.io/clevertap/aws-for-fluent-bit:init-2.32.0",
+            "LogConfiguration": {
+              "LogDriver": "awsfirelens",
+              "Options": {
+                "Host": "eu1.splunk-hec.clevertap-internal.io",
+                "Name": "splunk",
+                "Port": "443",
+                "Splunk_Send_Raw": "Off",
+                "event_host": "${HOSTNAME}",
+                "event_index": "sensu",
+                "event_source": "fluentbit-stdout",
+                "event_sourcetype": "_json",
+                "tls": "on",
+                "tls.verify": "off"
+              },
+              "SecretOptions": [
+                {
+                  "Name": "Splunk_Token",
+                  "ValueFrom": {
+                    "Fn::Join": [
+                      ":",
+                      [
+                        {
+                          "Fn::ImportValue": "eu1-SharedResources-SplunkTokenSecretsManagerSecret"
+                        },
+                        "splunk-token::"
+                      ]
+                    ]
+                  }
+                }
+              ]
+            },
+            "Memory": 128,
+            "Name": "log_router",
+            "Privileged": false,
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+              }
+            }
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "MongoEcsTaskIamRole",
+            "Arn"
+          ]
+        },
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "NetworkMode": "host",
+        "Volumes": [
+          {
+            "DockerVolumeConfiguration": {
+              "Driver": "local",
+              "Scope": "task"
+            },
+            "Name": "cache-dir"
+          },
+          {
+            "Host": {
+              "SourcePath": "/etc/cfn_stackname"
+            },
+            "Name": "stack-name-file"
+          },
+          {
+            "Host": {
+              "SourcePath": "/var/lib/mongo"
+            },
+            "Name": "mongo-dir-path"
+          },
+          {
+            "Host": {
+              "SourcePath": "/"
+            },
+            "Name": "root-fs"
+          }
+        ]
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    },
+    "SplunkForwarderEcsService": {
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-MongoEcsClusterName"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
+        "SchedulingStrategy": "DAEMON",
+        "TaskDefinition": {
+          "Ref": "SplunkForwarderEcsTaskDefinition"
+        }
+      },
+      "Type": "AWS::ECS::Service"
+    },
+    "SplunkForwarderEcsTaskDefinition": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Environment": [
+              {
+                "Name": "SPLUNK_START_ARGS",
+                "Value": "--accept-license"
+              },
+              {
+                "Name": "SPLUNK_PASSWORD",
+                "Value": "aliceInWonderland"
+              },
+              {
+                "Name": "SPLUNK_USER",
+                "Value": "root"
+              },
+              {
+                "Name": "STACK_NAME",
+                "Value": {
+                  "Ref": "AWS::StackName"
+                }
+              }
+            ],
+            "Essential": true,
+            "Image": {
+              "Fn::Join": [
+                "/",
+                [
+                  "artifactory.clevertap.net/clevertap",
+                  {
+                    "Fn::Sub": "${SplunkForwarderImageName}:${SplunkForwarderImageTag}"
+                  }
+                ]
+              ]
+            },
+            "MemoryReservation": 128,
+            "MountPoints": [
+              {
+                "ContainerPath": "/var/log",
+                "ReadOnly": true,
+                "SourceVolume": "var-log"
+              },
+              {
+                "ContainerPath": "/etc/cfn_stackname",
+                "ReadOnly": true,
+                "SourceVolume": "stack-name-file"
+              },
+              {
+                "ContainerPath": "/opt/splunkforwarder/var/lib/splunk/persistentstorage",
+                "SourceVolume": "splunk-persistentstate-file"
+              }
+            ],
+            "Name": "splunk-forwarder",
+            "Privileged": false,
+            "ReadonlyRootFilesystem": false,
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": "eu1-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+              }
+            }
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "MongoEcsTaskIamRole",
+            "Arn"
+          ]
+        },
+        "NetworkMode": "host",
+        "Volumes": [
+          {
+            "Host": {
+              "SourcePath": "/var/log"
+            },
+            "Name": "var-log"
+          },
+          {
+            "Host": {
+              "SourcePath": "/etc/cfn_stackname"
+            },
+            "Name": "stack-name-file"
+          },
+          {
+            "Name": "splunk-persistentstate-file"
+          }
+        ]
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    }
+  }
+}

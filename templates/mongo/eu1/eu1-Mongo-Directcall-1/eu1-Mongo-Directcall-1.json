@@ -1,0 +1,1077 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Outputs": {
+    "CloudflareTunnelTokenSecretsManagerSecretName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-CloudflareTunnelTokenSecretsManagerSecretName"
+        }
+      },
+      "Value": {
+        "Ref": "CloudflareTunnelTokenSecretsManagerSecret"
+      }
+    },
+    "MongoDbKeySecretManagerSecretArn": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-MongoDbKeySecretManagerSecretArn"
+        }
+      },
+      "Value": {
+        "Ref": "MongoDbKeySecretManagerSecret"
+      }
+    },
+    "MongoEcsClusterName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-MongoEcsClusterName"
+        }
+      },
+      "Value": {
+        "Ref": "MongoEcsCluster"
+      }
+    }
+  },
+  "Resources": {
+    "CloudflareTunnelTokenSecretsManagerSecret": {
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "This is a Secrets Manager secret for MongoDB compass Cloudflare tunnel secret in stack ${AWS::StackName}"
+        },
+        "SecretString": "\u003creplaceme\u003e"
+      },
+      "Type": "AWS::SecretsManager::Secret"
+    },
+    "MongoDbKeySecretManagerSecret": {
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "A secrets manager secret used as a MongoDB key for the stack ${AWS::StackName}"
+        },
+        "SecretString": "\u003creplaceme\u003e"
+      },
+      "Type": "AWS::SecretsManager::Secret"
+    },
+    "MongoDirectcallReplicaSetSubnetA": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "a"
+            ]
+          ]
+        },
+        "CidrBlock": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Fn::ImportValue": "eu1-VpcNetworkPrefix"
+              },
+              "13.128/28"
+            ]
+          ]
+        },
+        "VpcId": {
+          "Fn::ImportValue": "eu1-VpcId"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "MongoDirectcallReplicaSetSubnetARouteTableAssociation": {
+      "Properties": {
+        "RouteTableId": {
+          "Fn::ImportValue": "eu1-RouteTableNatId"
+        },
+        "SubnetId": {
+          "Ref": "MongoDirectcallReplicaSetSubnetA"
+        }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    "MongoDirectcallReplicaSetSubnetB": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "b"
+            ]
+          ]
+        },
+        "CidrBlock": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Fn::ImportValue": "eu1-VpcNetworkPrefix"
+              },
+              "13.144/28"
+            ]
+          ]
+        },
+        "VpcId": {
+          "Fn::ImportValue": "eu1-VpcId"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "MongoDirectcallReplicaSetSubnetBRouteTableAssociation": {
+      "Properties": {
+        "RouteTableId": {
+          "Fn::ImportValue": "eu1-Nat1bEc2RouteTableId"
+        },
+        "SubnetId": {
+          "Ref": "MongoDirectcallReplicaSetSubnetB"
+        }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    "MongoDirectcallReplicaSetSubnetC": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "c"
+            ]
+          ]
+        },
+        "CidrBlock": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Fn::ImportValue": "eu1-VpcNetworkPrefix"
+              },
+              "13.160/28"
+            ]
+          ]
+        },
+        "VpcId": {
+          "Fn::ImportValue": "eu1-VpcId"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "MongoDirectcallReplicaSetSubnetCRouteTableAssociation": {
+      "Properties": {
+        "RouteTableId": {
+          "Fn::ImportValue": "eu1-RouteTableNatId"
+        },
+        "SubnetId": {
+          "Ref": "MongoDirectcallReplicaSetSubnetC"
+        }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    "MongoDnsRecordSet": {
+      "Properties": {
+        "HostedZoneId": {
+          "Fn::ImportValue": {
+            "Fn::Join": [
+              "-",
+              [
+                "eu1",
+                "MongoDbHostedZoneId"
+              ]
+            ]
+          }
+        },
+        "Name": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "mongodb.clevertap.net"
+            ]
+          ]
+        },
+        "ResourceRecords": [
+          "10.11.13.132",
+          "10.11.13.148",
+          "10.11.13.164"
+        ],
+        "TTL": "60",
+        "Type": "A"
+      },
+      "Type": "AWS::Route53::RecordSet"
+    },
+    "MongoEbsDlmLifecyclePolicy": {
+      "Properties": {
+        "Description": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "MongoVolumeXvdp",
+              "LifecyclePolicy"
+            ]
+          ]
+        },
+        "ExecutionRoleArn": {
+          "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/service-role/AWSDataLifecycleManagerServiceRole"
+        },
+        "PolicyDetails": {
+          "ResourceTypes": [
+            "VOLUME"
+          ],
+          "Schedules": [
+            {
+              "CopyTags": true,
+              "CreateRule": {
+                "Interval": 4,
+                "IntervalUnit": "HOURS",
+                "Times": [
+                  "00:00"
+                ]
+              },
+              "Name": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "AWS::StackName"
+                    },
+                    "SnapshotSchedule"
+                  ]
+                ]
+              },
+              "RetainRule": {
+                "Count": 84
+              }
+            }
+          ],
+          "TargetTags": [
+            {
+              "Key": "DlmIdentifier",
+              "Value": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "AWS::StackName"
+                    },
+                    "MongoVolumeXvdp"
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        "State": "ENABLED"
+      },
+      "Type": "AWS::DLM::LifecyclePolicy"
+    },
+    "MongoEc2InstanceIamInstanceProfile": {
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "MongoEc2InstanceIamRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::InstanceProfile"
+    },
+    "MongoEc2InstanceIamPolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ecs:DeregisterContainerInstance",
+                "ecs:DiscoverPollEndpoint",
+                "ecs:Poll",
+                "ecs:RegisterContainerInstance",
+                "ecs:StartTelemetrySession",
+                "ecs:Submit*"
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+              "Sid": "AllowInteractionWithEcsCluster"
+            },
+            {
+              "Action": [
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:GetRepositoryPolicy",
+                "ecr:DescribeRepositories",
+                "ecr:ListImages",
+                "ecr:BatchGetImage"
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+              "Sid": "AbilityToCheckoutFromEcr"
+            },
+            {
+              "Action": [
+                "cloudwatch:GetMetricStatistics"
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+              "Sid": "AbilityToPullMetricsFromCloudwatch"
+            },
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+              "Sid": "WriteLogsToCloudWatchLogs"
+            },
+            {
+              "Action": [
+                "ec2messages:*",
+                "ssm:ListAssociations",
+                "ssm:ListInstanceAssociations"
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+              "Sid": "AllowSsmAgentToFunction"
+            },
+            {
+              "Action": [
+                "ssmmessages:*",
+                "ssm:UpdateInstanceInformation"
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+              "Sid": "AllowTwoWayWebsocketChannelComminicationBetweenTheClientBrowserOrCliAndRemoteManagedInstance"
+            },
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "eu1-SharedResources-SsmLogsLogGroupArn"
+              },
+              "Sid": "AllowSsmAccessToCloudWatchLogGroup"
+            },
+            {
+              "Action": [
+                "s3:GetObject"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::ImportValue": "eu1-SharedResources-RuncommandAutomationScriptsS3BucketArn"
+                      },
+                      "latest"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::ImportValue": "eu1-SharedResources-RuncommandAutomationScriptsS3BucketArn"
+                      },
+                      "latest",
+                      "*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "AllowMongoAccessToReadAtomationScriptsFromS3"
+            },
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:CreateMultipartUpload",
+                "s3:ListMultipartUploadParts",
+                "s3:ListBucket",
+                "s3:ListBucketMultipartUploads"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::ImportValue": "eu1-SharedResources-SsmS3BucketArn"
+                },
+                {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::ImportValue": "eu1-SharedResources-SsmS3BucketArn"
+                      },
+                      "*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "AllowSsmAgentToPutLogsToS3"
+            },
+            {
+              "Action": [
+                "kms:GenerateDataKey",
+                "kms:Decrypt"
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+              "Sid": "AllowSSMAgentToGetKMSGeneratedDataKeyWhenAccessingS3Bucket"
+            },
+            {
+              "Action": [
+                "s3:GetEncryptionConfiguration"
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+              "Sid": "AllowSsmToGetS3EncryptionConfiguration"
+            },
+            {
+              "Action": [
+                "ec2:DescribeTags"
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+              "Sid": "AllowBootstrapViaCloudInitToBeAbleToDescribeTags"
+            },
+            {
+              "Action": [
+                "ec2:DescribeTags",
+                "ec2:DescribeInstances",
+                "ec2:DescribeInstanceStatus"
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+              "Sid": "AllowDescribeInstances"
+            },
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::ImportValue": "eu1-SharedResources-MongoUserCredentialsSecretsManagerSecretName"
+                },
+                {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::ImportValue": "eu1-SharedResources-MongoUserCredentialsSecretsManagerSecretName"
+                      },
+                      "*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "AllowMongoInstancesToAccessMongoSecrets"
+            },
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:CreateMultipartUpload",
+                "s3:ListMultipartUploadParts",
+                "s3:ListBucket",
+                "s3:ListBucketMultipartUploads"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::ImportValue": "eu1-SharedResources-SsmOutputS3BucketArn"
+                },
+                {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::ImportValue": "eu1-SharedResources-SsmOutputS3BucketArn"
+                      },
+                      "*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "AllowSsmAgentToPutoSsmS3OutputS3"
+            },
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:GetObjectAcl",
+                "s3:GetBucketLocation",
+                "s3:ListObjects",
+                "s3:ListObjectsV2",
+                "s3:ListBucket"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::ImportValue": "eu1-SharedResources-FluentBitConfigS3BucketArn"
+                },
+                {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::ImportValue": "eu1-SharedResources-FluentBitConfigS3BucketArn"
+                      },
+                      "*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "AllowFluentbitConfigurationS3Bucket"
+            }
+          ]
+        },
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "LogCollectorEc2InstanceIamPolicy"
+            ]
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "MongoEc2InstanceIamRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "MongoEc2InstanceIamRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              },
+              "Sid": "RoleMappedToContainerInstancesViaEc2InstanceIamInstanceProfile"
+            }
+          ]
+        },
+        "Path": "/"
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "MongoEcsCluster": {
+      "Properties": {},
+      "Type": "AWS::ECS::Cluster"
+    },
+    "MongoReplicaSetEncryptedVolumeXvdp013132": {
+      "DeletionPolicy": "Snapshot",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "a"
+            ]
+          ]
+        },
+        "Encrypted": true,
+        "Iops": 3000,
+        "KmsKeyId": {
+          "Fn::GetAtt": [
+            "MongoVolumeXvdpKmsKey",
+            "Arn"
+          ]
+        },
+        "Size": 64,
+        "Tags": [
+          {
+            "Key": "DlmIdentifier",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "MongoVolumeXvdp"
+                ]
+              ]
+            }
+          }
+        ],
+        "Throughput": 256,
+        "VolumeType": "gp3"
+      },
+      "Type": "AWS::EC2::Volume"
+    },
+    "MongoReplicaSetEncryptedVolumeXvdp013148": {
+      "DeletionPolicy": "Snapshot",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "b"
+            ]
+          ]
+        },
+        "Encrypted": true,
+        "Iops": 3000,
+        "KmsKeyId": {
+          "Fn::GetAtt": [
+            "MongoVolumeXvdpKmsKey",
+            "Arn"
+          ]
+        },
+        "Size": 64,
+        "Tags": [
+          {
+            "Key": "DlmIdentifier",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "MongoVolumeXvdp"
+                ]
+              ]
+            }
+          }
+        ],
+        "Throughput": 256,
+        "VolumeType": "gp3"
+      },
+      "Type": "AWS::EC2::Volume"
+    },
+    "MongoReplicaSetEncryptedVolumeXvdp013164": {
+      "DeletionPolicy": "Snapshot",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "c"
+            ]
+          ]
+        },
+        "Encrypted": true,
+        "Iops": 3000,
+        "KmsKeyId": {
+          "Fn::GetAtt": [
+            "MongoVolumeXvdpKmsKey",
+            "Arn"
+          ]
+        },
+        "Size": 64,
+        "Tags": [
+          {
+            "Key": "DlmIdentifier",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "MongoVolumeXvdp"
+                ]
+              ]
+            }
+          }
+        ],
+        "Throughput": 256,
+        "VolumeType": "gp3"
+      },
+      "Type": "AWS::EC2::Volume"
+    },
+    "MongoReplicaSetInstance013132": {
+      "Properties": {
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "Encrypted": true,
+              "KmsKeyId": {
+                "Fn::GetAtt": [
+                  "MongoVolumeXvdaKmsKey",
+                  "Arn"
+                ]
+              },
+              "VolumeSize": 30,
+              "VolumeType": "gp2"
+            }
+          }
+        ],
+        "DisableApiTermination": false,
+        "IamInstanceProfile": {
+          "Ref": "MongoEc2InstanceIamInstanceProfile"
+        },
+        "ImageId": "ami-0cf050cf6a290ef26",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "InstanceType": "t4g.medium",
+        "Monitoring": true,
+        "PrivateIpAddress": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "eu1-VpcNetworkPrefix"
+                }
+              },
+              "13.132"
+            ]
+          ]
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::ImportValue": "eu1-SecurityGroup-DirectcallMongoInstanceEC2SecurityGroupId"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "MongoDirectcallReplicaSetSubnetA"
+        },
+        "Tags": [
+          {
+            "Key": "customer",
+            "Value": "clevertap"
+          },
+          {
+            "Key": "role",
+            "Value": "mongo"
+          },
+          {
+            "Key": "ecs_cluster",
+            "Value": {
+              "Ref": "MongoEcsCluster"
+            }
+          }
+        ],
+        "Volumes": [
+          {
+            "Device": "/dev/sdp",
+            "VolumeId": {
+              "Ref": "MongoReplicaSetEncryptedVolumeXvdp013132"
+            }
+          }
+        ]
+      },
+      "Type": "AWS::EC2::Instance"
+    },
+    "MongoReplicaSetInstance013148": {
+      "Properties": {
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "Encrypted": true,
+              "KmsKeyId": {
+                "Fn::GetAtt": [
+                  "MongoVolumeXvdaKmsKey",
+                  "Arn"
+                ]
+              },
+              "VolumeSize": 30,
+              "VolumeType": "gp2"
+            }
+          }
+        ],
+        "DisableApiTermination": false,
+        "IamInstanceProfile": {
+          "Ref": "MongoEc2InstanceIamInstanceProfile"
+        },
+        "ImageId": "ami-0cf050cf6a290ef26",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "InstanceType": "t4g.medium",
+        "Monitoring": true,
+        "PrivateIpAddress": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "eu1-VpcNetworkPrefix"
+                }
+              },
+              "13.148"
+            ]
+          ]
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::ImportValue": "eu1-SecurityGroup-DirectcallMongoInstanceEC2SecurityGroupId"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "MongoDirectcallReplicaSetSubnetB"
+        },
+        "Tags": [
+          {
+            "Key": "customer",
+            "Value": "clevertap"
+          },
+          {
+            "Key": "role",
+            "Value": "mongo"
+          },
+          {
+            "Key": "ecs_cluster",
+            "Value": {
+              "Ref": "MongoEcsCluster"
+            }
+          }
+        ],
+        "Volumes": [
+          {
+            "Device": "/dev/sdp",
+            "VolumeId": {
+              "Ref": "MongoReplicaSetEncryptedVolumeXvdp013148"
+            }
+          }
+        ]
+      },
+      "Type": "AWS::EC2::Instance"
+    },
+    "MongoReplicaSetInstance013164": {
+      "Properties": {
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "Encrypted": true,
+              "KmsKeyId": {
+                "Fn::GetAtt": [
+                  "MongoVolumeXvdaKmsKey",
+                  "Arn"
+                ]
+              },
+              "VolumeSize": 30,
+              "VolumeType": "gp2"
+            }
+          }
+        ],
+        "DisableApiTermination": false,
+        "IamInstanceProfile": {
+          "Ref": "MongoEc2InstanceIamInstanceProfile"
+        },
+        "ImageId": "ami-0cf050cf6a290ef26",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "InstanceType": "t4g.medium",
+        "Monitoring": true,
+        "PrivateIpAddress": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "eu1-VpcNetworkPrefix"
+                }
+              },
+              "13.164"
+            ]
+          ]
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::ImportValue": "eu1-SecurityGroup-DirectcallMongoInstanceEC2SecurityGroupId"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "MongoDirectcallReplicaSetSubnetC"
+        },
+        "Tags": [
+          {
+            "Key": "customer",
+            "Value": "clevertap"
+          },
+          {
+            "Key": "role",
+            "Value": "mongo"
+          },
+          {
+            "Key": "ecs_cluster",
+            "Value": {
+              "Ref": "MongoEcsCluster"
+            }
+          }
+        ],
+        "Volumes": [
+          {
+            "Device": "/dev/sdp",
+            "VolumeId": {
+              "Ref": "MongoReplicaSetEncryptedVolumeXvdp013164"
+            }
+          }
+        ]
+      },
+      "Type": "AWS::EC2::Instance"
+    },
+    "MongoSecretAccessToMongoInstancesIamPolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Ref": "MongoDbKeySecretManagerSecret"
+                }
+              ],
+              "Sid": "AllowSecretsRetrieveValueForMongoDbKey"
+            }
+          ]
+        },
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "MongoSecretKeyAccessToMongoInstancesIamPolicy"
+            ]
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "MongoEc2InstanceIamRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "MongoVolumeXvdaKmsKey": {
+      "Properties": {
+        "Description": "KMS key used for Encrypted volume",
+        "EnableKeyRotation": true,
+        "Enabled": true,
+        "KeyPolicy": {
+          "Id": "key-default-1",
+          "Statement": [
+            {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      "arn:aws:iam:",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      "root"
+                    ]
+                  ]
+                }
+              },
+              "Resource": "*",
+              "Sid": "EnableIamPoliciesToGiveIamUsersAndRolesInTheAccountAccessToThisCmk"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Tags": [
+          {
+            "Key": "ct-aws:cloudformation:stack-name",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "Identifier",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName}-MongoVolumeKmsKey"
+            }
+          }
+        ]
+      },
+      "Type": "AWS::KMS::Key"
+    },
+    "MongoVolumeXvdpKmsKey": {
+      "Properties": {
+        "Description": "KMS key used for Encrypted volume",
+        "EnableKeyRotation": true,
+        "Enabled": true,
+        "KeyPolicy": {
+          "Id": "key-default-1",
+          "Statement": [
+            {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      "arn:aws:iam:",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      "root"
+                    ]
+                  ]
+                }
+              },
+              "Resource": "*",
+              "Sid": "EnableIamPoliciesToGiveIamUsersAndRolesInTheAccountAccessToThisCmk"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Tags": [
+          {
+            "Key": "ct-aws:cloudformation:stack-name",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "Identifier",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName}-MongoVolumeKmsKey"
+            }
+          }
+        ]
+      },
+      "Type": "AWS::KMS::Key"
+    }
+  }
+}

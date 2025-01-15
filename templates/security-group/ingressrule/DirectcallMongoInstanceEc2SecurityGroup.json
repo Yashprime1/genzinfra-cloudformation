@@ -1,0 +1,28 @@
+{
+  "Parameters": {
+    "NetworkStack": {
+      "Description": "Name of the stack that acts as the bases for all stacks in System",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "CallSocksEcsTaskInterDirectcallMongoInstanceEc2SecurityGroupIngress" : {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "tcp",
+        "FromPort": "27017",
+        "ToPort": "27017",
+        "SourceSecurityGroupId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+          }
+        },
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-SecurityGroup-DirectcallMongoInstanceEC2SecurityGroupId"
+          }
+        }
+      }
+    }
+  }
+}
