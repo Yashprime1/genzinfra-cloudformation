@@ -44,6 +44,15 @@
                       "StackProvisioningMode": "dev"
                     },
                     "StackPolicy": {}
+                  },
+                  {
+                    "StackName": "eu1-Callsock-1",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/callsock/callsock.json",
+                    "Parameters": {
+                      "NetworkStack": "eu1"
+                    },
+                    "StackPolicy": {}
                   }
             ]
         }
