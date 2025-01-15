@@ -106,19 +106,9 @@
                 "Action": [
                   "secretsmanager:GetSecretValue"
                 ],
-                "Resource": [
-                  {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${NetworkStack}-SharedResources-SplunkTokenSecretsManagerSecret"
-                    }
-                  },
-                  {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${NetworkStack}-SharedResources-SignedCallsRSAPrivateSecretsManagerSecretName"
-                    }
-                  }
-                ]
-              }
+                "Resource": "*"
+              },
+              
             ]
           },
           "Roles": [
