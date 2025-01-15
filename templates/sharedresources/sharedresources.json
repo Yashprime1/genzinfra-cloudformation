@@ -1,0 +1,548 @@
+{
+  "Transform": "AWS::LanguageExtensions",
+  "Parameters": {
+    "NetworkStack": {
+      "Description": "Name of the stack that this stack references for networking",
+      "Type": "String"
+    },
+    "StackProvisioningMode": {
+      "AllowedValues": [
+        "dev",
+        "prod"
+      ],
+      "Default": "prod",
+      "Description": "Specifies the environment (dev or prod) for provisioning CloudFormation stacks",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "ArtifactoryDockerUserCredentialsSecretsManagerSecret": {
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "This is a Secrets Manager secret for Artifactory docker user credentials"
+        },
+        "SecretString": "{\"username\":\"secret-user\",\"password\":\"secret-password\"}"
+      },
+      "Type": "AWS::SecretsManager::Secret"
+    },
+    "CallsockToAdminSignedCallStandardSqsQueue": {
+      "Properties": {
+        "QueueName": {
+          "Fn::Sub": "${AWS::StackName}-callsock-to-admin-signedcall-sqs-queue"
+        }
+      },
+      "Type": "AWS::SQS::Queue"
+    },
+    "CallsockToAdminSwiggySignedCallSqsQueue": {
+      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
+      "Properties": {
+        "QueueName": {
+          "Fn::Sub": "${AWS::StackName}-callsock-to-admin-swiggy-signedcall-sqs-queue"
+        }
+      },
+      "Type": "AWS::SQS::Queue"
+    },
+    "SignedCallsRSAPrivateSecretsManagerSecret": {
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "This is a Secrets Manager secret for ${AWS::StackName}-SignedCallsRSAPrivateSecretsManagerSecret"
+        },
+        "SecretString": "replacewithactualkey"
+      },
+      "Type": "AWS::SecretsManager::Secret"
+    },
+    "SignedCallsRSAPublicSecretsManagerSecret": {
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "This is a Secrets Manager secret for ${AWS::StackName}-SignedCallsRSAPublicSecretsManagerSecret"
+        },
+        "SecretString": "replacewithactualkey"
+      },
+      "Type": "AWS::SecretsManager::Secret"
+    },
+    "SplunkForwarderPasswordSecretsManagerSecret": {
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "This is a Secrets Manager secret for Splunk Forwarder Password"
+        },
+        "SecretString": "{\"password\":\"changeme\"}"
+      },
+      "Type": "AWS::SecretsManager::Secret"
+    },
+    "SplunkTokenSecretsManagerSecret": {
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "This is a Secrets Manager secret for ${AWS::StackName}-SplunkTokenSecretsManagerSecret"
+        },
+        "SecretString": "{\"splunk-token\":\"replacesplunktoken\"}"
+      },
+      "Type": "AWS::SecretsManager::Secret"
+    },
+    "SsmKmsKey": {
+      "Properties": {
+        "Description": "KeyUsedForEncryptingSsmSessionLogs(CloudWatch)AndRunCommandOutput",
+        "EnableKeyRotation": true,
+        "Enabled": true,
+        "KeyPolicy": {
+          "Id": "key-default-1",
+          "Statement": [
+            {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      "arn:aws:iam:",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      "root"
+                    ]
+                  ]
+                }
+              },
+              "Resource": "*",
+              "Sid": "EnableIamPoliciesToGiveIamUsersAndRolesInTheAccountAccessToThisCmk"
+            },
+            {
+              "Action": [
+                "kms:Encrypt*",
+                "kms:Decrypt*",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:Describe*"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": {
+                  "Fn::Join": [
+                    ".",
+                    [
+                      "logs",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "amazonaws",
+                      "com"
+                    ]
+                  ]
+                }
+              },
+              "Resource": "*",
+              "Sid": "AllowCloudWatchToUseThisKey"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Tags": [
+          {
+            "Key": "ct-aws:cloudformation:stack-name",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "Identifier",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName}-SsmKmsKey"
+            }
+          }
+        ]
+      },
+      "Type": "AWS::KMS::Key"
+    },
+    "SsmLogsLogGroup": {
+      "Properties": {
+        "RetentionInDays": 731
+      },
+      "Type": "AWS::Logs::LogGroup"
+    },
+    "SsmS3Bucket": {
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "BucketKeyEnabled": true,
+              "ServerSideEncryptionByDefault": {
+                "KMSMasterKeyID": {
+                  "Fn::GetAtt": [
+                    "SsmS3KmsKey",
+                    "Arn"
+                  ]
+                },
+                "SSEAlgorithm": "aws:kms"
+              }
+            }
+          ]
+        },
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "ExpirationInDays": "60",
+              "Prefix": "jifa-heapdump/",
+              "Status": "Enabled"
+            }
+          ]
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        }
+      },
+      "Type": "AWS::S3::Bucket"
+    },
+    "SsmS3KmsKey": {
+      "Properties": {
+        "Description": "KeyUsedForEncryptingSsmS3Bucket",
+        "EnableKeyRotation": true,
+        "Enabled": true,
+        "KeyPolicy": {
+          "Id": "key-default-1",
+          "Statement": [
+            {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      "arn:aws:iam:",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      "root"
+                    ]
+                  ]
+                }
+              },
+              "Resource": "*",
+              "Sid": "EnableIamPoliciesToGiveIamUsersAndRolesInTheAccountAccessToThisCmk"
+            },
+            {
+              "Action": [
+                "kms:Encrypt*",
+                "kms:Decrypt*",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:Describe*"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com",
+                  "ecs.amazonaws.com",
+                  "s3.amazonaws.com",
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Resource": "*",
+              "Sid": "AllowS3ECSandECSTASKSToUseThisKey"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Tags": [
+          {
+            "Key": "ct-aws:cloudformation:stack-name",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "Identifier",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName}-SsmS3KmsKey"
+            }
+          }
+        ]
+      },
+      "Type": "AWS::KMS::Key"
+    },
+    "SwiggyVoipSqsUploadSQSPolicy": {
+      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "SQS:SendMessage",
+                "SQS:ReceiveMessage"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "s3.amazonaws.com"
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SwiggyVoipSqsUploadSqsQueue",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        },
+        "Queues": [
+          {
+            "Ref": "SwiggyVoipSqsUploadSqsQueue"
+          }
+        ]
+      },
+      "Type": "AWS::SQS::QueuePolicy"
+    },
+    "SwiggyVoipSqsUploadSqsQueue": {
+      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
+      "Properties": {},
+      "Type": "AWS::SQS::Queue"
+    },
+    "VoipSqsUploadSQSPolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "SQS:SendMessage",
+                "SQS:ReceiveMessage"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "s3.amazonaws.com"
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "VoipSqsUploadSqsQueue",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        },
+        "Queues": [
+          {
+            "Ref": "VoipSqsUploadSqsQueue"
+          }
+        ]
+      },
+      "Type": "AWS::SQS::QueuePolicy"
+    },
+    "VoipSqsUploadSqsQueue": {
+      "Properties": {},
+      "Type": "AWS::SQS::Queue"
+    }
+  },
+  "Outputs": {
+    "ArtifactoryDockerUserCredentialsSecretsManagerSecretName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+        }
+      },
+      "Value": {
+        "Ref": "ArtifactoryDockerUserCredentialsSecretsManagerSecret"
+      }
+    },
+    "CallsockToAdminSignedCallStandardSqsQueueArn": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-CallsockToAdminSignedCallStandardSqsQueueArn"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "CallsockToAdminSignedCallStandardSqsQueue",
+          "Arn"
+        ]
+      }
+    },
+    "CallsockToAdminSignedCallStandardSqsQueueUrl": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-CallsockToAdminSignedCallStandardSqsQueueUrl"
+        }
+      },
+      "Value": {
+        "Ref": "CallsockToAdminSignedCallStandardSqsQueue"
+      }
+    },
+    "CallsockToAdminSwiggySignedCallSqsQueueArn": {
+      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-CallsockToAdminSwiggySignedCallSqsQueueArn"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "CallsockToAdminSwiggySignedCallSqsQueue",
+          "Arn"
+        ]
+      }
+    },
+    "CallsockToAdminSwiggySignedCallSqsQueueName": {
+      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-CallsockToAdminSwiggySignedCallSqsQueueName"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "CallsockToAdminSwiggySignedCallSqsQueue",
+          "QueueName"
+        ]
+      }
+    },
+    "CallsockToAdminSwiggySignedCallSqsQueueUrl": {
+      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-CallsockToAdminSwiggySignedCallSqsQueueUrl"
+        }
+      },
+      "Value": {
+        "Ref": "CallsockToAdminSwiggySignedCallSqsQueue"
+      }
+    },
+    "SignedCallsRSAPrivateSecretsManagerSecretName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-SignedCallsRSAPrivateSecretsManagerSecretName"
+        }
+      },
+      "Value": {
+        "Ref": "SignedCallsRSAPrivateSecretsManagerSecret"
+      }
+    },
+    "SignedCallsRSAPublicSecretsManagerSecretName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-SignedCallsRSAPublicSecretsManagerSecretName"
+        }
+      },
+      "Value": {
+        "Ref": "SignedCallsRSAPublicSecretsManagerSecret"
+      }
+    },
+    "SplunkForwarderPasswordSecretsManagerSecretName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-SplunkForwarderPasswordSecretsManagerSecretName"
+        }
+      },
+      "Value": {
+        "Ref": "SplunkForwarderPasswordSecretsManagerSecret"
+      }
+    },
+    "SplunkTokenSecretsManagerSecretName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-SplunkTokenSecretsManagerSecret"
+        }
+      },
+      "Value": {
+        "Ref": "SplunkTokenSecretsManagerSecret"
+      }
+    },
+    "SsmLogsLogGroupArn": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-SsmLogsLogGroupArn"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "SsmLogsLogGroup",
+          "Arn"
+        ]
+      }
+    },
+    "SsmOutputS3BucketArn": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-SsmOutputS3BucketArn"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "SsmOutputS3Bucket",
+          "Arn"
+        ]
+      }
+    },
+    "SsmS3BucketArn": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-SsmS3BucketArn"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "SsmS3Bucket",
+          "Arn"
+        ]
+      }
+    },
+    "SsmS3BucketName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-SsmS3BucketName"
+        }
+      },
+      "Value": {
+        "Ref": "SsmS3Bucket"
+      }
+    },
+    "SwiggyVoipSqsUploadSQSQueueArn": {
+      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-SwiggyVoipSqsUploadSQSQueueArn"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "SwiggyVoipSqsUploadSqsQueue",
+          "Arn"
+        ]
+      }
+    },
+    "SwiggyVoipSqsUploadSQSQueueurl": {
+      "Condition": "IsDedicatedSignedCallSetupForSwiggyEnabled",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-SwiggyVoipSqsUploadSQSQueueurl"
+        }
+      },
+      "Value": {
+        "Ref": "SwiggyVoipSqsUploadSqsQueue"
+      }
+    },
+    "VoipSqsUploadSQSQueueArn": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-VoipSqsUploadSQSQueueArn"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "VoipSqsUploadSqsQueue",
+          "Arn"
+        ]
+      }
+    },
+    "VoipSqsUploadSQSQueueurl": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-VoipSqsUploadSQSQueueUrl"
+        }
+      },
+      "Value": {
+        "Ref": "VoipSqsUploadSqsQueue"
+      }
+    }
+  }
+}

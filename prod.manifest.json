@@ -16,6 +16,15 @@
                       "NatInstanceAmiId": "ami-085252d6cf1b51097"
                     },
                     "StackPolicy": {}
+                  },
+                  {
+                    "StackName": "eu1-SharedResources",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/sharedresources/sharedresources.json",
+                    "Parameters": {
+                      "NetworkStack": "eu1"
+                    },
+                    "StackPolicy": {}
                   }
             ]
         }
