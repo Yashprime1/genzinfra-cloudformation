@@ -385,7 +385,7 @@
                   "secretsmanager:GetSecretValue"
                 ],
                 "Resource": [
-                  "arn:aws:secretsmanager:eu-west-1:736548753645:secret:pingtest-e5d7yt"
+                  "arn:aws:secretsmanager:eu-west-1:736548753645:secret:pingtest*"
                 ]
               }
             ]
