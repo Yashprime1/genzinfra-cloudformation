@@ -194,7 +194,7 @@
               {
                 "Ref": "AWS::StackName"
               },
-              "mongodb.clevertap.net"
+              "mongodb.yashprime07.rocks"
             ]
           ]
         },
