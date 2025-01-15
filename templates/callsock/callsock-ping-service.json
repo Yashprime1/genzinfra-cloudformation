@@ -375,52 +375,6 @@
                     "Fn::ImportValue": {
                       "Fn::Sub": "${NetworkStack}-SharedResources-CallsockToAdminSignedCallStandardSqsQueueArn"
                     }
-                  },
-                  {
-                    "Fn::If": [
-                      "ArePermissionsForCallSockToAdminSwiggySignedCallSqsQueueEnabled",
-                      {
-                        "Fn::ImportValue": {
-                          "Fn::Sub": "${NetworkStack}-SharedResources-CallsockToAdminSwiggySignedCallSqsQueueArn"
-                        }
-                      },
-                      {
-                        "Ref": "AWS::NoValue"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "Fn::If": [
-                  "IsPutObjectPermissionsForCsRecordingsSignedCallTestS3BucketEnabled",
-                  {
-                    "Sid": "AllowCallSockTaskToPutLogsToNiyosS3Bucket",
-                    "Effect": "Allow",
-                    "Action": [
-                      "s3:PutObject"
-                    ],
-                    "Resource": [
-                      "arn:aws:s3:::cs-recordings-signed-call-test",
-                      "arn:aws:s3:::cs-recordings-signed-call-test/*"
-                    ]
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
-              },
-              {
-                "Fn::If": [
-                  "ArePermissionsToAssumeClevertapS3PushIamRoleEnabled",
-                  {
-                    "Sid": "PermissionToAssumeRoleS3PushIamRole",
-                    "Effect": "Allow",
-                    "Action": "sts:AssumeRole",
-                    "Resource": "arn:aws:iam::062484260092:role/clevertap-s3-push"
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
                   }
                 ]
               }
@@ -527,22 +481,9 @@
               "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
             }
           },
-          "DeploymentConfiguration": {
-            "Fn::If": [
-              "IsDeploymentCircuitBreakerConfigurationEnabled",
-              {
-                "MaximumPercent": "200",
-                "MinimumHealthyPercent": "100",
-                "DeploymentCircuitBreaker": {
-                  "Enable": true,
-                  "Rollback": true
-                }
-              },
-              {
+          "DeploymentConfiguration":{
                 "MaximumPercent": "200",
                 "MinimumHealthyPercent": "100"
-              }
-            ]
           },
           "DesiredCount": "1",
           "LaunchType": "FARGATE",
