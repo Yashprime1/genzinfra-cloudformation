@@ -18,6 +18,24 @@
                     "StackPolicy": {}
                   },
                   {
+                    "StackName": "eu1-SecurityGroup",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/security-group/security-group.json",
+                    "Parameters": {
+                      "NetworkStack": "eu1"
+                    },
+                    "StackPolicy": {}
+                  },
+                  {
+                    "StackName": "eu1-SecurityGroup-IngressRule-CallSocksEcsTaskEc2SecurityGroup",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/security-group/ingressrule/CallSocksEcsTaskEc2SecurityGroup.json",
+                    "Parameters": {
+                      "NetworkStack": "eu1"
+                    },
+                    "StackPolicy": {}
+                  },
+                  {
                     "StackName": "eu1-SharedResources",
                     "Action": "CREATE",
                     "TemplatePath": "templates/sharedresources/sharedresources.json",
