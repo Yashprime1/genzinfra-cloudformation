@@ -1,0 +1,122 @@
+{
+  "Parameters": {
+    "NetworkStack": {
+      "Description": "Name of the stack that acts as the bases for all stacks in System",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "UDPFromAnywhereInterCallSocksEcsTaskEc2SecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "udp",
+        "FromPort": "7503",
+        "ToPort": "7503",
+        "CidrIp": "0.0.0.0/0",
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+          }
+        }
+      }
+    },
+    "TCPFromAnywhereInterCallSocksEcsTask5060Ec2SecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "tcp",
+        "FromPort": "5060",
+        "ToPort": "5060",
+        "CidrIp": "0.0.0.0/0",
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+          }
+        }
+      }
+    },
+    "TCPFromAnywhereInterCallSocksEcsTask8088Ec2SecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "tcp",
+        "FromPort": "8088",
+        "ToPort": "8088",
+        "CidrIp": "0.0.0.0/0",
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+          }
+        }
+      }
+    },
+    "TCPFromAnywhereInterCallSocksEcsTask3001Ec2SecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "tcp",
+        "FromPort": "3001",
+        "ToPort": "3001",
+        "CidrIp": "0.0.0.0/0",
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+          }
+        }
+      }
+    },
+    "TCPFromAnywhereInterCallSocksEcsTask8089Ec2SecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "tcp",
+        "FromPort": "8089",
+        "ToPort": "8089",
+        "CidrIp": "0.0.0.0/0",
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+          }
+        }
+      }
+    },
+    "TCPFromAnywhereInterCallSocksEcsTask7503Ec2SecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "tcp",
+        "FromPort": "7503",
+        "ToPort": "7503",
+        "CidrIp": "0.0.0.0/0",
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+          }
+        }
+      }
+    },
+    "UDPFromAnywhereInterCallSocksEcsTask5060Ec2SecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "udp",
+        "FromPort": "5060",
+        "ToPort": "5060",
+        "CidrIp": "0.0.0.0/0",
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+          }
+        }
+      }
+    },
+    "UDPFromAnywhereInterCallSocksEcsTask10000To20000Ec2SecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "udp",
+        "FromPort": "10000",
+        "ToPort": "20000",
+        "CidrIp": "0.0.0.0/0",
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+          }
+        }
+      }
+    }
+  }
+}

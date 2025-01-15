@@ -1,0 +1,36 @@
+{
+  "Parameters": {
+    "NetworkStack": {
+      "Description": "Name of the stack that acts as the bases for all stacks in System",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "CallSocksEcsTaskEC2SecurityGroup": {
+      "Properties": {
+        "GroupDescription": "callsock Ecs Task security group",
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    }
+  },
+  "Outputs": {
+    "CallSocksEcsTaskEC2SecurityGroupId": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-CallSocksEcsTaskEC2SecurityGroupId"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "CallSocksEcsTaskEC2SecurityGroup",
+          "GroupId"
+        ]
+      }
+    }
+  }
+}
