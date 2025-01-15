@@ -20,7 +20,7 @@
           "Fn::Sub": "${AWS::StackName}-AppPrivateSubnet2Id"
         }
       },
-      "Value": {
+      "Value": {``
         "Ref": "AppPrivateSubnet2"
       }
     },
