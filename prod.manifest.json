@@ -46,6 +46,42 @@
                     "StackPolicy": {}
                   },
                   {
+                    "StackName": "eu1-Mongo-Directcall-1",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/mongo/eu1/eu1-Mongo-Directcall-1/eu1-Mongo-Directcall-1.json",
+                    "Parameters": {},
+                    "StackPolicy": {}
+                  },
+                  {
+                    "StackName": "eu1-Mongo-Directcall-1-Service",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/mongo/eu1/eu1-Mongo-Directcall-1/eu1-Mongo-Directcall-1-Service.json",
+                    "Parameters": {
+                      "ContainerTag": "{{ ContainerTag }}",
+                      "SensuClientImageName": "sensu",
+                      "SensuClientImageTag": "{{ SensuClientImageTag }}",
+                      "SplunkForwarderImageName": "splunk-forwarder",
+                      "SplunkForwarderImageTag": "{{ SplunkForwarderImageTag }}",
+                      "CadvisorImageName": "clevertap/cadvisor",
+                      "CadvisorImageTag": "{{ CadvisorImageTag }}",
+                      "SensuClientContainerTag": "{{ SensuClientContainerTag }}",
+                      "SensuV2BackendUrl": "wss://sensu-v2-backend.clevertap.net",
+                      "MongoContainerTag101113132": "{{ MongoContainerTag101113132 }}",
+                      "MongoContainerTag101113148": "{{ MongoContainerTag101113148 }}",
+                      "MongoContainerTag101113164": "{{ MongoContainerTag101113164 }}"
+                    },
+                    "StackPolicy": {
+                      "Statement": [
+                        {
+                          "Effect": "Allow",
+                          "Action": "Update:*",
+                          "Principal": "*",
+                          "Resource": "*"
+                        }
+                      ]
+                    }
+                  },
+                  {
                     "StackName": "eu1-Callsock-1",
                     "Action": "CREATE",
                     "TemplatePath": "templates/callsock/callsock.json",

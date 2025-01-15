@@ -1,7 +1,17 @@
 {
     "eu-west-1":{
-        "Devtools-Bamboo-Service": {
-            "BambooContainerTag": "github-master-35"
+        "eu1-Mongo-Directcall-1-Service": {
+            "ContainerTag": "bamboo-mongo-task-2652-mongo-8",
+            "MongodbMmsImageTag": "bamboo-docker-bamboo-server-master-5",
+            "SensuClientImageTag": "bamboo-sensu-master-91",
+            "SplunkForwarderImageTag": "github-master-37",
+            "CadvisorImageTag": "bamboo-cadvisor-master-12",
+            "SensuClientContainerTag": "bamboo-sensu-master-76",
+            "MongoContainerTag101113132": "github-task-2652-mongo-version-5.0-69",
+            "MongoContainerTag101113148": "github-task-2652-mongo-version-5.0-69",
+            "MongoContainerTag101113164": "github-task-2652-mongo-version-5.0-69",
+            "MongoContainerTag101113133": "github-task-2652-mongo-version-5.0-69",
+            "MongoContainerTag101113149": "github-task-2652-mongo-version-5.0-69"
         }
     }
 }

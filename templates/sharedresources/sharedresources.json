@@ -25,6 +25,10 @@
       },
       "Type": "AWS::SecretsManager::Secret"
     },
+    "FluentBitConfigS3Bucket": {
+      "Properties": {},
+      "Type": "AWS::S3::Bucket"
+    },
     "CallsockToAdminSignedCallStandardSqsQueue": {
       "Properties": {
         "QueueName": {
@@ -32,6 +36,87 @@
         }
       },
       "Type": "AWS::SQS::Queue"
+    },
+    "SsmOutputS3Bucket": {
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "BucketOwnerPreferred"
+            }
+          ]
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        }
+      },
+      "Type": "AWS::S3::Bucket"
+    },
+    "SsmOutputLoggingS3BucketPolicy": {
+      "Condition": "IsSsmOutputLoggingS3BucketEnabled",
+      "Properties": {
+        "Bucket": {
+          "Ref": "SsmOutputLoggingS3Bucket"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:PutObject"
+              ],
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SsmOutputS3Bucket",
+                      "Arn"
+                    ]
+                  }
+                }
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "logging.s3.amazonaws.com"
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "SsmOutputLoggingS3Bucket"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::S3::BucketPolicy"
+    },
+    "MongoUserCredentialsSecretsManagerSecret": {
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "This is a Secrets Manager secret for Mongo user credentials"
+        },
+        "SecretString": "{\"username\":\"secret-user\",\"password\":\"secret-password\"}"
+      },
+      "Type": "AWS::SecretsManager::Secret"
     },
     "SignedCallsRSAPrivateSecretsManagerSecret": {
       "Properties": {
@@ -68,6 +153,27 @@
         "SecretString": "{\"splunk-token\":\"replacesplunktoken\"}"
       },
       "Type": "AWS::SecretsManager::Secret"
+    },
+    "RuncommandAutomationScriptsS3Bucket": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        }
+      },
+      "Type": "AWS::S3::Bucket"
     },
     "SsmKmsKey": {
       "Properties": {
@@ -399,6 +505,19 @@
         "Ref": "SsmS3Bucket"
       }
     },
+    "SsmOutputS3BucketArn": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-SsmOutputS3BucketArn"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "SsmOutputS3Bucket",
+          "Arn"
+        ]
+      }
+    },
     "VoipSqsUploadSQSQueueArn": {
       "Export": {
         "Name": {
@@ -420,6 +539,53 @@
       },
       "Value": {
         "Ref": "VoipSqsUploadSqsQueue"
+      }
+    },
+
+    "RuncommandAutomationScriptsS3BucketArn": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-RuncommandAutomationScriptsS3BucketArn"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "RuncommandAutomationScriptsS3Bucket",
+          "Arn"
+        ]
+      }
+    },
+    "RuncommandAutomationScriptsS3BucketName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-RuncommandAutomationScriptsS3BucketName"
+        }
+      },
+      "Value": {
+        "Ref": "RuncommandAutomationScriptsS3Bucket"
+      }
+    },
+    "FluentBitConfigS3BucketArn": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-FluentBitConfigS3BucketArn"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "FluentBitConfigS3Bucket",
+          "Arn"
+        ]
+      }
+    },
+    "MongoUserCredentialsSecretsManagerSecretName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-MongoUserCredentialsSecretsManagerSecretName"
+        }
+      },
+      "Value": {
+        "Ref": "MongoUserCredentialsSecretsManagerSecret"
       }
     }
   }

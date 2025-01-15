@@ -16,6 +16,17 @@
         }
       },
       "Type": "AWS::EC2::SecurityGroup"
+    },
+    "DirectcallMongoInstanceEC2SecurityGroup": {
+      "Properties": {
+        "GroupDescription": "mongo ec2 security group",
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
     }
   },
   "Outputs": {
@@ -28,6 +39,19 @@
       "Value": {
         "Fn::GetAtt": [
           "CallSocksEcsTaskEC2SecurityGroup",
+          "GroupId"
+        ]
+      }
+    },
+    "DirectcallMongoInstanceEC2SecurityGroupId": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DirectcallMongoInstanceEC2SecurityGroupId"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "DirectcallMongoInstanceEC2SecurityGroup",
           "GroupId"
         ]
       }
