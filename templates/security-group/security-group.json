@@ -27,6 +27,17 @@
         }
       },
       "Type": "AWS::EC2::SecurityGroup"
+    },
+    "DirectcallElastiCacheEC2SecurityGroup": {
+      "Properties": {
+        "GroupDescription": "DirectcallElastiCacheEc2SecurityGroup",
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
     }
   },
   "Outputs": {
@@ -52,6 +63,19 @@
       "Value": {
         "Fn::GetAtt": [
           "DirectcallMongoInstanceEC2SecurityGroup",
+          "GroupId"
+        ]
+      }
+    },
+    "DirectcallElastiCacheEC2SecurityGroupId": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DirectcallElastiCacheEC2SecurityGroupId"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "DirectcallElastiCacheEC2SecurityGroup",
           "GroupId"
         ]
       }
