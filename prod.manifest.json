@@ -114,7 +114,7 @@
                       "NetworkStack": "eu1",
                       "ContainerTag": "{{ ContainerTag }}",
                       "AsteriskContainerTag": "{{ AsteriskImageTag }}",
-                      "DesiredCount": "14",
+                      "DesiredCount": "1",
                       "PostgresContainerTag" : "{{ PostgresContainerTag }}",
                       "CPU": "8192",
                       "Memory": "16384",
