@@ -82,6 +82,22 @@
                     }
                   },
                   {
+                    "StackName": "eu1-Redis-Directcall-1",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/redis-directcall/Redis-Directcall.json",
+                    "Parameters": {
+                      "NetworkStack": "eu1",
+                      "DirectcallElastiCacheAzAEc2SubnetCidrBlock": "10.11.41.0/28",
+                      "DirectcallElastiCacheAzBEc2SubnetCidrBlock": "10.11.41.16/28",
+                      "DirectcallElastiCacheRelicationGroupCacheNodeType": "cache.r5.xlarge",
+                      "DirectcallElastiCacheRelicationGroupCacheParameterGroupName": "default.redis5.0",
+                      "DirectcallElastiCacheRelicationGroupEngineVersion": "5.0.6",
+                      "DirectcallElastiCacheRelicationGroupNumCacheClusters": "2",
+                      "DirectcallElastiCacheRelicationGroupId": "DirectcallElastiCacheRelicationGroup"
+                    },
+                    "StackPolicy": {}
+                  },
+                  {
                     "StackName": "eu1-Callsock-1",
                     "Action": "CREATE",
                     "TemplatePath": "templates/callsock/callsock.json",
