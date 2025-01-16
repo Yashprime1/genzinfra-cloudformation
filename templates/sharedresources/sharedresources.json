@@ -373,6 +373,15 @@
       },
       "Type": "AWS::KMS::Key"
     },
+    "MongoLoggerSplunkTokenSecretsManagerSecret": {
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "This is a Secrets Manager secret for ${AWS::StackName}-MongoLoggerSplunkTokenSecretsManagerSecret"
+        },
+        "SecretString": "{\"splunk-token\":\"replacesplunktoken\"}"
+      },
+      "Type": "AWS::SecretsManager::Secret"
+    },
     "VoipSqsUploadSQSPolicy": {
       "Properties": {
         "PolicyDocument": {
@@ -554,7 +563,16 @@
         "Ref": "VoipSqsUploadSqsQueue"
       }
     },
-
+    "MongoLoggerSplunkTokenSecretsManagerSecretName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-MongoLoggerSplunkTokenSecretsManagerSecretName"
+        }
+      },
+      "Value": {
+        "Ref": "MongoLoggerSplunkTokenSecretsManagerSecret"
+      }
+    },
     "RuncommandAutomationScriptsS3BucketArn": {
       "Export": {
         "Name": {

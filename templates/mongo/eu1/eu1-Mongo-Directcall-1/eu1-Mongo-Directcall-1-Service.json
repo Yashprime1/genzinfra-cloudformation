@@ -1221,9 +1221,6 @@
                   "Fn::ImportValue": "eu1-SharedResources-MongoLoggerSplunkTokenSecretsManagerSecretName"
                 },
                 {
-                  "Fn::ImportValue": "eu1-SharedResources-SolarwindsSecretsManagerSecretName"
-                },
-                {
                   "Fn::ImportValue": "eu1-SharedResources-MongoUserCredentialsSecretsManagerSecretName"
                 },
                 {

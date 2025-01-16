@@ -514,6 +514,34 @@
             },
             {
               "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:CreateMultipartUpload",
+                "s3:ListMultipartUploadParts",
+                "s3:ListBucket",
+                "s3:ListBucketMultipartUploads"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::ImportValue": "eu1-SharedResources-SsmOutputS3BucketArn"
+                },
+                {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::ImportValue": "eu1-SharedResources-SsmOutputS3BucketArn"
+                      },
+                      "*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "AllowSsmAgentToPutoSsmS3OutputS3"
+            },
+            {
+              "Action": [
                 "s3:GetObject",
                 "s3:GetObjectAcl",
                 "s3:GetBucketLocation",
