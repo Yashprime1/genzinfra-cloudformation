@@ -100,8 +100,6 @@
                       "AsteriskContainerTag": "{{ AsteriskImageTag }}",
                       "DesiredCount": "14",
                       "PostgresContainerTag" : "{{ PostgresContainerTag }}",
-                      "SplunkForwarderImageTag": "{{ SplunkForwarderImageTag }}",
-                      "SplunkForwarderImageName": "splunk-forwarder",
                       "CPU": "8192",
                       "Memory": "16384",
                       "MinTasks": "2",

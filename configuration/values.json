@@ -16,7 +16,6 @@
         "eu1-Callsock-1-Service": {
             "ContainerTag": "callsock-eu1-rapido-saving-recording-to-default-bucket-2",
             "PostgresContainerTag": "postgres-task-SNE-36358_1-4",
-            "SplunkForwarderImageTag": "github-master-37",
             "AsteriskImageTag": "asterisk-master-26"
         }
     }
