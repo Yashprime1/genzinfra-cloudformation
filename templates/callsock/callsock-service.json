@@ -289,25 +289,6 @@
                     }
                   }
                 ]
-              },
-              {
-                "Sid": "AllowSecretsRetreiveSplunkToken",
-                "Effect": "Allow",
-                "Action": [
-                  "secretsmanager:GetSecretValue"
-                ],
-                "Resource": [
-                  {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${NetworkStack}-SharedResources-SplunkTokenSecretsManagerSecret"
-                    }
-                  },
-                  {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${NetworkStack}-SharedResources-SignedCallsRSAPrivateSecretsManagerSecretName"
-                    }
-                  }
-                ]
               }
             ]
           },
@@ -786,46 +767,6 @@
                   ]
                 ]
               },
-              "LogConfiguration": {
-                "LogDriver": "splunk",
-                "Options": {
-                  "labels": "stack",
-                  "splunk-format": "raw",
-                  "splunk-index": "asterisk",
-                  "splunk-source": "stdout",
-                  "splunk-sourcetype": "stdout",
-                  "splunk-url": {
-                    "Fn::Sub": "https://${NetworkStack}.splunk-hec.clevertap-internal.io"
-                  },
-                  "splunk-verify-connection": "false"
-                },
-                "SecretOptions": [
-                  {
-                    "Name": "splunk-token",
-                    "ValueFrom": {
-                      "Fn::Join": [
-                        ":",
-                        [
-                          {
-                            "Fn::ImportValue": {
-                              "Fn::Join": [
-                                "-",
-                                [
-                                  {
-                                    "Ref": "NetworkStack"
-                                  },
-                                  "SharedResources-SplunkTokenSecretsManagerSecret"
-                                ]
-                              ]
-                            }
-                          },
-                          "splunk-token::"
-                        ]
-                      ]
-                    }
-                  }
-                ]
-              },
               "RepositoryCredentials": {
                 "CredentialsParameter": {
                   "Fn::ImportValue": {
@@ -1263,46 +1204,6 @@
                   ]
                 ]
               },
-              "LogConfiguration": {
-                "LogDriver": "splunk",
-                "Options": {
-                  "labels": "stack",
-                  "splunk-format": "raw",
-                  "splunk-index": "callsock-stdout",
-                  "splunk-source": "stdout",
-                  "splunk-sourcetype": "stdout",
-                  "splunk-url": {
-                    "Fn::Sub": "https://${NetworkStack}.splunk-hec.clevertap-internal.io"
-                  },
-                  "splunk-verify-connection": "false"
-                },
-                "SecretOptions": [
-                  {
-                    "Name": "splunk-token",
-                    "ValueFrom": {
-                      "Fn::Join": [
-                        ":",
-                        [
-                          {
-                            "Fn::ImportValue": {
-                              "Fn::Join": [
-                                "-",
-                                [
-                                  {
-                                    "Ref": "NetworkStack"
-                                  },
-                                  "SharedResources-SplunkTokenSecretsManagerSecret"
-                                ]
-                              ]
-                            }
-                          },
-                          "splunk-token::"
-                        ]
-                      ]
-                    }
-                  }
-                ]
-              },
               "RepositoryCredentials": {
                 "CredentialsParameter": {
                   "Fn::ImportValue": {
@@ -1542,46 +1443,6 @@
                       "Ref": "AsteriskContainerTag"
                     }
                   ]
-                ]
-              },
-              "LogConfiguration": {
-                "LogDriver": "splunk",
-                "Options": {
-                  "labels": "stack",
-                  "splunk-format": "raw",
-                  "splunk-index": "asterisk",
-                  "splunk-source": "stdout",
-                  "splunk-sourcetype": "stdout",
-                  "splunk-url": {
-                    "Fn::Sub": "https://${NetworkStack}.splunk-hec.clevertap-internal.io"
-                  },
-                  "splunk-verify-connection": "false"
-                },
-                "SecretOptions": [
-                  {
-                    "Name": "splunk-token",
-                    "ValueFrom": {
-                      "Fn::Join": [
-                        ":",
-                        [
-                          {
-                            "Fn::ImportValue": {
-                              "Fn::Join": [
-                                "-",
-                                [
-                                  {
-                                    "Ref": "NetworkStack"
-                                  },
-                                  "SharedResources-SplunkTokenSecretsManagerSecret"
-                                ]
-                              ]
-                            }
-                          },
-                          "splunk-token::"
-                        ]
-                      ]
-                    }
-                  }
                 ]
               },
               "RepositoryCredentials": {
@@ -1979,46 +1840,6 @@
                       "Ref": "ContainerTag"
                     }
                   ]
-                ]
-              },
-              "LogConfiguration": {
-                "LogDriver": "splunk",
-                "Options": {
-                  "labels": "stack",
-                  "splunk-format": "raw",
-                  "splunk-index": "callsock-stdout",
-                  "splunk-source": "stdout",
-                  "splunk-sourcetype": "stdout",
-                  "splunk-url": {
-                    "Fn::Sub": "https://${NetworkStack}.splunk-hec.clevertap-internal.io"
-                  },
-                  "splunk-verify-connection": "false"
-                },
-                "SecretOptions": [
-                  {
-                    "Name": "splunk-token",
-                    "ValueFrom": {
-                      "Fn::Join": [
-                        ":",
-                        [
-                          {
-                            "Fn::ImportValue": {
-                              "Fn::Join": [
-                                "-",
-                                [
-                                  {
-                                    "Ref": "NetworkStack"
-                                  },
-                                  "SharedResources-SplunkTokenSecretsManagerSecret"
-                                ]
-                              ]
-                            }
-                          },
-                          "splunk-token::"
-                        ]
-                      ]
-                    }
-                  }
                 ]
               },
               "RepositoryCredentials": {
