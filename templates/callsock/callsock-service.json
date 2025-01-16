@@ -641,7 +641,7 @@
                   ":",
                   [
                     {
-                      "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/postgres"
+                      "Fn::Sub": "artifactory.clevertap.net/clevertap/postgres"
                     },
                     {
                       "Ref": "PostgresContainerTag"
@@ -764,7 +764,7 @@
                   ":",
                   [
                     {
-                      "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/asterisk"
+                      "Fn::Sub": "artifactory.clevertap.net/clevertap/asterisk"
                     },
                     {
                       "Ref": "AsteriskContainerTag"
@@ -1201,7 +1201,7 @@
                   ":",
                   [
                     {
-                      "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/callsock"
+                      "Fn::Sub": "artifactory.clevertap.net/clevertap/callsock"
                     },
                     {
                       "Ref": "ContainerTag"
@@ -1319,7 +1319,7 @@
                   ":",
                   [
                     {
-                      "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/postgres"
+                      "Fn::Sub": "artifactory.clevertap.net/clevertap/postgres"
                     },
                     {
                       "Ref": "PostgresContainerTag"
@@ -1442,7 +1442,7 @@
                   ":",
                   [
                     {
-                      "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/asterisk"
+                      "Fn::Sub": "artifactory.clevertap.net/clevertap/asterisk"
                     },
                     {
                       "Ref": "AsteriskContainerTag"
@@ -1839,7 +1839,7 @@
                   ":",
                   [
                     {
-                      "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/callsock"
+                      "Fn::Sub": "artifactory.clevertap.net/clevertap/callsock"
                     },
                     {
                       "Ref": "ContainerTag"
