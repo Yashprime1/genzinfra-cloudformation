@@ -67,7 +67,7 @@
               "--enable_metrics=cpu,cpuLoad,disk,diskIO,memory,memory_numa,network,process,tcp,udp"
             ],
             "Essential": true,
-            "Image": "eu1.registry.clevertap-internal.io/clevertap/cadvisor:v0.49.1",
+            "Image": "artifactory.clevertap.net/clevertap/cadvisor:v0.49.1",
             "MemoryReservation": 128,
             "MountPoints": [
               {
@@ -535,7 +535,7 @@
                 ":",
                 [
                   {
-                    "Fn::Sub": "eu1.registry.clevertap-internal.io/clevertap/mongo"
+                    "Fn::Sub": "artifactory.clevertap.net/clevertap/mongo"
                   },
                   {
                     "Ref": "MongoContainerTag101113132"
@@ -1001,7 +1001,7 @@
                 ":",
                 [
                   {
-                    "Fn::Sub": "eu1.registry.clevertap-internal.io/clevertap/mongo"
+                    "Fn::Sub": "artifactory.clevertap.net/clevertap/mongo"
                   },
                   {
                     "Ref": "MongoContainerTag101113164"
@@ -1784,7 +1784,7 @@
               }
             ],
             "Essential": true,
-            "Image": "eu1.registry.clevertap-internal.io/clevertap/sensu:6.12.0",
+            "Image": "artifactory.clevertap.net/clevertap/sensu:6.12.0",
             "LogConfiguration": {
               "LogDriver": "awsfirelens",
               "Options": {
@@ -1896,7 +1896,7 @@
             "FirelensConfiguration": {
               "Type": "fluentbit"
             },
-            "Image": "eu1.registry.clevertap-internal.io/clevertap/aws-for-fluent-bit:init-2.32.0",
+            "Image": "artifactory.clevertap.net/clevertap/aws-for-fluent-bit:init-2.32.0",
             "LogConfiguration": {
               "LogDriver": "awsfirelens",
               "Options": {
