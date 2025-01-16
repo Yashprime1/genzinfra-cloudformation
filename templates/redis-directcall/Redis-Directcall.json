@@ -1,0 +1,327 @@
+{
+  "Parameters": {
+    "NetworkStack": {
+      "Description": "Name of the stack that this stack references for networking and shared resources",
+      "Default": "",
+      "Type": "String"
+    },
+    "DirectcallElastiCacheAzAEc2SubnetCidrBlock": {
+      "Type": "String"
+    },
+    "DirectcallElastiCacheAzBEc2SubnetCidrBlock": {
+      "Type": "String"
+    },
+    "DirectcallElastiCacheRelicationGroupCacheNodeType": {
+      "Type": "String"
+    },
+    "DirectcallElastiCacheRelicationGroupCacheParameterGroupName": {
+      "Type": "String"
+    },
+    "DirectcallElastiCacheRelicationGroupEngineVersion": {
+      "Type": "String"
+    },
+    "DirectcallElastiCacheRelicationGroupNumCacheClusters": {
+      "Default": "2",
+      "Type": "Number",
+      "MinValue": "2",
+      "MaxValue": "6"
+    },
+    "DirectcallElastiCacheRelicationGroupId": {
+      "Type": "String"
+    }
+  },
+  "Conditions": {
+    "StackIsIn1RedisSwiggyDirectcall1": {
+      "Fn::Equals": [
+        {
+          "Ref": "AWS::StackName"
+        },
+        "in1-Redis-Swiggy-Directcall-1"
+      ]
+    },
+    "StackIsAps3OrMec1": {
+      "Fn::Or": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "NetworkStack"
+            },
+            "aps3"
+          ]
+        },
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "NetworkStack"
+            },
+            "mec1"
+          ]
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "DirectcallElastiCacheAzAEc2Subnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "a"
+            ]
+          ]
+        },
+        "CidrBlock": {
+          "Ref": "DirectcallElastiCacheAzAEc2SubnetCidrBlock"
+        },
+        "MapPublicIpOnLaunch": false,
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
+        }
+      }
+    },
+    "DirectcallElastiCacheAzAEc2RouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
+        }
+      }
+    },
+    "DirectcallElastiCacheAzAEc2RouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "DirectcallElastiCacheAzAEc2RouteTable"
+        },
+        "SubnetId": {
+          "Ref": "DirectcallElastiCacheAzAEc2Subnet"
+        }
+      }
+    },
+    "DirectcallElastiCacheAzBEc2Subnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "b"
+            ]
+          ]
+        },
+        "CidrBlock": {
+          "Ref": "DirectcallElastiCacheAzBEc2SubnetCidrBlock"
+        },
+        "MapPublicIpOnLaunch": false,
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
+        }
+      }
+    },
+    "DirectcallElastiCacheAzBEc2RouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
+        }
+      }
+    },
+    "DirectcallElastiCacheAzBEc2RouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "DirectcallElastiCacheAzBEc2RouteTable"
+        },
+        "SubnetId": {
+          "Ref": "DirectcallElastiCacheAzBEc2Subnet"
+        }
+      }
+    },
+    "DirectcallElastiCacheSubnetGroup": {
+      "Type": "AWS::ElastiCache::SubnetGroup",
+      "Properties": {
+        "Description": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "DirectcallElastiCacheSubnetGroup"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "DirectcallElastiCacheAzAEc2Subnet"
+          },
+          {
+            "Ref": "DirectcallElastiCacheAzBEc2Subnet"
+          }
+        ]
+      }
+    },
+    "DirectcallElastiCacheKmsKey": {
+      "Properties": {
+        "Description": "KMS key used for Encrypted volume",
+        "EnableKeyRotation": true,
+        "Enabled": true,
+        "KeyPolicy": {
+          "Id": "key-default-1",
+          "Statement": [
+            {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      "arn:aws:iam:",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      "root"
+                    ]
+                  ]
+                }
+              },
+              "Resource": "*",
+              "Sid": "EnableIamPoliciesToGiveIamUsersAndRolesInTheAccountAccessToThisCmk"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Tags": [
+          {
+            "Key": "ct-aws:cloudformation:stack-name",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "Identifier",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName}-DirectcallElastiCacheKmsKey"
+            }
+          }
+        ]
+      },
+      "Type": "AWS::KMS::Key"
+    },
+    "DirectcallElastiCacheParameterGroup": {
+      "Type": "AWS::ElastiCache::ParameterGroup",
+      "Properties": {
+        "CacheParameterGroupFamily": {
+          "Fn::If": [
+            "StackIsAps3OrMec1",
+            "redis6.x",
+            "redis5.0"
+          ]
+        },
+        "Description": "Custom Parameter Group for ElastiCache",
+        "Properties": {
+          "maxmemory-policy": "allkeys-lfu"
+        }
+      }
+    },
+    "DirectcallElastiCacheRelicationGroup": {
+      "Type": "AWS::ElastiCache::ReplicationGroup",
+      "Properties": {
+        "AtRestEncryptionEnabled": true,
+        "AutomaticFailoverEnabled": true,
+        "CacheNodeType": {
+          "Ref": "DirectcallElastiCacheRelicationGroupCacheNodeType"
+        },
+        "CacheParameterGroupName": {
+          "Ref": "DirectcallElastiCacheParameterGroup"
+        },
+        "CacheSubnetGroupName": {
+          "Ref": "DirectcallElastiCacheSubnetGroup"
+        },
+        "Engine": "redis",
+        "EngineVersion": {
+          "Ref": "DirectcallElastiCacheRelicationGroupEngineVersion"
+        },
+        "KmsKeyId": {
+          "Ref": "DirectcallElastiCacheKmsKey"
+        },
+        "NumCacheClusters": {
+          "Ref": "DirectcallElastiCacheRelicationGroupNumCacheClusters"
+        },
+        "Port": 6379,
+        "ReplicationGroupDescription": "Directcall elasticache replication group",
+        "ReplicationGroupId": {
+          "Ref": "DirectcallElastiCacheRelicationGroupId"
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${NetworkStack}-SecurityGroup-DirectcallElastiCacheEC2SecurityGroupId"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "DirectcallElastiCacheEndpointAddress": {
+      "Export": {
+        "Name": {
+          "Fn::If": [
+            "StackIsIn1RedisSwiggyDirectcall1",
+            {
+              "Fn::Sub": "${NetworkStack}-Swiggy-DirectcallElastiCacheEndpointAddress"
+            },
+            {
+              "Fn::Sub": "${NetworkStack}-DirectcallElastiCacheEndpointAddress"
+            }
+          ]
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "DirectcallElastiCacheRelicationGroup",
+          "PrimaryEndPoint.Address"
+        ]
+      }
+    },
+    "DirectcallElastiCacheEndpointPort": {
+      "Export": {
+        "Name": {
+          "Fn::If": [
+            "StackIsIn1RedisSwiggyDirectcall1",
+            {
+              "Fn::Sub": "${NetworkStack}-Swiggy-DirectcallElastiCacheEndpointPort"
+            },
+            {
+              "Fn::Sub": "${NetworkStack}-DirectcallElastiCacheEndpointPort"
+            }
+          ]
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "DirectcallElastiCacheRelicationGroup",
+          "PrimaryEndPoint.Port"
+        ]
+      }
+    }
+  }
+}
