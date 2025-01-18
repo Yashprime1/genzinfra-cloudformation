@@ -825,6 +825,10 @@
                 {
                   "ContainerPath": "/etc/asterisk/certs",
                   "SourceVolume": "certbot-certs"
+                },
+                {
+                  "ContainerPath": "/etc/asterisk/logs",
+                  "SourceVolume": "certbot-logs"
                 }
               ],
               "Ulimits": [
@@ -1319,15 +1323,6 @@
                   }
                 }
               ],
-              "HealthCheck": {
-                "Command": [
-                  "CMD-SHELL",
-                  "curl -f http://localhost:80/ || exit 1"
-                ],
-                "Interval": 30,
-                "Timeout": 5,
-                "Retries": 3
-              },
               "MountPoints": [
                 {
                   "ContainerPath": "/etc/letsencrypt",
