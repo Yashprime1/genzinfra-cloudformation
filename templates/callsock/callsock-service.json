@@ -1368,7 +1368,6 @@
                 }
               ],
               "Command": [
-                "certbot",
                 "certonly",
                 "--dns-route53",
                 "--agree-tos",
