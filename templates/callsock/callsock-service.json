@@ -1368,7 +1368,12 @@
                 }
               ],
               "Command": [
-                "certonly --dns-route53 --agree-tos --register-unsafely-without-email  -d ${CERTBOT_DOMAINS}"
+                "certonly",
+                "--dns-route53",
+                "--agree-tos",
+                "--register-unsafely-without-email",
+                "-d",
+                "${CERTBOT_DOMAINS}"
               ]
             }            
           ],
