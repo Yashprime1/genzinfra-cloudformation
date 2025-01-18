@@ -81,6 +81,24 @@
         "Type": "AWS::ECS::Cluster",
         "Properties": {}
       },
+      "AwsSecretAccessKeyIdSecretsManagerSecret": {
+        "Type": "AWS::SecretsManager::Secret",
+        "Properties": {
+          "Description": {
+            "Fn::Sub": "This is a Secrets Manager secret for ${NetworkStack}-SecretAccessKeyId"
+          },
+          "SecretString":"replaceme"
+        }
+      },
+      "AwsSecretAccessKeySecretsManagerSecret": {
+        "Type": "AWS::SecretsManager::Secret",
+        "Properties": {
+          "Description": {
+            "Fn::Sub": "This is a Secrets Manager secret for ${NetworkStack}-SecretAccessKey"
+          },
+          "SecretString":"replaceme"
+        }
+      },
       "CallsockDeploymentS3BucketKmsKey": {
         "Type": "AWS::KMS::Key",
         "Properties": {
@@ -538,6 +556,26 @@
         },
         "Value": {
           "Ref": "CallsockSignedCallAmiPasswordSecretsManagerSecret"
+        }
+      },
+      "CallsockAwsSecretAccessKeyIdSecretsManagerSecretArn": {
+        "Export": {
+          "Name": {
+            "Fn::Sub": "${AWS::StackName}-Service-AwsSecretAccessKeyIdSecretsManagerSecretArn"
+          }
+        },
+        "Value": {
+          "Ref": "AwsSecretAccessKeyIdSecretsManagerSecret"
+        }
+      },
+      "CallsockAwsSecretAccessKeySecretsManagerSecretArn": {
+        "Export": {
+          "Name": {
+            "Fn::Sub": "${AWS::StackName}-Service-AwsSecretAccessKeySecretsManagerSecretArn"
+          }
+        },
+        "Value": {
+          "Ref": "AwsSecretAccessKeySecretsManagerSecret"
         }
       }
     }

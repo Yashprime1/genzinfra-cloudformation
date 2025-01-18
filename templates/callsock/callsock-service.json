@@ -292,6 +292,16 @@
                     "Fn::ImportValue": {
                       "Fn::Sub": "${NetworkStack}-SharedResources-SignedCallsRSAPrivateSecretsManagerSecretName"
                     }
+                  },
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-AwsSecretAccessKeyIdSecretsManagerSecretArn"
+                    }
+                  },
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-AwsSecretAccessKeySecretsManagerSecretArn"
+                    }
                   }
                 ]
               }
@@ -1264,7 +1274,93 @@
                   "Protocol": "tcp"
                 }
               ]
-            }
+            },
+            {
+              "ContainerName": "certbot",
+              "Image": "certbot/certbot",
+              "Essential": true,
+              "Environment": [
+                {
+                  "Name": "CERTBOT_EMAIL",
+                  "Value": "your-email@example.com"
+                },
+                {
+                  "Name": "CERTBOT_DOMAINS",
+                  "Value": "*.yashprime07.rocks"
+                },
+                {
+                  "Name": "CERTBOT_SERVER",
+                  "Value": "https://acme-v02.api.letsencrypt.org/directory"
+                },
+                {
+                  "Name": "AWS_REGION",
+                  "Value": "eu-west-1"
+                }
+              ],
+              "Secrets": [
+                {
+                  "Name": "AWS_ACCESS_KEY_ID",
+                  "ValueFrom": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-AwsSecretAccessKeyIdSecretsManagerSecretArn"
+                    }
+                  }
+                },
+                {
+                  "Name": "AWS_SECRET_ACCESS_KEY",
+                  "ValueFrom": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-AwsSecretAccessKeySecretsManagerSecretArn"
+                    }
+                  }
+                }
+              ],
+              "HealthCheck": {
+                "Command": [
+                  "CMD-SHELL",
+                  "curl -f http://localhost:80/ || exit 1"
+                ],
+                "Interval": 30,
+                "Timeout": 5,
+                "Retries": 3
+              },
+              "MountPoints": [
+                {
+                  "ContainerPath": "/etc/letsencrypt",
+                  "SourceVolume": "certbot-certs",
+                  "ReadOnly": false
+                },
+                {
+                  "ContainerPath": "/var/log/letsencrypt",
+                  "SourceVolume": "certbot-logs",
+                  "ReadOnly": false
+                }
+              ],
+              "Ulimits": [
+                {
+                  "HardLimit": 1024,
+                  "SoftLimit": 1024,
+                  "Name": "nofile"
+                }
+              ],
+              "PortMappings": [
+                {
+                  "ContainerPort": 80,
+                  "HostPort": 80,
+                  "Protocol": "tcp"
+                },
+                {
+                  "ContainerPort": 443,
+                  "HostPort": 443,
+                  "Protocol": "tcp"
+                }
+              ],
+              "Command": [
+                "sh",
+                "-c",
+                "certbot certonly --dns-route53 --agree-tos --no-eff-email  -d ${CERTBOT_DOMAINS} && certbot renew --quiet --dns-route53"
+              ]
+            }            
           ],
           "ExecutionRoleArn": {
             "Fn::GetAtt": [
@@ -1294,6 +1390,12 @@
             },
             {
               "Name": "logs"
+            },
+            {
+              "Name":"certbot-logs"
+            },
+            {
+              "Name":"certbot-certs"
             }
           ],
           "Cpu": {
