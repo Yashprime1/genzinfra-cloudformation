@@ -196,6 +196,13 @@
               "Resource": "*"
             },
             {
+              "Action":[
+                "ecs:ExecuteCommand"
+              ],
+              "Efect":"Allow",
+              "Resource":"*"
+            },
+            {
               "Action": [
                 "ssmmessages:CreateControlChannel",
                 "ssmmessages:CreateDataChannel",
