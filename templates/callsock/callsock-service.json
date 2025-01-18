@@ -1306,7 +1306,7 @@
                   "Name": "AWS_ACCESS_KEY_ID",
                   "ValueFrom": {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${StackName}-AwsSecretAccessKeyIdSecretsManagerSecretArn"
+                      "Fn::Sub": "${AWS::StackName}-AwsSecretAccessKeyIdSecretsManagerSecretArn"
                     }
                   }
                 },
@@ -1314,7 +1314,7 @@
                   "Name": "AWS_SECRET_ACCESS_KEY",
                   "ValueFrom": {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${StackName}-AwsSecretAccessKeySecretsManagerSecretArn"
+                      "Fn::Sub": "${AWS::StackName}-AwsSecretAccessKeySecretsManagerSecretArn"
                     }
                   }
                 }
