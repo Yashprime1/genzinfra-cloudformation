@@ -821,6 +821,10 @@
                 {
                   "ContainerPath": "/var/log/asterisk",
                   "SourceVolume": "logs"
+                },
+                {
+                  "ContainerPath": "/etc/asterisk/certs",
+                  "SourceVolume": "certbot-certs"
                 }
               ],
               "Ulimits": [
@@ -1278,7 +1282,7 @@
             {
               "ContainerName": "certbot",
               "Image": "certbot/certbot",
-              "Essential": true,
+              "Essential": false,
               "Environment": [
                 {
                   "Name": "CERTBOT_EMAIL",
