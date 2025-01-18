@@ -1373,7 +1373,7 @@
                 "--agree-tos",
                 "--register-unsafely-without-email",
                 "-d",
-                "${CERTBOT_DOMAINS}"
+                "*.yashprime07.rocks"
               ]
             }            
           ],
