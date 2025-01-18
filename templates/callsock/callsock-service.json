@@ -295,12 +295,12 @@
                   },
                   {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${NetworkStack}-AwsSecretAccessKeyIdSecretsManagerSecretArn"
+                      "Fn::Sub": "${AWS::StackName}-AwsSecretAccessKeyIdSecretsManagerSecretArn"
                     }
                   },
                   {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${NetworkStack}-AwsSecretAccessKeySecretsManagerSecretArn"
+                      "Fn::Sub": "${AWS::StackName}-AwsSecretAccessKeySecretsManagerSecretArn"
                     }
                   }
                 ]
