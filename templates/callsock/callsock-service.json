@@ -304,6 +304,14 @@
                     }
                   }
                 ]
+              },
+              {
+                "Sid": "AllowCreateLogGroup",
+                "Effect": "Allow",
+                "Action": [
+                  "logs:CreateLogGroup "
+                ],
+                "Resource": "*"
               }
             ]
           },
@@ -1286,12 +1294,14 @@
             {
               "Name": "certbot",
               "Image": "certbot/certbot",
+              "LogConfiguration":{
+                "LogDriver" :"awslogs"
+                "Options":{
+                  "awslogs-create-group":"true"
+                }
+              },
               "Essential": false,
               "Environment": [
-                {
-                  "Name": "CERTBOT_EMAIL",
-                  "Value": "your-email@example.com"
-                },
                 {
                   "Name": "CERTBOT_DOMAINS",
                   "Value": "*.yashprime07.rocks"
