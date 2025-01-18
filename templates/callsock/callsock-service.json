@@ -309,7 +309,7 @@
                 "Sid": "AllowCreateLogGroup",
                 "Effect": "Allow",
                 "Action": [
-                  "logs:CreateLogGroup "
+                  "logs:*"
                 ],
                 "Resource": "*"
               }
