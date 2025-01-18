@@ -1293,7 +1293,7 @@
             },
             {
               "Name": "certbot",
-              "Image": "certbot/certbot",
+              "Image": "certbot/dns-route53",
               "LogConfiguration":{
                 "LogDriver" :"awslogs",
                 "Options":{
@@ -1368,7 +1368,7 @@
                 }
               ],
               "Command": [
-                "certbot certonly --dns-route53 --agree-tos --no-eff-email  -d ${CERTBOT_DOMAINS} && certbot renew --quiet --dns-route53"
+                "certonly --dns-route53 --agree-tos --register-unsafely-without-email  -d ${CERTBOT_DOMAINS}"
               ]
             }            
           ],
