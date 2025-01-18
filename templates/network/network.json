@@ -199,7 +199,7 @@
               "Action":[
                 "ecs:ExecuteCommand"
               ],
-              "Efect":"Allow",
+              "Effect":"Allow",
               "Resource":"*"
             },
             {
