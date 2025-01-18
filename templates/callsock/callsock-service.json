@@ -1306,10 +1306,6 @@
               "Essential": false,
               "Environment": [
                 {
-                  "Name": "CERTBOT_DOMAINS",
-                  "Value": "*.yashprime07.rocks"
-                },
-                {
                   "Name": "CERTBOT_SERVER",
                   "Value": "https://acme-v02.api.letsencrypt.org/directory"
                 },
@@ -1373,7 +1369,7 @@
                 "--agree-tos",
                 "--register-unsafely-without-email",
                 "-d",
-                "*.yashprime07.rocks"
+                "*.yashprime.ninja"
               ]
             }            
           ],
