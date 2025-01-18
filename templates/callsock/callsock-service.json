@@ -1295,7 +1295,7 @@
               "Name": "certbot",
               "Image": "certbot/certbot",
               "LogConfiguration":{
-                "LogDriver" :"awslogs"
+                "LogDriver" :"awslogs",
                 "Options":{
                   "awslogs-create-group":"true"
                 }
