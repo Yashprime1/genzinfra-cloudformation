@@ -1293,7 +1293,7 @@
             },
             {
               "Name": "certbot",
-              "Image": "certbot/dns-cloudflare",
+              "Image": "certbot/dns-route53",
               "LogConfiguration":{
                 "LogDriver" :"awslogs",
                 "Options":{
@@ -1365,7 +1365,7 @@
               ],
               "Command": [
                 "certonly",
-                "--dns-cloudflare",
+                "--dns-route53",
                 "--agree-tos",
                 "--register-unsafely-without-email",
                 "-d",
