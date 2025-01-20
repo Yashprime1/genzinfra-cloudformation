@@ -36,6 +36,15 @@
                     "StackPolicy": {}
                   },
                   {
+                    "StackName": "eu1-SecurityGroup-IngressRule-CallSocksEfsEcsTaskEc2SecurityGroup",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/security-group/ingressrule/CallSocksEfsEcsTaskEc2SecurityGroup.json",
+                    "Parameters": {
+                      "NetworkStack": "eu1"
+                    },
+                    "StackPolicy": {}
+                  },
+                  {
                     "StackName": "eu1-SharedResources",
                     "Action": "CREATE",
                     "TemplatePath": "templates/sharedresources/sharedresources.json",

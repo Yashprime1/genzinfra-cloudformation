@@ -17,6 +17,17 @@
       },
       "Type": "AWS::EC2::SecurityGroup"
     },
+    "CallSocksEFSEcsTaskEC2SecurityGroup": {
+      "Properties": {
+        "GroupDescription": "Callsock EFS Ecs Task security group",
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
     "DirectcallMongoInstanceEC2SecurityGroup": {
       "Properties": {
         "GroupDescription": "mongo ec2 security group",
@@ -50,6 +61,19 @@
       "Value": {
         "Fn::GetAtt": [
           "CallSocksEcsTaskEC2SecurityGroup",
+          "GroupId"
+        ]
+      }
+    },
+    "CallSocksEFSEcsTaskEC2SecurityGroupId": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-CallSocksEcsTaskEC2SecurityGroupId"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "CallSocksEFSEcsTaskEC2SecurityGroup",
           "GroupId"
         ]
       }
