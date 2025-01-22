@@ -653,7 +653,7 @@
         "Properties": {
           "ContainerDefinitions": [
             {
-              "Name": "certbot-maintainer",
+              "Name": "cert-maintainer",
               "Image": "ubuntu:22.04",
               "LogConfiguration":{
                 "LogDriver" :"awslogs",
@@ -664,7 +664,7 @@
                   "awslogs-stream-prefix":"certbot-maintainer-logs"
                 }
               },
-              "Essential": false,
+              "Essential": true,
               "Environment": [
                 {
                   "Name": "CERTBOT_SERVER",
@@ -726,7 +726,7 @@
               ],
               "EntryPoint": ["/bin/bash", "-c"],
               "Command": [
-                "apt-get update && apt-get install -y certbot awscli openssl"       
+                "apt-get update && apt-get install -y certbot python3.12-venv less curl unzip openssl python3-pip && python3 -m venv prod-venv && source prod-venv/bin/activate && pip3 install certbot-dns-route53 && curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\" && unzip -oq \"awscliv2.zip\" && ./aws/install --update && while true; do if [[ $(certbot certificates) =~ \"No certificates found.\" ]]; then certbot certonly --non-interactive --dns-route53 --agree-tos --register-unsafely-without-email -d *.${DOMAIN} -d ${DOMAIN}; else certbot renew;  fi; aws s3 sync /etc/letsencrypt/ s3://${CERTS_BUCKET_NAME}/certs/; sleep 30; done"        
               ]
             }         
           ],
@@ -858,7 +858,7 @@
                   "Condition": "HEALTHY"
                 },
                 {
-                  "ContainerName": "certbot-cert-transferer",
+                  "ContainerName": "cert-refresher",
                   "Condition": "HEALTHY"
                 }
                 
@@ -1426,7 +1426,7 @@
               ]
             },
             {
-              "Name": "certbot-cert-transferer",
+              "Name": "cert-refresher",
               "Image": "ubuntu:22.04",
               "LogConfiguration":{
                 "LogDriver" :"awslogs",
@@ -1497,9 +1497,16 @@
                   "Name": "nofile"
                 }
               ],
+              "HealthCheck": {
+                "Command" : [ "CMD","sh","-c","aws s3 ls s3://${CERTS_BUCKET_NAME}/certs/ | grep -q ." ],
+                "Interval" : 60,
+                "Retries" : 5,
+                "StartPeriod" : 60,
+                "Timeout" : 10
+              },            
               "EntryPoint": ["/bin/bash", "-c"],
               "Command": [
-                "apt-get update && apt-get install -y  awscli  && mkdir -p /tmp/certs && mkdir -p /etc/letsencrypt/live/$DOMAIN"    
+                "apt-get update && apt-get install -y less curl unzip && curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\" && unzip -oq \"awscliv2.zip\" && ./aws/install --update && mkdir -p /etc/letsencrypt/ && while true; do aws s3 sync s3://${CERTS_BUCKET_NAME}/certs/ /etc/letencrypt; echo \"syncing changes to certs and configs\" ; sleep 10; done"     
               ]
             }             
           ],
