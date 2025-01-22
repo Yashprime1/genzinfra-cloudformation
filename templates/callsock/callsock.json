@@ -500,59 +500,6 @@
               ]
             }
           }
-      },
-      "CallsockCertbotEFSFileSystem": {
-        "Type": "AWS::EFS::FileSystem",
-        "Properties": {
-          "FileSystemTags": [
-            {
-              "Key": "Name",
-              "Value": "CertbotEfs"
-            }
-          ]
-        }
-      },
-      "CallsockCertbotEFSAccessPoint": {
-        "Type": "AWS::EFS::AccessPoint",
-        "Properties": {
-          "FileSystemId": {
-            "Ref": "CallsockCertbotEFSFileSystem"
-          },
-          "PosixUser": {
-            "Uid": "1000",
-            "Gid": "1000"
-          },
-          "RootDirectory": {
-            "CreationInfo": {
-              "OwnerGid": "1000",
-              "OwnerUid": "1000",
-              "Permissions": "0755"
-            },
-            "Path": "/n8n_data"
-          }
-        }
-      },
-      "CallsockCertbotEFSMountTarget": {
-        "Type": "AWS::EFS::MountTarget",
-        "Properties": {
-          "FileSystemId": {
-            "Ref": "CallsockCertbotEFSFileSystem"
-          },
-          "SubnetId": {
-            "Fn::ImportValue": {
-              "Fn::Sub": "${NetworkStack}-CallSocksAzAEc2SubnetId"
-            }
-          },
-          "SecurityGroups": [
-            {
-              {
-                "Fn::ImportValue": {
-                  "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEFSEcsTaskEC2SecurityGroupId"
-                }
-              }
-            }
-          ]
-        }
       }
     },
     "Outputs" : {
