@@ -726,22 +726,7 @@
               ],
               "EntryPoint": ["/bin/bash", "-c"],
               "Command": [
-                "apt-get update && apt-get install -y certbot awscli openssl && \
-                while true; do \
-                  CERTS_NOT_FOUND=false && \
-                  aws s3 cp s3://${CERTS_BUCKET_NAME}/fullchain.pem /tmp/fullchain.pem || CERTS_NOT_FOUND=true; \
-                  if [ \"$CERTS_NOT_FOUND\" = \"true\" ]; then \
-                    certbot certonly --non-interactive --dns-route53 --agree-tos  --register-unsafely-without-email -d ${DOMAIN}; \
-                  else \
-                    EXPIRY_DATE=$(openssl x509 -enddate -noout -in /tmp/fullchain.pem | cut -d= -f2); \
-                    DAYS_LEFT=$(( ($(date -d \"$EXPIRY_DATE\" +%s) - $(date +%s)) / 86400 )); \
-                    if [ \"$DAYS_LEFT\" -lt 10 ]; then \
-                      certbot renew; \
-                    fi; \
-                  fi; \
-                  aws s3 cp --recursive /etc/letsencrypt/ s3://${CERTS_BUCKET_NAME}/; \
-                  sleep 86400; \
-                done"        
+                "apt-get update && apt-get install -y certbot awscli openssl"       
               ]
             }         
           ],
@@ -1514,28 +1499,7 @@
               ],
               "EntryPoint": ["/bin/bash", "-c"],
               "Command": [
-                "apt-get update && apt-get install -y  awscli  && mkdir -p /tmp/certs && mkdir -p /etc/letsencrypt/live/$DOMAIN \
-                 while true; do \
-                    aws s3 cp --recursive s3://${CERTS_BUCKET_NAME}/certs/ /tmp/certs/ || CERTS_NOT_FOUND=true; \
-                    if [ "$CERTS_NOT_FOUND" == "true" ]; then \
-                      echo "Certificates not found in S3. Retrying in 5 minutes..."; \
-                      CERTS_NOT_FOUND=false; \
-                    else \
-                      if [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then \
-                        NEW_HASH=$(sha256sum /tmp/certs/fullchain.pem | awk '{ print $1 }'); \
-                        CURRENT_HASH=$(sha256sum /etc/letsencrypt/live/$DOMAIN/fullchain.pem 2>/dev/null || echo \"\"); \
-                        if [ \"$NEW_HASH\" != \"$CURRENT_HASH\" ]; then \
-                          cp /tmp/certs/* /etc/letsencrypt/live/$DOMAIN/ ; \
-                          echo \"Certificates updated\"; \
-                        else \
-                          echo \"No changes in certificates.\"; \
-                        fi; \
-                      else \
-                        cp /tmp/certs/* /etc/letsencrypt/live/$DOMAIN/; \
-                      fi; \
-                    fi; \
-                    sleep 300; \
-                  done"     
+                "apt-get update && apt-get install -y  awscli  && mkdir -p /tmp/certs && mkdir -p /etc/letsencrypt/live/$DOMAIN"    
               ]
             }             
           ],
