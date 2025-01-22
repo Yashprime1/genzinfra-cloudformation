@@ -2308,7 +2308,7 @@
               [
                 {
                   "Ref": "AWS::StackName"
-                }
+                },
                 "cert"
               ]
             ]
