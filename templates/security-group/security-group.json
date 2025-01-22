@@ -65,19 +65,6 @@
         ]
       }
     },
-    "CallSocksEFSEcsTaskEC2SecurityGroupId": {
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-CallSocksEcsTaskEC2SecurityGroupId"
-        }
-      },
-      "Value": {
-        "Fn::GetAtt": [
-          "CallSocksEFSEcsTaskEC2SecurityGroup",
-          "GroupId"
-        ]
-      }
-    },
     "DirectcallMongoInstanceEC2SecurityGroupId": {
       "Export": {
         "Name": {

@@ -4,7 +4,7 @@
         {
             "Name": "eu-west-1",
             "Stacks": [
-                {
+                  {
                     "StackName": "eu1",
                     "Action": "CREATE",
                     "TemplatePath": "templates/network/network.json",
