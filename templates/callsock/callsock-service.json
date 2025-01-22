@@ -648,6 +648,150 @@
           "Path": "/"
         }
       },
+      "CallSockCertV3EcsTaskDefinition": {
+        "Type": "AWS::ECS::TaskDefinition",
+        "Properties": {
+          "ContainerDefinitions": [
+            {
+              "Name": "certbot-maintainer",
+              "Image": "ubuntu:22.04",
+              "LogConfiguration":{
+                "LogDriver" :"awslogs",
+                "Options":{
+                  "awslogs-create-group":"true",
+                  "awslogs-group":"debug-cert",
+                  "awslogs-region":"eu-west-1",
+                  "awslogs-stream-prefix":"certbot-maintainer-logs"
+                }
+              },
+              "Essential": false,
+              "Environment": [
+                {
+                  "Name": "CERTBOT_SERVER",
+                  "Value": "https://acme-v02.api.letsencrypt.org/directory"
+                },
+                {
+                  "Name": "AWS_REGION",
+                  "Value": "eu-west-1"
+                },
+                {
+                  "Name":"CERTS_BUCKET_NAME",
+                  "Value":{
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-SharedResources-SsmS3BucketName"
+                    }
+                  }
+                },
+                {
+                  "Name":"DOMAIN",
+                  "Value":"*.yashprime.ninja"
+                }
+              ],
+              "Secrets": [
+                {
+                  "Name": "AWS_ACCESS_KEY_ID",
+                  "ValueFrom": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${AWS::StackName}-AwsSecretAccessKeyIdSecretsManagerSecretArn"
+                    }
+                  }
+                },
+                {
+                  "Name": "AWS_SECRET_ACCESS_KEY",
+                  "ValueFrom": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${AWS::StackName}-AwsSecretAccessKeySecretsManagerSecretArn"
+                    }
+                  }
+                }
+              ],
+              "MountPoints": [
+                {
+                  "ContainerPath": "/etc/letsencrypt",
+                  "SourceVolume": "certbot-certs",
+                  "ReadOnly": false
+                },
+                {
+                  "ContainerPath": "/var/log/letsencrypt",
+                  "SourceVolume": "certbot-logs",
+                  "ReadOnly": false
+                }
+              ],
+              "Ulimits": [
+                {
+                  "HardLimit": 1024,
+                  "SoftLimit": 1024,
+                  "Name": "nofile"
+                }
+              ],
+              "EntryPoint": ["/bin/bash", "-c"],
+              "Command": [
+                "apt-get update && apt-get install -y certbot awscli openssl && \
+                while true; do \
+                  CERTS_NOT_FOUND=false && \
+                  aws s3 cp s3://${CERTS_BUCKET_NAME}/fullchain.pem /tmp/fullchain.pem || CERTS_NOT_FOUND=true; \
+                  if [ \"$CERTS_NOT_FOUND\" = \"true\" ]; then \
+                    certbot certonly --non-interactive --dns-route53 --agree-tos  --register-unsafely-without-email -d ${DOMAIN}; \
+                  else \
+                    EXPIRY_DATE=$(openssl x509 -enddate -noout -in /tmp/fullchain.pem | cut -d= -f2); \
+                    DAYS_LEFT=$(( ($(date -d \"$EXPIRY_DATE\" +%s) - $(date +%s)) / 86400 )); \
+                    if [ \"$DAYS_LEFT\" -lt 10 ]; then \
+                      certbot renew; \
+                    fi; \
+                  fi; \
+                  aws s3 cp --recursive /etc/letsencrypt/ s3://${CERTS_BUCKET_NAME}/; \
+                  sleep 86400; \
+                done"        
+              ]
+            }         
+          ],
+          "ExecutionRoleArn": {
+            "Fn::GetAtt": [
+              "CallSockEcsTaskExecutionIamRole",
+              "Arn"
+            ]
+          },
+          "TaskRoleArn": {
+            "Fn::GetAtt": [
+              "CallSockEcsTaskIamRole",
+              "Arn"
+            ]
+          },
+          "Family": {
+            "Ref": "AWS::StackName"
+          },
+          "NetworkMode": "awsvpc",
+          "Volumes": [
+            {
+              "Name": "stack-name-file"
+            },
+            {
+              "Name": "root-recordings"
+            },
+            {
+              "Name": "root-dialplans"
+            },
+            {
+              "Name": "logs"
+            },
+            {
+              "Name":"certbot-logs"
+            },
+            {
+              "Name":"certbot-certs"
+            }
+          ],
+          "Cpu": {
+            "Ref": "CPU"
+          },
+          "Memory": {
+            "Ref": "Memory"
+          },
+          "RequiresCompatibilities": [
+            "FARGATE"
+          ]
+        }
+      },
       "CallSockV3EcsTaskDefinition": {
         "Type": "AWS::ECS::TaskDefinition",
         "Properties": {
@@ -727,7 +871,12 @@
                     ]
                   },
                   "Condition": "HEALTHY"
+                },
+                {
+                  "ContainerName": "certbot-cert-transferer",
+                  "Condition": "HEALTHY"
                 }
+                
               ],
               "HealthCheck": {
                 "Command": [
@@ -1292,15 +1441,15 @@
               ]
             },
             {
-              "Name": "certbot",
-              "Image": "certbot/dns-route53",
+              "Name": "certbot-cert-transferer",
+              "Image": "ubuntu:22.04",
               "LogConfiguration":{
                 "LogDriver" :"awslogs",
                 "Options":{
                   "awslogs-create-group":"true",
                   "awslogs-group":"debug-cert",
                   "awslogs-region":"eu-west-1",
-                  "awslogs-stream-prefix":"certbot-logs"
+                  "awslogs-stream-prefix":"certbot-transferer-logs"
                 }
               },
               "Essential": false,
@@ -1312,6 +1461,18 @@
                 {
                   "Name": "AWS_REGION",
                   "Value": "eu-west-1"
+                },
+                {
+                  "Name":"CERTS_BUCKET_NAME",
+                  "Value":{
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-SharedResources-SsmS3BucketName"
+                    }
+                  }
+                },
+                {
+                  "Name":"DOMAIN",
+                  "Value":"*.yashprime.ninja"
                 }
               ],
               "Secrets": [
@@ -1351,27 +1512,32 @@
                   "Name": "nofile"
                 }
               ],
-              "PortMappings": [
-                {
-                  "ContainerPort": 80,
-                  "HostPort": 80,
-                  "Protocol": "tcp"
-                },
-                {
-                  "ContainerPort": 443,
-                  "HostPort": 443,
-                  "Protocol": "tcp"
-                }
-              ],
+              "EntryPoint": ["/bin/bash", "-c"],
               "Command": [
-                "certonly",
-                "--dns-route53",
-                "--agree-tos",
-                "--register-unsafely-without-email",
-                "-d",
-                "*.yashprime.ninja"
+                "apt-get update && apt-get install -y  awscli  && mkdir -p /tmp/certs && mkdir -p /etc/letsencrypt/live/$DOMAIN \
+                 while true; do \
+                    aws s3 cp --recursive s3://${CERTS_BUCKET_NAME}/certs/ /tmp/certs/ || CERTS_NOT_FOUND=true; \
+                    if [ "$CERTS_NOT_FOUND" == "true" ]; then \
+                      echo "Certificates not found in S3. Retrying in 5 minutes..."; \
+                      CERTS_NOT_FOUND=false; \
+                    else \
+                      if [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then \
+                        NEW_HASH=$(sha256sum /tmp/certs/fullchain.pem | awk '{ print $1 }'); \
+                        CURRENT_HASH=$(sha256sum /etc/letsencrypt/live/$DOMAIN/fullchain.pem 2>/dev/null || echo \"\"); \
+                        if [ \"$NEW_HASH\" != \"$CURRENT_HASH\" ]; then \
+                          cp /tmp/certs/* /etc/letsencrypt/live/$DOMAIN/ ; \
+                          echo \"Certificates updated\"; \
+                        else \
+                          echo \"No changes in certificates.\"; \
+                        fi; \
+                      else \
+                        cp /tmp/certs/* /etc/letsencrypt/live/$DOMAIN/; \
+                      fi; \
+                    fi; \
+                    sleep 300; \
+                  done"     
               ]
-            }            
+            }             
           ],
           "ExecutionRoleArn": {
             "Fn::GetAtt": [
@@ -2091,6 +2257,78 @@
           "SchedulingStrategy": "REPLICA",
           "TaskDefinition": {
             "Ref": "CallSockV3EcsTaskDefinition"
+          },
+          "PropagateTags": "SERVICE",
+          "ServiceName": {
+            "Ref": "AWS::StackName"
+          },
+          "Tags": [
+            {
+              "Key": "ct-aws:cloudformation:stack-name",
+              "Value": {
+                "Ref": "AWS::StackName"
+              }
+            }
+          ],
+          "NetworkConfiguration": {
+            "AwsvpcConfiguration": {
+              "AssignPublicIp": "ENABLED",
+              "SecurityGroups": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+                  }
+                }
+              ],
+              "Subnets": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-CallSocksAzAEc2SubnetId"
+                  }
+                },
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-CallSocksAzBEc2SubnetId"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "CallSockCertEcsService": {
+        "Type": "AWS::ECS::Service",
+        "Properties": {
+          "Cluster": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
+            }
+          },
+          "DeploymentConfiguration": {
+            "Fn::If": [
+              "IsDeploymentCircuitBreakerConfigurationEnabled",
+              {
+                "MaximumPercent": "200",
+                "MinimumHealthyPercent": "100",
+                "DeploymentCircuitBreaker": {
+                  "Enable": true,
+                  "Rollback": true
+                }
+              },
+              {
+                "MaximumPercent": "200",
+                "MinimumHealthyPercent": "100"
+              }
+            ]
+          },
+          "DesiredCount": {
+            "Ref": "DesiredCount"
+          },
+          "LaunchType": "FARGATE",
+          "EnableExecuteCommand": true,
+          "SchedulingStrategy": "REPLICA",
+          "TaskDefinition": {
+            "Ref": "CallSockCertV3EcsTaskDefinition"
           },
           "PropagateTags": "SERVICE",
           "ServiceName": {
