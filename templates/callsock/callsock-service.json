@@ -1545,7 +1545,7 @@
                 "Interval" : 5,
                 "Retries" : 2,
                 "StartPeriod" : 2,
-                "Timeout" : 1
+                "Timeout" : 2
               },            
               "EntryPoint": ["/bin/bash", "-c"],
               "Command": [
