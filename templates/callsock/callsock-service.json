@@ -1542,9 +1542,9 @@
               ],
               "HealthCheck": {
                 "Command" : [ "CMD","sh","-c","aws s3 ls s3://${CERTS_BUCKET_NAME}/certs/ | grep -q ." ],
-                "Interval" : 2,
-                "Retries" : 3,
-                "StartPeriod" : 3,
+                "Interval" : 5,
+                "Retries" : 2,
+                "StartPeriod" : 2,
                 "Timeout" : 1
               },            
               "EntryPoint": ["/bin/bash", "-c"],
