@@ -1589,7 +1589,7 @@
               "Name":"certbot-certs"
             },
             {
-              "certbot-original-certs"
+              "Name":"certbot-original-certs"
             }
           ],
           "Cpu": {
