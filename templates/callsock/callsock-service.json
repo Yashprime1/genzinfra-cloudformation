@@ -2813,6 +2813,22 @@
                         }
                     }
                 }
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                    "ecs:TagResource"
+                ],
+                "Resource": "*",
+                "Condition": {
+                    "ArnLike": {
+                        "ecs:cluster": {
+                          "Fn::ImportValue":{
+                            "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterArn"
+                          }
+                        }
+                    }
+                }
               }
             ]
           },
