@@ -685,6 +685,10 @@
                   "Value": "https://acme-v02.api.letsencrypt.org/directory"
                 },
                 {
+                  "Name":"DEBIAN_FRONTEND",
+                  "Value":"noninteractive"
+                },
+                {
                   "Name": "AWS_REGION",
                   "Value": "eu-west-1"
                 },
