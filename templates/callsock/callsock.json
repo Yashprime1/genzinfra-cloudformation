@@ -513,6 +513,19 @@
           "Ref": "CallsockEcsCluster"
         }
       },
+      "CallsockEcsClusterArn": {
+        "Export": {
+          "Name": {
+            "Fn::Sub": "${AWS::StackName}-Service-CallsockEcsClusterArn"
+          }
+        },
+        "Value": {
+          "Fn::GetAtt":[
+            "CallsockEcsCluster",
+            "Arn"
+          ] 
+        }
+      },
       "CallsockM2PEcsClusterName": {
         "Condition":"IsParallelClusterForM2pSignedCallEnabled",
         "Export": {

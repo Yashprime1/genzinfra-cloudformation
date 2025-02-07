@@ -698,6 +698,44 @@
                 {
                   "Name":"DOMAIN",
                   "Value":"yashprime.ninja"
+                },
+                {
+                  "Name":"S3_CERTS_PATH",
+                  "Value":
+                  {
+                    "Fn::Join":[
+                      "",
+                      [
+                        "s3://",
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-SharedResources-SsmS3BucketName"
+                          }
+                        },
+                        "/certs"
+                      ]
+                    ]
+                  }
+                },       
+                {
+                  "Name":"CERTS_DIR",
+                  "Value":"/etc/letsencrypt"
+                },
+                {
+                  "Name":"CALLSOCK_CLUSTER_ARN",
+                  "Value":{
+                    "Fn::ImportValue":{
+                      "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterArn"
+                    }
+                  }
+                },
+                {
+                  "Name":"CALLSOCK_SERVICE_NAME",
+                  "Value":{
+                    "Fn::GetAtt": [
+                      "CallSockEcsService",
+                      "Name"
+                    ]
                 }
               ],
               "Secrets": [
@@ -739,7 +777,7 @@
               ],
               "EntryPoint": ["/bin/bash", "-c"],
               "Command": [
-                "apt-get update && apt-get install -y certbot python3.12-venv less curl unzip openssl python3-pip && python3 -m venv prod-venv && source prod-venv/bin/activate && pip3 install certbot-dns-route53 && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip -oq "awscliv2.zip" && ./aws/install --update && CERTS_DIR="/etc/letsencrypt" && S3_CERTS_PATH="s3://${CERTS_BUCKET_NAME}/certs/" && DOMAIN_CERT_PATH="${CERTS_DIR}/live/${DOMAIN}/cert.pem" && aws s3 sync "${S3_CERTS_PATH}" "${CERTS_DIR}" --exact-timestamps && if [[ -f "$DOMAIN_CERT_PATH" ]]; then echo "Certificate found locally, checking expiry..."; EXPIRY_DAYS=$(openssl x509 -enddate -noout -in "$DOMAIN_CERT_PATH" | cut -d= -f2 | date -d - +%s); CURRENT_DATE=$(date +%s); DAYS_LEFT=$(( (EXPIRY_DAYS - CURRENT_DATE) / 86400 )); if [[ $DAYS_LEFT -le 30 ]]; then echo "Certificate is expiring in $DAYS_LEFT days. Renewing..."; certbot renew ; aws s3 sync "${CERTS_DIR}" "${S3_CERTS_PATH}" else echo "Certificate is valid for $DAYS_LEFT days. Exiting.";  exit 0; fi; else echo "No certificate found. Generating a new one..."; certbot certonly --non-interactive --dns-route53 --agree-tos --register-unsafely-without-email -d "*.${DOMAIN}" -d "${DOMAIN}"; aws s3 sync "${CERTS_DIR}" "${S3_CERTS_PATH}" fi"        
+                "apt-get update && apt-get install -y certbot python3.12-venv less curl unzip openssl python3-pip && python3 -m venv prod-venv && source prod-venv/bin/activate && pip3 install certbot-dns-route53 && curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\" && unzip -oq \"awscliv2.zip\" && ./aws/install --update && DOMAIN_CERT_PATH=\"${CERTS_DIR}/live/${DOMAIN}/cert.pem\"  && aws s3 sync \"${S3_CERTS_PATH}\" \"${CERTS_DIR}\" --exact-timestamps && if [[ -f \"$DOMAIN_CERT_PATH\" ]]; then echo \"Certificate found locally, checking expiry...\"; EXPIRY_DAYS=$(openssl x509 -enddate -noout -in \"$DOMAIN_CERT_PATH\" | cut -d= -f2 | date -d - +%s); CURRENT_DATE=$(date +%s); DAYS_LEFT=$(( (EXPIRY_DAYS - CURRENT_DATE) / 86400 )); if [[ $DAYS_LEFT -le 30 ]]; then echo \"Certificate is expiring in $DAYS_LEFT days. Renewing...\"; certbot renew ; aws s3 sync \"${CERTS_DIR}\" \"${S3_CERTS_PATH}\"; aws ecs update-service --cluster \"${CALLSOCK_CLUSTER_ARN}\"   --service  \"${CALLSOCK_SERVICE_NAME}\" --force-new-deployment; else echo \"Certificate is valid for $DAYS_LEFT days. Exiting.\";  exit 0; fi; else echo \"No certificate found. Generating a new one...\"; certbot certonly --non-interactive --dns-route53 --agree-tos --register-unsafely-without-email -d \"*.${DOMAIN}\" -d \"${DOMAIN}\"; aws s3 sync \"${CERTS_DIR}\" \"${S3_CERTS_PATH}\"; aws ecs update-service --cluster \"${CALLSOCK_CLUSTER_ARN}\"   --service  \"${CALLSOCK_SERVICE_NAME}\" --force-new-deployment; fi"        
               ]
             }         
           ],
@@ -872,9 +910,8 @@
                 },
                 {
                   "ContainerName": "cert-refresher",
-                  "Condition": "HEALTHY"
+                  "Condition": "SUCCESS"
                 }
-                
               ],
               "HealthCheck": {
                 "Command": [
@@ -978,17 +1015,14 @@
                   "SourceVolume": "logs"
                 },
                 {
-                  "ContainerPath": "/etc/asterisk/certs",
+                  "ContainerPath": "/etc/asterisk/keys/certificate",
                   "SourceVolume": "certbot-certs"
                 },
                 {
                   "ContainerPath": "/etc/asterisk/logs",
                   "SourceVolume": "certbot-logs"
                 },
-                {
-                  "ContainerPath": "/etc/asterisk/keys/certificate",
-                  "SourceVolume": "certbot-original-certs"
-                }
+                
               ],
               "Ulimits": [
                 {
@@ -1049,6 +1083,10 @@
                     ]
                   },
                   "Condition": "HEALTHY"
+                },
+                {
+                  "ContainerName": "cert-refresher",
+                  "Condition": "SUCCESS"
                 }
               ],
               "DockerLabels": {
@@ -1425,6 +1463,10 @@
                 {
                   "ContainerPath": "/var/log/asterisk",
                   "SourceVolume": "logs"
+                },
+                {
+                  "ContainerPath": "/home/callsock/release/libs/certificate",
+                  "SourceVolume": "certbot-certs"
                 }
               ],
               "Ulimits": [
@@ -1473,26 +1515,26 @@
                   }
                 },
                 {
-                  "Name":"ASTERISK_CLUSTER_NAME",
-                  "Value":{
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
-                    }
-                  }
-                },
-                {
-                  "Name":"ASTERISK_CONTAINER_NAME",
-                  "Value":{
-                    "Fn::Join": [
-                      "-",
+                  "Name":"S3_CERTS_PATH",
+                  "Value":
+                  {
+                    "Fn::Join":[
+                      "",
                       [
+                        "s3://",
                         {
-                          "Ref": "AWS::StackName"
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-SharedResources-SsmS3BucketName"
+                          }
                         },
-                        "Asterisk"
+                        "/certs"
                       ]
                     ]
                   }
+                },       
+                {
+                  "Name":"CERTS_DIR",
+                  "Value":"/certs"
                 },
                 {
                   "Name":"DOMAIN",
@@ -1519,13 +1561,9 @@
               ],
               "MountPoints": [
                 {
-                  "ContainerPath": "/etc/letsencrypt",
+                  "ContainerPath": "/certs",
                   "SourceVolume": "certbot-certs",
                   "ReadOnly": false
-                },
-                {
-                  "ContainerPath": "/etc/asterisk/keys/certificate",
-                  "SourceVolume": "certbot-original-certs"
                 },
                 {
                   "ContainerPath": "/var/log/letsencrypt",
@@ -1549,7 +1587,7 @@
               },            
               "EntryPoint": ["/bin/bash", "-c"],
               "Command": [
-                "apt-get update && apt-get install -y certbot python3.12-venv less curl unzip openssl python3-pip && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip -oq "awscliv2.zip" && ./aws/install --update && CERTS_DIR=\"/etc/letsencrypt\" && S3_CERTS_PATH=\"s3://${CERTS_BUCKET_NAME}/certs/\" && DOMAIN_CERT_PATH=\"${CERTS_DIR}/live/${DOMAIN}/cert.pem\" && aws s3 sync \"${S3_CERTS_PATH}\" \"${CERTS_DIR}\" --exact-timestamps"     
+                "apt-get update && apt-get install -y certbot python3.12-venv less curl unzip openssl python3-pip && curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\" && unzip -oq \"awscliv2.zip\" && ./aws/install --update  && DOMAIN_CERT_PATH=\"${S3_CERTS_PATH}/live/${DOMAIN}/cert.pem\" && DOMAIN_PRIVKEY_PATH=\"${S3_CERTS_PATH}/live/${DOMAIN}/privkey.pem\" && aws s3 cp \"${DOMAIN_CERT_PATH}\" \"${CERTS_DIR}/clevertap-signedcall_com.crt\" && aws s3 cp \"${DOMAIN_PRIVKEY_PATH}\" \"${CERTS_DIR}/clevertap-signedcall.com.key\""     
               ]
             }             
           ],
@@ -2313,86 +2351,6 @@
           }
         }
       },
-      "CallSockCertEcsService": {
-        "Type": "AWS::ECS::Service",
-        "Properties": {
-          "Cluster": {
-            "Fn::ImportValue": {
-              "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
-            }
-          },
-          "DeploymentConfiguration": {
-            "Fn::If": [
-              "IsDeploymentCircuitBreakerConfigurationEnabled",
-              {
-                "MaximumPercent": "200",
-                "MinimumHealthyPercent": "100",
-                "DeploymentCircuitBreaker": {
-                  "Enable": true,
-                  "Rollback": true
-                }
-              },
-              {
-                "MaximumPercent": "200",
-                "MinimumHealthyPercent": "100"
-              }
-            ]
-          },
-          "DesiredCount": {
-            "Ref": "DesiredCount"
-          },
-          "LaunchType": "FARGATE",
-          "EnableExecuteCommand": true,
-          "SchedulingStrategy": "REPLICA",
-          "TaskDefinition": {
-            "Ref": "CallSockCertV3EcsTaskDefinition"
-          },
-          "PropagateTags": "SERVICE",
-          "ServiceName": {
-            "Fn::Join":[
-              "-",
-              [
-                {
-                  "Ref": "AWS::StackName"
-                },
-                "cert"
-              ]
-            ]
-          },
-          "Tags": [
-            {
-              "Key": "ct-aws:cloudformation:stack-name",
-              "Value": {
-                "Ref": "AWS::StackName"
-              }
-            }
-          ],
-          "NetworkConfiguration": {
-            "AwsvpcConfiguration": {
-              "AssignPublicIp": "ENABLED",
-              "SecurityGroups": [
-                {
-                  "Fn::ImportValue": {
-                    "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
-                  }
-                }
-              ],
-              "Subnets": [
-                {
-                  "Fn::ImportValue": {
-                    "Fn::Sub": "${NetworkStack}-CallSocksAzAEc2SubnetId"
-                  }
-                },
-                {
-                  "Fn::ImportValue": {
-                    "Fn::Sub": "${NetworkStack}-CallSocksAzBEc2SubnetId"
-                  }
-                }
-              ]
-            }
-          }
-        }
-      },
       "CallSockM2PEcsService": {
         "Condition": "IsM2pSignedCallServiceEnabled",
         "Type": "AWS::ECS::Service",
@@ -2730,6 +2688,65 @@
           }
         },
         "Type": "AWS::ApplicationAutoScaling::ScalingPolicy"
+      },
+      "CertRenewalTaskSchedule": {
+        "Type": "AWS::Events::Rule",
+        "Properties": {
+          "Description": "Cert Renewal Task Based On Cron",
+          "Name": "Cert Renewal Task",
+          "ScheduleExpression": "rate(5 minutes)",
+          "State": "ENABLED",
+          "Targets": [
+            {
+              "Id": "CertRenewalTask",
+              "EcsParameters": {
+                "TaskDefinitionArn": {
+                  "Ref": "CallSockCertV3EcsTaskDefinition"
+                },
+                "LaunchType" : "FARGATE",
+                "EnableExecuteCommand": true,
+                "TagList" : [ 
+                  {
+                    "Key": "ct-aws:cloudformation:stack-name",
+                    "Value": {
+                      "Ref": "AWS::StackName"
+                    }
+                  }
+                ],
+                "PropagateTags":"TASK_DEFINITION"
+                "NetworkConfiguration": {
+                  "AwsvpcConfiguration": {
+                    "AssignPublicIp": "ENABLED",
+                    "SecurityGroups": [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+                        }
+                      }
+                    ],
+                    "Subnets": [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${NetworkStack}-CallSocksAzAEc2SubnetId"
+                        }
+                      },
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${NetworkStack}-CallSocksAzBEc2SubnetId"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "Arn": {
+                "Fn::ImportValue":{
+                  "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterArn"
+                }
+              }
+            }
+          ]
+        }
       }
     },
     "Outputs": {
