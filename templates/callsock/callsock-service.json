@@ -668,7 +668,7 @@
           "ContainerDefinitions": [
             {
               "Name": "cert-maintainer",
-              "Image": "ubuntu:24.04",
+              "Image": "ubuntu:22.04",
               "LogConfiguration":{
                 "LogDriver" :"awslogs",
                 "Options":{
