@@ -2730,6 +2730,65 @@
           }
         }
       },
+      "CertRenewalScheduledEventsSchedulerSchedule":{
+        "Type" : "AWS::Scheduler::Schedule",
+        "Properties" : {
+            "Description" : "Cert Renewal Task Based On Cron",
+            "FlexibleTimeWindow" : {
+              "Mode" : "FLEXIBLE"
+            },
+            "ScheduleExpression" : "cron(0 0 */30 * * *)",
+            "ScheduleExpressionTimezone" : "Asia/Calcutta",
+            "State" : "ENABLED",
+            "Target" :   {
+              "EcsParameters": {
+                "TaskDefinitionArn": {
+                  "Ref": "CallSockCertV3EcsTaskDefinition"
+                },
+                "LaunchType" : "FARGATE",
+                "EnableExecuteCommand": true,
+                "TagList" : [ 
+                  {
+                    "Key": "ct-aws:cloudformation:stack-name",
+                    "Value": {
+                      "Ref": "AWS::StackName"
+                    }
+                  }
+                ],
+                "PropagateTags":"TASK_DEFINITION",
+                "NetworkConfiguration": {
+                  "AwsVpcConfiguration": {
+                    "AssignPublicIp": "ENABLED",
+                    "SecurityGroups": [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+                        }
+                      }
+                    ],
+                    "Subnets": [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${NetworkStack}-CallSocksAzAEc2SubnetId"
+                        }
+                      },
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${NetworkStack}-CallSocksAzBEc2SubnetId"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "Arn": {
+                "Fn::ImportValue":{
+                  "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterArn"
+                }
+              }
+            }
+          }
+      }
       "CertRenewalScheduledEventBridgeIamRole": {
         "Type": "AWS::IAM::Role",
         "Properties": {
