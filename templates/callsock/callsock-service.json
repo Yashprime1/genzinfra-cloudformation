@@ -2682,7 +2682,7 @@
                 },
                 "LaunchType" : "FARGATE",
                 "EnableExecuteCommand": true,
-                "TagList" : [ 
+                "Tags" : [ 
                   {
                     "Key": "ct-aws:cloudformation:stack-name",
                     "Value": {
@@ -2692,7 +2692,7 @@
                 ],
                 "PropagateTags":"TASK_DEFINITION",
                 "NetworkConfiguration": {
-                  "AwsVpcConfiguration": {
+                  "AwsvpcConfiguration": {
                     "AssignPublicIp": "ENABLED",
                     "SecurityGroups": [
                       {
