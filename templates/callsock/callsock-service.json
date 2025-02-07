@@ -2707,12 +2707,12 @@
                 "Fn::ImportValue":{
                   "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterArn"
                 }
-              },
-              "RoleARN":{
-                "Ref":"CertRenewalScheduledEventBridgeIAMrole"
               }
             }
-          ]
+          ],
+          "RoleARN":{
+            "Ref":"CertRenewalScheduledEventBridgeIAMrole"
+          }
         }
       },
       "CertRenewalScheduledEventBridgeIAMrole": {
