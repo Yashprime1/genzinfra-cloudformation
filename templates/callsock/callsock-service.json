@@ -2724,7 +2724,7 @@
           ],
           "RoleArn":{
             "Fn::GetAtt":[
-              "CertRenewalScheduledEventBridgeIAMrole",
+              "CertRenewalScheduledEventBridgeIamRole",
               "Arn"
             ]
           }
