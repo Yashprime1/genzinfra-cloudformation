@@ -2730,7 +2730,7 @@
           }
         }
       },
-      "CertRenewalScheduledEventBridgeIAMrole": {
+      "CertRenewalScheduledEventBridgeIamRole": {
         "Type": "AWS::IAM::Role",
         "Properties": {
            "AssumeRolePolicyDocument": {
@@ -2748,6 +2748,81 @@
               ]
           },
           "Path": "/"
+        }
+      },
+      "CertRenewalScheduledEventBridgeIamPolicy": {
+        "Type": "AWS::IAM::Policy",
+        "Properties": {
+          "PolicyName": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "CertRenewalScheduledEventBridgeIamPolicy"
+              ]
+            ]
+          },
+          "PolicyDocument": {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "iam:PassRole",
+                "Resource": [
+                    "*"
+                ],
+                "Condition": {
+                    "StringLike": {
+                        "iam:PassedToService": "ecs-tasks.amazonaws.com"
+                    }
+                }
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                    "ecs:RunTask"
+                ],
+                "Resource": [
+                    "arn:aws:ecs:eu-west-1:736548753645:task-definition/eu1-Mongo-Directcall-1-Service-SplunkForwarderEcsTaskDefinition-CNFg06kkgqbz:*",
+                    {
+                      "Fn::GetAtt":[
+                        "CallSockCertV3EcsTaskDefinition",
+                        "TaskDefinitionArn"
+                      ]
+                    },
+                    {
+                      "Fn::Join":[
+                        ":",
+                        [
+                          {
+                            "Fn::GetAtt":[
+                              "CallSockCertV3EcsTaskDefinition",
+                              "TaskDefinitionArn"
+                            ]
+                          },
+                          "*"
+                        ]
+                      ]
+                    } 
+                ],
+                "Condition": {
+                    "ArnLike": {
+                        "ecs:cluster": {
+                          "Fn::ImportValue":{
+                            "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterArn"
+                          }
+                        }
+                    }
+                }
+              }
+            ]
+          },
+          "Roles": [
+            {
+              "Ref": "CertRenewalScheduledEventBridgeIamRole"
+            }
+          ]
         }
       }
     },
