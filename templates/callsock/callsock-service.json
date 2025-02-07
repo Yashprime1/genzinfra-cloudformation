@@ -2723,7 +2723,10 @@
             }
           ],
           "RoleArn":{
-            "Ref":"CertRenewalScheduledEventBridgeIAMrole"
+            "Fn::GetAtt":[
+              "CertRenewalScheduledEventBridgeIAMrole",
+              "Arn"
+            ]
           }
         }
       },
