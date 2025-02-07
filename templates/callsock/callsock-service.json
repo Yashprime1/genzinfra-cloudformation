@@ -2739,8 +2739,8 @@
                  {
                     "Effect": "Allow",
                     "Principal": {
-                      "Service": "scheduler.amazonaws.com",
-                    }
+                      "Service": "scheduler.amazonaws.com"
+                    },
                     "Action": "sts:AssumeRole"
                  }
               ]
