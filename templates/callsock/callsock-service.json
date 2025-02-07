@@ -631,6 +631,31 @@
                     "Ref": "AWS::NoValue"
                   }
                 ]
+              },
+              {
+                "Sid": "AllowCertbotCreateDnsValidationRecords",
+                "Effect": "Allow",
+                "Action": [
+                    "route53:ChangeResourceRecordSets"
+                ],
+                "Resource": {
+                  "Fn::Join":[
+                    "/",
+                    [
+                      "arn:*:route53:::hostedzone",
+                      "Z10279092II048YFWS8OR"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Sid": "AllowCertbotListHostedZoneAndGetChanges",
+                "Effect": "Allow",
+                "Action": [
+                    "route53:GetChange",
+                    "route53:ListHostedZones"
+                ],
+                "Resource": "*"
               }
             ]
           },
