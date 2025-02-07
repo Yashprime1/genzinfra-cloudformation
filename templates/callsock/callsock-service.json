@@ -2710,7 +2710,7 @@
               }
             }
           ],
-          "RoleARN":{
+          "RoleArn":{
             "Ref":"CertRenewalScheduledEventBridgeIAMrole"
           }
         }
