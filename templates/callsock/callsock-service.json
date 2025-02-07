@@ -2672,7 +2672,7 @@
             "FlexibleTimeWindow" : {
               "Mode" : "OFF"
             },
-            "ScheduleExpression" : "cron(0 0 */30 * * *)",
+            "ScheduleExpression" : "cron(0 0 */30 * ? *)",
             "ScheduleExpressionTimezone" : "Asia/Calcutta",
             "State" : "ENABLED",
             "Target" :   {
