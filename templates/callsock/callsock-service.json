@@ -2670,7 +2670,7 @@
         "Properties" : {
             "Description" : "Cert Renewal Task Based On Cron",
             "FlexibleTimeWindow" : {
-              "Mode" : "FLEXIBLE"
+              "Mode" : "OFF"
             },
             "ScheduleExpression" : "cron(0 0 */30 * * *)",
             "ScheduleExpressionTimezone" : "Asia/Calcutta",
