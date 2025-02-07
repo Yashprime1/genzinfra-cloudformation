@@ -2693,7 +2693,7 @@
         "Type": "AWS::Events::Rule",
         "Properties": {
           "Description": "Cert Renewal Task Based On Cron",
-          "Name": "Cert Renewal Task",
+          "Name": "CertRenewalTask",
           "ScheduleExpression": "rate(5 minutes)",
           "State": "ENABLED",
           "Targets": [
