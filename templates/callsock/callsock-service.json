@@ -2689,7 +2689,7 @@
         },
         "Type": "AWS::ApplicationAutoScaling::ScalingPolicy"
       },
-      "CertRenewalTaskSchedule": {
+      "CertRenewalScheduledEventsRule": {
         "Type": "AWS::Events::Rule",
         "Properties": {
           "Description": "Cert Renewal Task Based On Cron",
@@ -2743,9 +2743,32 @@
                 "Fn::ImportValue":{
                   "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterArn"
                 }
+              },
+              "RoleARN":{
+                "Ref":"CertRenewalScheduledEventBridgeIAMrole"
               }
             }
           ]
+        }
+      },
+      "CertRenewalScheduledEventBridgeIAMrole": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+           "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                 {
+                    "Effect": "Allow",
+                    "Principal": {
+                       "Service": {
+                          "Fn::Sub": "events.amazonaws.com"
+                       }
+                    },
+                    "Action": "sts:AssumeRole"
+                 }
+              ]
+          },
+          "Path": "/",
         }
       }
     },
