@@ -958,6 +958,15 @@
                   ]
                 ]
               },
+              "LogConfiguration":{
+                "LogDriver" :"awslogs",
+                "Options":{
+                  "awslogs-create-group":"true",
+                  "awslogs-group":"application-logs",
+                  "awslogs-region":"eu-west-1",
+                  "awslogs-stream-prefix":"asterisk-logs"
+                }
+              },
               "RepositoryCredentials": {
                 "CredentialsParameter": {
                   "Fn::ImportValue": {
@@ -1406,6 +1415,15 @@
                     }
                   ]
                 ]
+              },
+              "LogConfiguration":{
+                "LogDriver" :"awslogs",
+                "Options":{
+                  "awslogs-create-group":"true",
+                  "awslogs-group":"application-logs",
+                  "awslogs-region":"eu-west-1",
+                  "awslogs-stream-prefix":"callsock-logs"
+                }
               },
               "RepositoryCredentials": {
                 "CredentialsParameter": {
