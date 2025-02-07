@@ -739,24 +739,6 @@
                   }
                 }
               ],
-              "Secrets": [
-                {
-                  "Name": "AWS_ACCESS_KEY_ID",
-                  "ValueFrom": {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${AWS::StackName}-AwsSecretAccessKeyIdSecretsManagerSecretArn"
-                    }
-                  }
-                },
-                {
-                  "Name": "AWS_SECRET_ACCESS_KEY",
-                  "ValueFrom": {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${AWS::StackName}-AwsSecretAccessKeySecretsManagerSecretArn"
-                    }
-                  }
-                }
-              ],
               "MountPoints": [
                 {
                   "ContainerPath": "/etc/letsencrypt",
@@ -1539,24 +1521,6 @@
                 {
                   "Name":"DOMAIN",
                   "Value":"yashprime.ninja"
-                }
-              ],
-              "Secrets": [
-                {
-                  "Name": "AWS_ACCESS_KEY_ID",
-                  "ValueFrom": {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${AWS::StackName}-AwsSecretAccessKeyIdSecretsManagerSecretArn"
-                    }
-                  }
-                },
-                {
-                  "Name": "AWS_SECRET_ACCESS_KEY",
-                  "ValueFrom": {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${AWS::StackName}-AwsSecretAccessKeySecretsManagerSecretArn"
-                    }
-                  }
                 }
               ],
               "MountPoints": [
