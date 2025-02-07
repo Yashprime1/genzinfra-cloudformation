@@ -2739,10 +2739,8 @@
                  {
                     "Effect": "Allow",
                     "Principal": {
-                       "Service": {
-                          "Fn::Sub": "events.amazonaws.com"
-                       }
-                    },
+                      "Service": "scheduler.amazonaws.com",
+                    }
                     "Action": "sts:AssumeRole"
                  }
               ]
