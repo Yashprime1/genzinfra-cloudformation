@@ -562,6 +562,16 @@
           "Ref": "CallsockEcsCluster"
         }
       },
+      "CallsockCertEfsFileSystemId": {
+        "Export": {
+          "Name": {
+            "Fn::Sub": "${AWS::StackName}-Service-CallsockCertEfsFileSystemId"
+          }
+        },
+        "Value": {
+          "Ref": "CallsockCertEfsFileSystem"
+        }
+      },
       "CallsockEcsClusterArn": {
         "Export": {
           "Name": {
