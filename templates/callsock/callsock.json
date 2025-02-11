@@ -518,7 +518,7 @@
           "SecurityGroups": [
             {
               "Fn::ImportValue": {
-                "Fn::Sub": "${NetworkStack}-SecurityGroup-CallsockCertEfsEC2SecurityGroupId"
+                "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksCertEFSEcsTaskEC2SecurityGroupId"
               }
             }
           ],
@@ -538,7 +538,7 @@
           "SecurityGroups": [
             {
               "Fn::ImportValue": {
-                "Fn::Sub": "${NetworkStack}-SecurityGroup-CallsockCertEfsEC2SecurityGroupId"
+                "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksCertEFSEcsTaskEC2SecurityGroupId"
               }
             }
           ],
