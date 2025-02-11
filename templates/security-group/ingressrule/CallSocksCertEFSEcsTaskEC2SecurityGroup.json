@@ -1,0 +1,28 @@
+{
+  "Parameters": {
+    "NetworkStack": {
+      "Description": "Name of the stack that acts as the bases for all stacks in System",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "UDPFromAnywhereInterCallSocksEcsTaskEc2SecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "udp",
+        "FromPort": "2049",
+        "ToPort": "2049",
+        "SourceSecurityGroupId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+          }
+        },
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksCertEFSEcsTaskEC2SecurityGroupId"
+          }
+        }
+      }
+    }
+  }
+}
