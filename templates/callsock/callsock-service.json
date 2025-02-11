@@ -737,10 +737,6 @@
                 {
                   "ContainerName": "cert-refresher",
                   "Condition": "SUCCESS"
-                },
-                {
-                  "ContainerName": "required-files-creator",
-                  "Condition": "SUCCESS"
                 }
               ],
               "HealthCheck": {
