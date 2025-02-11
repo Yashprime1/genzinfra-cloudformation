@@ -292,16 +292,6 @@
                     "Fn::ImportValue": {
                       "Fn::Sub": "${NetworkStack}-SharedResources-SignedCallsRSAPrivateSecretsManagerSecretName"
                     }
-                  },
-                  {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${AWS::StackName}-AwsSecretAccessKeyIdSecretsManagerSecretArn"
-                    }
-                  },
-                  {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${AWS::StackName}-AwsSecretAccessKeySecretsManagerSecretArn"
-                    }
                   }
                 ]
               },
