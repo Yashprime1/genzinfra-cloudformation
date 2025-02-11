@@ -1398,7 +1398,7 @@
                   "Name": "nofile"
                 }
               ],    
-              "EntryPoint": ["/bin/bash", "-c"],
+              "EntryPoint": ["/bin/sh", "-c"],
               "Command": [
                 "certbot renew --non-interactive --dns-route53 && cp /etc/letsencrypt/live/${DOMAIN}/cert.pem ${CERTS_DIR}/clevertap-signedcall_com.crt && cp /etc/letsencrypt/live/${DOMAIN}/privkey.pem ${CERTS_DIR}/clevertap-signedcall.com.key  && cp /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ${CERTS_DIR}/clevertap-signedcall_com.ca-bundle &&  cat ${CERTS_DIR}/clevertap-signedcall.com.key ${CERTS_DIR}/clevertap-signedcall_com.ca-bundle > ${CERTS_DIR}/clevertap-signedcall.com.key.pem"
               ]
