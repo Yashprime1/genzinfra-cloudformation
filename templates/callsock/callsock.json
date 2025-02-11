@@ -13,15 +13,6 @@
         "Description": "Enables or disables api direct call upload call recordings s3 bucket",
         "Type": "String"
       },
-      "EnableParallelClusterForM2pSignedCall": {
-        "AllowedValues": [
-          "true",
-          "false"
-        ],
-        "Default": "false",
-        "Description": "Enables or disables call sock m2p ecs cluster",
-        "Type": "String"
-      },
       "EnableNotificationSetupForCallSockServiceScalingAlarms": {
         "AllowedValues": [
           "true",
@@ -37,14 +28,6 @@
         "Fn::Equals": [
           {
             "Ref": "EnableApiDirectCallUploadCallRecordingsS3Bucket"
-          },
-          "true"
-        ]
-      },
-      "IsParallelClusterForM2pSignedCallEnabled": {
-        "Fn::Equals": [
-          {
-            "Ref": "EnableParallelClusterForM2pSignedCall"
           },
           "true"
         ]
@@ -73,11 +56,6 @@
         }
       },
       "CallsockEcsCluster": {
-        "Type": "AWS::ECS::Cluster",
-        "Properties": {}
-      },
-      "CallsockM2PEcsCluster": {
-        "Condition":"IsParallelClusterForM2pSignedCallEnabled",
         "Type": "AWS::ECS::Cluster",
         "Properties": {}
       },
@@ -595,17 +573,6 @@
             "CallsockEcsCluster",
             "Arn"
           ] 
-        }
-      },
-      "CallsockM2PEcsClusterName": {
-        "Condition":"IsParallelClusterForM2pSignedCallEnabled",
-        "Export": {
-          "Name": {
-            "Fn::Sub": "${AWS::StackName}-Service-CallsockM2PEcsClusterName"
-          }
-        },
-        "Value": {
-          "Ref": "CallsockM2PEcsCluster"
         }
       },
       "CallsockAutoScalingAlarmNotificationSnsTopicArn": {
