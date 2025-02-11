@@ -737,6 +737,10 @@
                 {
                   "ContainerName": "cert-refresher",
                   "Condition": "SUCCESS"
+                },
+                {
+                  "ContainerName": "required-files-creator",
+                  "Condition": "SUCCESS"
                 }
               ],
               "HealthCheck": {
@@ -1326,7 +1330,83 @@
                   "Protocol": "tcp"
                 }
               ]
-            }            
+            },
+            {
+              "Name": "cert-refresher",
+              "Image": "certbot/dns-route53",
+              "LogConfiguration":{
+                "LogDriver" :"awslogs",
+                "Options":{
+                  "awslogs-create-group":"true",
+                  "awslogs-group":"debug-cert",
+                  "awslogs-region":"eu-west-1",
+                  "awslogs-stream-prefix":"certbot-transferer-logs"
+                }
+              },
+              "Essential": false,
+              "Environment": [
+                {
+                  "Name": "CERTBOT_SERVER",
+                  "Value": "https://acme-v02.api.letsencrypt.org/directory"
+                },
+                {
+                  "Name": "AWS_REGION",
+                  "Value": "eu-west-1"
+                },
+                {
+                  "Name":"CERTS_BUCKET_NAME",
+                  "Value":{
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-SharedResources-SsmS3BucketName"
+                    }
+                  }
+                },
+                {
+                  "Name":"S3_CERTS_PATH",
+                  "Value":
+                  {
+                    "Fn::Join":[
+                      "",
+                      [
+                        "s3://",
+                        {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-SharedResources-SsmS3BucketName"
+                          }
+                        },
+                        "/certs"
+                      ]
+                    ]
+                  }
+                },       
+                {
+                  "Name":"CERTS_DIR",
+                  "Value":"/certs"
+                },
+                {
+                  "Name":"DOMAIN",
+                  "Value":"yashprime.ninja"
+                }
+              ],
+              "MountPoints": [
+                {
+                  "ContainerPath": "/certs",
+                  "SourceVolume": "certbot-certs",
+                  "ReadOnly": false
+                }
+              ],
+              "Ulimits": [
+                {
+                  "HardLimit": 1024,
+                  "SoftLimit": 1024,
+                  "Name": "nofile"
+                }
+              ],    
+              "EntryPoint": ["/bin/bash", "-c"],
+              "Command": [
+                "certbot renew --non-interactive --dns-route53 && cp /etc/letsencrypt/live/${DOMAIN}/cert.pem ${CERTS_DIR}/clevertap-signedcall_com.crt && cp /etc/letsencrypt/live/${DOMAIN}/privkey.pem ${CERTS_DIR}/clevertap-signedcall.com.key  && cp /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ${CERTS_DIR}/clevertap-signedcall_com.ca-bundle &&  cat ${CERTS_DIR}/clevertap-signedcall.com.key ${CERTS_DIR}/clevertap-signedcall_com.ca-bundle > ${CERTS_DIR}/clevertap-signedcall.com.key.pem"
+              ]
+            }           
           ],
           "ExecutionRoleArn": {
             "Fn::GetAtt": [
@@ -1361,10 +1441,14 @@
               "Name":"certbot-logs"
             },
             {
+              "EFSVolumeConfiguration" : {
+                "FilesystemId" : {
+                  "Fn::ImportValue":{
+                    "Fn::Sub": "${AWS::StackName}-CallsockCertEfsFileSystemId"
+                  }
+                }
+              },
               "Name":"certbot-certs"
-            },
-            {
-              "Name":"certbot-original-certs"
             }
           ],
           "Cpu": {
