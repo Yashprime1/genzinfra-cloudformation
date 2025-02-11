@@ -500,6 +500,95 @@
               ]
             }
           }
+      },
+      "CallsockCertEfsFileSystem": {
+        "Properties": {
+          "Encrypted": true,
+          "FileSystemTags": [
+            {
+              "Key": "Name",
+              "Value": "CallsockCertEfs"
+            }
+          ],
+          "PerformanceMode": "generalPurpose"
+        },
+        "Type": "AWS::EFS::FileSystem"
+      },
+      "CallsockCertAccessPoint": {
+        "Properties": {
+          "AccessPointTags": [
+            {
+              "Key": "Name",
+              "Value": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "AWS::StackName"
+                    },
+                    "CallsockCertEfsFileSystem"
+                  ]
+                ]
+              }
+            }
+          ],
+          "FileSystemId": {
+            "Ref": "CallsockCertEfsFileSystem"
+          },
+          "PosixUser": {
+            "Gid": "8800",
+            "Uid": "8800"
+          },
+          "RootDirectory": {
+            "CreationInfo": {
+              "OwnerGid": "8800",
+              "OwnerUid": "8800",
+              "Permissions": "0711"
+            },
+            "Path": "/certs"
+          }
+        },
+        "Type": "AWS::EFS::AccessPoint"
+      },
+      "CallsockCert1aEc2SubnetEfsMountTarget": {
+        "Properties": {
+          "FileSystemId": {
+            "Ref": "CallsockCertEfsFileSystem"
+          },
+          "SecurityGroups": [
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${NetworkStack}-SecurityGroup-CallsockCertEfsEC2SecurityGroupId"
+              }
+            }
+          ],
+          "SubnetId": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${NetworkStack}-CallSocksAzAEc2SubnetId"
+            }
+          }
+        },
+        "Type": "AWS::EFS::MountTarget"
+      },
+      "CallsockCert1bEc2SubnetEfsMountTarget": {
+        "Properties": {
+          "FileSystemId": {
+            "Ref": "CallsockCertEfsFileSystem"
+          },
+          "SecurityGroups": [
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${NetworkStack}-SecurityGroup-CallsockCertEfsEC2SecurityGroupId"
+              }
+            }
+          ],
+          "SubnetId": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${NetworkStack}-CallSocksAzBEc2SubnetId"
+            }
+          }
+        },
+        "Type": "AWS::EFS::MountTarget"
       }
     },
     "Outputs" : {
