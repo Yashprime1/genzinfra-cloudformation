@@ -1791,19 +1791,45 @@
             "ScheduleExpressionTimezone" : "Asia/Calcutta",
             "State" : "ENABLED",
             "Target" :   {
-              "Input":  {
-                  "cluster": {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
+              "EcsParameters": {
+                "TaskDefinitionArn": {
+                  "Ref": "CallSockV3EcsTaskDefinition"
+                },
+                "LaunchType" : "FARGATE",
+                "EnableExecuteCommand": true,
+                "Tags" : [
+                  {
+                    "Key": "ct-aws:cloudformation:stack-name",
+                    "Value": {
+                      "Ref": "AWS::StackName"
                     }
-                  },
-                  "service": {
-                    "Fn::GetAtt": [
-                      "CallSockEcsService",
-                      "Name"
+                  }
+                ],
+                "PropagateTags":"TASK_DEFINITION",
+                "NetworkConfiguration": {
+                  "AwsvpcConfiguration": {
+                    "AssignPublicIp": "ENABLED",
+                    "SecurityGroups": [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+                        }
+                      }
+                    ],
+                    "Subnets": [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${NetworkStack}-CallSocksAzAEc2SubnetId"
+                        }
+                      },
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${NetworkStack}-CallSocksAzBEc2SubnetId"
+                        }
+                      }
                     ]
-                  },
-                  "forceNewDeployment": true
+                  }
+                }
               },
               "Arn": {
                 "Fn::ImportValue":{
