@@ -852,10 +852,6 @@
                 {
                   "ContainerPath": "/etc/asterisk/keys/certificate",
                   "SourceVolume": "certbot-certs"
-                },
-                {
-                  "ContainerPath": "/etc/asterisk/logs",
-                  "SourceVolume": "certbot-logs"
                 }
               ],
               "Ulimits": [
