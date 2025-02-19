@@ -851,7 +851,7 @@
                 },
                 {
                   "ContainerPath": "/etc/asterisk/keys/certificate",
-                  "SourceVolume": "certbot-certs"
+                  "SourceVolume": "certbot-certs-for-containers"
                 }
               ],
               "Ulimits": [
@@ -1305,7 +1305,7 @@
                 },
                 {
                   "ContainerPath": "/home/callsock/release/libs/certificate",
-                  "SourceVolume": "certbot-certs"
+                  "SourceVolume": "certbot-certs-for-containers"
                 }
               ],
               "Ulimits": [
@@ -1382,8 +1382,13 @@
               ],
               "MountPoints": [
                 {
-                  "ContainerPath": "/certs",
+                  "ContainerPath": "/etc/letsencrypt",
                   "SourceVolume": "certbot-certs",
+                  "ReadOnly": false
+                },
+                {
+                  "ContainerPath": "/certs",
+                  "SourceVolume": "certbot-certs-for-containers",
                   "ReadOnly": false
                 }
               ],
@@ -1438,6 +1443,9 @@
                 }
               },
               "Name":"certbot-certs"
+            },
+            {
+              "Name":"certbot-certs-for-containers"
             }
           ],
           "Cpu": {

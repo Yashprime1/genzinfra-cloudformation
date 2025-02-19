@@ -505,7 +505,7 @@
               "OwnerUid": "8800",
               "Permissions": "0711"
             },
-            "Path": "/certs"
+            "Path": "/"
           }
         },
         "Type": "AWS::EFS::AccessPoint"
