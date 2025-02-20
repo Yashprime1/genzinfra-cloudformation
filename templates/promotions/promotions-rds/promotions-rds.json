@@ -1,0 +1,192 @@
+{
+    "Parameters": {
+        "NetworkStack": {
+            "Description": "Name of the region that this stack references",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "PromotionsRdsDbSubnetGroup": {
+            "Properties": {
+                "DBSubnetGroupDescription": "Promotions db subnet group",
+                "DBSubnetGroupName":{
+                    "Fn::Join":[
+                        "-",
+                        [
+                            {
+                                "Ref":"AWS::StackName"
+                            },
+                            "PromotionsRDSDBSubnetGroup"
+                        ]
+                    ]
+                },
+                "SubnetIds": [
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzAEc2SubnetId"
+                        }
+                    },
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzBEc2SubnetId"
+                        }
+                    },
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzCEc2SubnetId"
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::RDS::DBSubnetGroup"
+        },
+        "PromotionsRDSSecretsManagerSecret": {
+            "Properties": {
+                "Description": {
+                    "Fn::Sub": "This is a Secrets Manager secret for ${AWS::StackName}-PromotionsRDSSecretsManagerSecret"
+                },
+                "GenerateSecretString": {
+                    "SecretStringTemplate": "{\"username\": \"promotions\"}",
+                    "GenerateStringKey": "password",
+                    "PasswordLength": 20,
+                    "ExcludeCharacters": "&^%$#@!*()|}{\":?><'/\\;+=`~[]"
+                }
+            },
+            "Type": "AWS::SecretsManager::Secret"
+        },
+        "PromotionsRDSDBParameterGroup": {
+            "Properties": {
+                "Description": "PromotionsRDS Custom Parameter Group",
+                "Family": "aurora-postgresql16",
+                "Parameters": {
+                    "cron.database_name": "promotions",
+                    "shared_preload_libraries": "auto_explain,orafce,pgaudit,pg_bigm,pg_similarity,pg_stat_statements,pg_tle,pg_hint_plan,pg_prewarm,plprofiler,pglogical,pg_cron"
+                }
+            },
+            "Type": "AWS::RDS::DBParameterGroup"
+        },
+        "PromotionsRDSDBClusterParameterGroup": {
+            "Properties": {
+                "Description": "PromotionsRDS Custom Cluster Parameter Group",
+                "Family": "aurora-postgresql16",
+                "Parameters": {
+                "rds.force_ssl": 0
+                }
+            },
+            "Type": "AWS::RDS::DBClusterParameterGroup"
+        },
+        "Promotions1RDSDBInstance": {
+            "Properties": {
+                "DBClusterIdentifier": {
+                    "Ref": "PromotionsRDSDBCluster"
+                },
+                "DBInstanceClass": "db.r5.large",
+                "DBParameterGroupName": {
+                    "Ref": "PromotionsRDSDBParameterGroup"
+                },
+                "Engine": "aurora-postgresql",
+                "EngineVersion": "16.4"
+            },
+            "Type": "AWS::RDS::DBInstance"
+        },
+        "Promotions2RDSDBInstance": {
+            "Properties": {
+                "DBClusterIdentifier": {
+                    "Ref": "PromotionsRDSDBCluster"
+                },
+                "DBInstanceClass": "db.r5.large",
+                "DBParameterGroupName": {
+                    "Ref": "PromotionsRDSDBParameterGroup"
+                },
+                "Engine": "aurora-postgresql",
+                "EngineVersion": "16.4"
+            },
+            "Type": "AWS::RDS::DBInstance"
+        },
+        "PromotionsRDSDBCluster": {
+            "Properties": {
+                "DBClusterParameterGroupName": {
+                    "Ref": "PromotionsRDSDBClusterParameterGroup"
+                },
+                "DBSubnetGroupName": {
+                    "Ref": "PromotionsRdsDbSubnetGroup"
+                },
+                "DatabaseName": "promotions",
+                "Engine": "aurora-postgresql",
+                "EngineVersion": "16.4",
+                "MasterUserPassword": {
+                "Fn::Join": [
+                    "",
+                    [
+                        "{{resolve:secretsmanager:",
+                        {
+                            "Ref": "PromotionsRDSSecretsManagerSecret"
+                        },
+                        ":SecretString:password}}"
+                    ]
+                ]
+                },
+                "MasterUsername": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "{{resolve:secretsmanager:",
+                            {
+                                "Ref": "PromotionsRDSSecretsManagerSecret"
+                            },
+                            ":SecretString:username}}"
+                        ]
+                    ]
+                },
+                "Port": 5432,
+                "StorageEncrypted": true,
+                "VpcSecurityGroupIds": [
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-SecurityGroup-PromotionsRDSEc2SecurityGroupId"
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::RDS::DBCluster"
+        }
+    },
+    "Outputs": {
+        "PromotionsRDSDBClusterEndpoint": {
+            "Export": {
+                "Name": {
+                "Fn::Sub": "${AWS::StackName}-PromotionsRDSDBClusterEndpoint"
+                }
+            },
+            "Value": {
+                "Fn::GetAtt": [
+                "PromotionsRDSDBCluster",
+                "Endpoint.Address"
+                ]
+            }
+        },
+        "PromotionsRDSDBClusterReaderEndpoint": {
+            "Export": {
+                "Name": {
+                "Fn::Sub": "${AWS::StackName}-PromotionsRDSDBClusterReaderEndpoint"
+                }
+            },
+            "Value": {
+                "Fn::GetAtt": [
+                "PromotionsRDSDBCluster",
+                "ReadEndpoint.Address"
+                ]
+            }
+        },
+        "PromotionsRDSSecretsManagerSecretArn": {
+            "Export": {
+                "Name": {
+                "Fn::Sub": "${AWS::StackName}-PromotionsRDSSecretsManagerSecretArn"
+                }
+            },
+            "Value": {
+                "Ref": "PromotionsRDSSecretsManagerSecret"
+            }
+        }
+    }
+}

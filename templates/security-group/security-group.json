@@ -49,6 +49,17 @@
         }
       },
       "Type": "AWS::EC2::SecurityGroup"
+    },
+    "PromotionsRDSEc2SecurityGroup": {
+      "Properties": {
+        "GroupDescription": "PromotionsRDSSecurityGroup",
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
     }
   },
   "Outputs": {

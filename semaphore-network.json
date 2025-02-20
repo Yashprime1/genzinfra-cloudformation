@@ -1,0 +1,45 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudFormation template to create a VPC Lattice Resource Gateway and Resource Configuration.",
+    "Resources": {
+      "VpcLatticeResourceGateway": {
+        "Type": "AWS::VpcLattice::ResourceGateway",
+        "Properties": {
+          "Name":"semaphore",
+          "VpcIdentifier": "vpc-cf743fa9",
+          "SubnetIds": ["subnet-0b78abe66e74d2798"]
+        }
+      },
+      "MyVpcLatticeResourceEndpoint": {
+        "Type": "AWS::VpcLattice::ResourceEndpoint",
+        "Properties": {
+            "VpcId": "vpc-12345678",
+            "SubnetIds": ["subnet-abc123"],
+            "SecurityGroupIds": ["sg-98765432"],
+            "ResourceConfigurationArn": "arn:aws:vpc-lattice:region:account-id:resource-configuration/xyz"
+        }
+      },
+      "VpcLatticeResourceConfiguration": {
+        "Type": "AWS::VpcLattice::ResourceConfiguration",
+        "Properties": {
+          "Name":"semaphore",
+          "ResourceConfigurationType":"ARN",
+          "ResourceConfigurationDefinition" : {
+            "ArnResource" : "arn:aws:rds:eu-west-1:062484260092:db:system-dronahq-dronav2rdsdbinstance-rugenpgg7atc"
+          },
+          "ResourceGatewayId": { "Ref": "VpcLatticeResourceGateway" }
+        }
+      }
+    },
+    "Outputs": {
+      "ResourceGatewayId": {
+        "Description": "The ID of the VPC Lattice Resource Gateway",
+        "Value": { "Ref": "VpcLatticeResourceGateway" }
+      },
+      "ResourceConfigurationId": {
+        "Description": "The ID of the VPC Lattice Resource Configuration",
+        "Value": { "Ref": "VpcLatticeResourceConfiguration" }
+      }
+    }
+  }
+  

@@ -34,6 +34,15 @@
                     "StackPolicy": {}
                   },
                   {
+                    "StackName": "eu1-SecurityGroup-IngressRule-PromotionsRDSEc2SecurityGroup",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/security-group/ingressrule/PromotionsRDSEc2SecurityGroup.json",
+                    "Parameters": {
+                      "NetworkStack": "eu1"
+                    },
+                    "StackPolicy": {}
+                  },
+                  {
                     "StackName": "eu1-SharedResources",
                     "Action": "CREATE",
                     "TemplatePath": "templates/sharedresources/sharedresources.json",
@@ -130,6 +139,42 @@
                         }
                       ]
                     }
+                  },
+                  {
+                    "StackName": "eu1-Callsock-1-Service",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/callsock/callsock-service.json",
+                    "Parameters": {
+                      "NetworkStack": "eu1",
+                      "ContainerTag": "{{ ContainerTag }}",
+                      "AsteriskContainerTag": "{{ AsteriskImageTag }}",
+                      "DesiredCount": "1",
+                      "PostgresContainerTag" : "{{ PostgresContainerTag }}",
+                      "CPU": "8192",
+                      "Memory": "16384",
+                      "MinTasks": "2",
+                      "MaxTasks": "10",
+                      "MongoDirectCallHosts": "10.11.13.132:27017,10.11.13.148:27017,10.11.13.164"
+                    },
+                    "StackPolicy": {
+                      "Statement": [
+                        {
+                          "Action": "Update:*",
+                          "Effect": "Allow",
+                          "Principal": "*",
+                          "Resource": "*"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "StackName": "eu1-Promotions-Rds",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/promotions/promotions-rds/promotions-rds.json",
+                    "Parameters": {
+                      "NetworkStack": "eu1"
+                    },
+                    "StackPolicy": {}
                   }
             ]
         }

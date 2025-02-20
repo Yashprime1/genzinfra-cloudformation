@@ -886,6 +886,136 @@
         }
       },
       "Type": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    "PromotionRDSAzAEc2Subnet": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "a"
+            ]
+          ]
+        },
+        "CidrBlock": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Ref": "VPCNetworkPrefix"
+              },
+              "4.96/27"
+            ]
+          ]
+        },
+        "MapPublicIpOnLaunch": false,
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "PromotionRDSAzAEc2SubnetRouteTableAssociation": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "RouteTableNat"
+        },
+        "SubnetId": {
+          "Ref": "PromotionRDSAzAEc2Subnet"
+        }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    "PromotionRDSAzBEc2Subnet": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              {
+                "Ref": "AvailabilityZoneBSuffix"
+              }
+            ]
+          ]
+        },
+        "CidrBlock": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Ref": "VPCNetworkPrefix"
+              },
+              "4.128/27"
+            ]
+          ]
+        },
+        "MapPublicIpOnLaunch": false,
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "PromotionRDSAzBEc2SubnetRouteTableAssociation": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "Nat1bEc2RouteTable"
+        },
+        "SubnetId": {
+          "Ref": "PromotionRDSAzBEc2Subnet"
+        }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    "PromotionRDSAzCEc2Subnet": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              {
+                "Ref": "AvailabilityZoneCSuffix"
+              }
+            ]
+          ]
+        },
+        "CidrBlock": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Ref": "VPCNetworkPrefix"
+              },
+              "4.160/27"
+            ]
+          ]
+        },
+        "MapPublicIpOnLaunch": false,
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "PromotionRDSAzCEc2SubnetRouteTableAssociation": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "Nat1cEc2RouteTable"
+        },
+        "SubnetId": {
+          "Ref": "PromotionRDSAzCEc2Subnet"
+        }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation"
     }
   },
   "Outputs": {
@@ -968,6 +1098,36 @@
       },
       "Value": {
         "Ref": "VPCNetworkPrefix"
+      }
+    },
+    "PromotionRDSAzAEc2SubnetId": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-PromotionRDSAzAEc2SubnetId"
+        }
+      },
+      "Value": {
+        "Ref": "PromotionRDSAzAEc2Subnet"
+      }
+    },
+    "PromotionRDSAzBEc2SubnetId": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-PromotionRDSAzBEc2SubnetId"
+        }
+      },
+      "Value": {
+        "Ref": "PromotionRDSAzBEc2Subnet"
+      }
+    },
+    "PromotionRDSAzCEc2SubnetId": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-PromotionRDSAzCEc2SubnetId"
+        }
+      },
+      "Value": {
+        "Ref": "PromotionRDSAzCEc2Subnet"
       }
     }
   }
