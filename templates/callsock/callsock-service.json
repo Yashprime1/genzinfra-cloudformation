@@ -1845,9 +1845,8 @@
               ]
           },
           "Code": {
-            "ZipFile": """
+            "ZipFile": |
                 import boto3
-                
                 def handler(event, context):
                     client = boto3.client('ecs')
                     return client.update_service(
@@ -1855,7 +1854,6 @@
                         service=event['ECS_SERVICE'],
                         forceNewDeployment=True
                     )
-            """
           },
           "Environment": {
             "Variables": {
