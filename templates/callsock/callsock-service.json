@@ -1851,7 +1851,7 @@
             "Variables": {
               "ECS_CLUSTER": { 
                   "Fn::ImportValue": {
-                    "Fn::Sub": "${AWS::StackName}-Service-CallsockEcsClusterName"
+                    "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
                   } 
               },
               "ECS_SERVICE": { 
