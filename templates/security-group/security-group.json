@@ -114,6 +114,19 @@
           "GroupId"
         ]
       }
+    },
+    "PromotionsRDSEc2SecurityGroupId": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-PromotionsRDSEc2SecurityGroupId"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "PromotionsRDSEc2SecurityGroup",
+          "GroupId"
+        ]
+      }
     }
   }
 }
