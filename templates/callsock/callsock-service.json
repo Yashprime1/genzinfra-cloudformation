@@ -1788,177 +1788,123 @@
         },
         "Type": "AWS::ApplicationAutoScaling::ScalingPolicy"
       },
-      "CertRenewalScheduledEventsSchedulerSchedule":{
-        "Type" : "AWS::Scheduler::Schedule",
-        "Properties" : {
-            "Description" : "Cert Renewal Task Based On Cron",
-            "FlexibleTimeWindow" : {
-              "Mode" : "OFF"
-            },
-            "ScheduleExpression" : "cron(0 0 */30 * ? *)",
-            "ScheduleExpressionTimezone" : "Asia/Calcutta",
-            "State" : "ENABLED",
-            "Target" :   {
-              "EcsParameters": {
-                "TaskDefinitionArn": {
-                  "Ref": "CallSockV3EcsTaskDefinition"
-                },
-                "LaunchType" : "FARGATE",
-                "EnableExecuteCommand": true,
-                "Tags" : [
+      "DeploymentLambdaFunctionExecutionIamRole": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": { "Service": "lambda.amazonaws.com" },
+                "Action": "sts:AssumeRole"
+              }
+            ]
+          },
+          "Policies": [
+            {
+              "PolicyName": "LambdaECSUpdatePolicy",
+              "PolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
                   {
-                    "Key": "ct-aws:cloudformation:stack-name",
-                    "Value": {
-                      "Ref": "AWS::StackName"
-                    }
-                  }
-                ],
-                "PropagateTags":"TASK_DEFINITION",
-                "NetworkConfiguration": {
-                  "AwsvpcConfiguration": {
-                    "AssignPublicIp": "ENABLED",
-                    "SecurityGroups": [
-                      {
-                        "Fn::ImportValue": {
-                          "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
-                        }
-                      }
+                    "Effect": "Allow",
+                    "Action": [
+                      "ecs:UpdateService"
                     ],
-                    "Subnets": [
+                    "Resource": [
                       {
-                        "Fn::ImportValue": {
-                          "Fn::Sub": "${NetworkStack}-CallSocksAzAEc2SubnetId"
-                        }
-                      },
-                      {
-                        "Fn::ImportValue": {
-                          "Fn::Sub": "${NetworkStack}-CallSocksAzBEc2SubnetId"
-                        }
+                        "Ref":"CallSockEcsService"
                       }
                     ]
+                  },
+                  {
+                    "Effect": "Allow",
+                    "Action": [
+                      "logs:CreateLogGroup",
+                      "logs:CreateLogStream",
+                      "logs:PutLogEvents"
+                    ],
+                    "Resource": "*"
                   }
-                }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "DeploymentLambdaFunction": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Handler": "index.handler",
+          "Runtime": "python3.8",
+          "Role": { 
+            "Fn::GetAtt": [
+              "DeploymentLambdaFunctionExecutionIamRole",
+               "Arn"
+              ]
+          },
+          "Code": {
+            "ZipFile": """
+                import boto3
+                
+                def handler(event, context):
+                    client = boto3.client('ecs')
+                    return client.update_service(
+                        cluster=event['ECS_CLUSTER'],
+                        service=event['ECS_SERVICE'],
+                        forceNewDeployment=True
+                    )
+            """
+          },
+          "Environment": {
+            "Variables": {
+              "ECS_CLUSTER": { 
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${AWS::StackName}-Service-CallsockEcsClusterName"
+                  } 
               },
-              "Arn": {
-                "Fn::ImportValue":{
-                  "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterArn"
-                }
-              },
-              "RoleArn":{
-                "Fn::GetAtt":[
-                  "CertRenewalScheduledEventBridgeIamRole",
-                  "Arn"
+              "ECS_SERVICE": { 
+                "Fn::GetAtt": [
+                  "CallSockEcsService",
+                  "Name"
                 ]
               }
             }
           }
-      },
-      "CertRenewalScheduledEventBridgeIamRole": {
-        "Type": "AWS::IAM::Role",
-        "Properties": {
-           "AssumeRolePolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                 {
-                    "Effect": "Allow",
-                    "Principal": {
-                      "Service": "scheduler.amazonaws.com"
-                    },
-                    "Action": "sts:AssumeRole"
-                 }
-              ]
-          },
-          "Path": "/"
         }
       },
-      "CertRenewalScheduledEventBridgeIamPolicy": {
-        "Type": "AWS::IAM::Policy",
+      "DeploymentCloudWatchEventsRule": {
+        "Type": "AWS::Events::Rule",
         "Properties": {
-          "PolicyName": {
-            "Fn::Join": [
-              "-",
-              [
-                {
-                  "Ref": "AWS::StackName"
-                },
-                "CertRenewalScheduledEventBridgeIamPolicy"
-              ]
-            ]
-          },
-          "PolicyDocument": {
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Action": "iam:PassRole",
-                "Resource": [
-                    "*"
-                ],
-                "Condition": {
-                    "StringLike": {
-                        "iam:PassedToService": "ecs-tasks.amazonaws.com"
-                    }
-                }
-              },
-              {
-                "Effect": "Allow",
-                "Action": [
-                    "ecs:RunTask"
-                ],
-                "Resource": [
-                    {
-                      "Fn::GetAtt":[
-                        "CallSockV3EcsTaskDefinition",
-                        "TaskDefinitionArn"
-                      ]
-                    },
-                    {
-                      "Fn::Join":[
-                        ":",
-                        [
-                          {
-                            "Fn::GetAtt":[
-                              "CallSockV3EcsTaskDefinition",
-                              "TaskDefinitionArn"
-                            ]
-                          },
-                          "*"
-                        ]
-                      ]
-                    }
-                ],
-                "Condition": {
-                    "ArnLike": {
-                        "ecs:cluster": {
-                          "Fn::ImportValue":{
-                            "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterArn"
-                          }
-                        }
-                    }
-                }
-              },
-              {
-                "Effect": "Allow",
-                "Action": [
-                    "ecs:TagResource"
-                ],
-                "Resource": "*",
-                "Condition": {
-                    "ArnLike": {
-                        "ecs:cluster": {
-                          "Fn::ImportValue":{
-                            "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterArn"
-                          }
-                        }
-                    }
-                }
-              }
-            ]
-          },
-          "Roles": [
+          "ScheduleExpression": "cron(0 0 */30 * ? *)",
+          "Targets": [
             {
-              "Ref": "CertRenewalScheduledEventBridgeIamRole"
+              "Arn": { 
+                "Fn::GetAtt": [
+                  "DeploymentLambdaFunction",
+                   "Arn"
+                ]
+              },
+              "Id": "LambdaTarget"
             }
           ]
+        }
+      },
+      "EventBridgeLambdaPermission": {
+        "Type": "AWS::Lambda::Permission",
+        "Properties": {
+          "Action": "lambda:InvokeFunction",
+          "FunctionName": { 
+            "Ref": "DeploymentLambdaFunction"
+          },
+          "Principal": "events.amazonaws.com",
+          "SourceArn": { 
+            "Fn::GetAtt": [
+              "CloudWatchEventRule",
+               "Arn"
+              ]
+          }
         }
       }
     }
