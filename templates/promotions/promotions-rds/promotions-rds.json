@@ -197,6 +197,7 @@
             }
         },
         "PromotionsRDSDBApplicationAutoScalingScalingPolicy": {
+            "DependsOn": "PromotionsRDSDBReadApplicationAutoScalingScalableTarget",
             "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
             "Properties": {
                 "PolicyName": { "Fn::Sub": "${AWS::StackName}-AutoScalingPolicy" },
