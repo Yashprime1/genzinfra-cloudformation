@@ -231,7 +231,7 @@
                 ]
                 },
                 "ManagedPolicyArns": [
-                    "arn:aws:iam::aws:policy/service-role/AmazonRDSFullAccess"
+                    "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
                 ]
             }
         },
