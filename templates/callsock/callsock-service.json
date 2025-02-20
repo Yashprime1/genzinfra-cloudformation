@@ -1891,7 +1891,7 @@
           "Principal": "events.amazonaws.com",
           "SourceArn": { 
             "Fn::GetAtt": [
-              "CloudWatchEventRule",
+              "DeploymentCloudWatchEventsRule",
                "Arn"
               ]
           }
