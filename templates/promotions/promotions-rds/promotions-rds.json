@@ -214,7 +214,99 @@
                     "ScaleOutCooldown": 60
                 }
             }
+        },
+        "RdsProxyRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": "rds.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                    }
+                ]
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AmazonRDSFullAccess"
+                ]
+            }
+        },
+        "RdsProxy": {
+            "Type": "AWS::RDS::DBProxy",
+            "Properties": {
+                "DBProxyName": "my-rds-proxy",
+                "EngineFamily": "MYSQL",
+                "RoleArn": {
+                    "Fn::GetAtt": ["RdsProxyRole", "Arn"]
+                },
+                "VpcSubnetIds": [
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzAEc2SubnetId"
+                        }
+                    },
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzBEc2SubnetId"
+                        }
+                    },
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzCEc2SubnetId"
+                        }
+                    }
+                ],
+                "VpcSecurityGroupIds": [
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-SecurityGroup-PromotionsRDSEc2SecurityGroupId"
+                        }
+                    }
+                ],
+                PromotionsRDSSecretsManagerSecret
+                "Auth": [
+                    {
+                        "AuthScheme": "SECRETS",
+                        "SecretArn": {
+                            "Ref":"PromotionsRDSSecretsManagerSecret"
+                        }
+                    }
+                ],
+                "RequireTLS": false
+            }
+        },
+        "RdsProxyEndpoint": {
+            "Type": "AWS::RDS::DBProxyEndpoint",
+            "Properties": {
+                "DBProxyEndpointName": "my-proxy-endpoint",
+                "DBProxyName": {
+                    "Ref": "RdsProxy"
+                },
+                "VpcSubnetIds": [
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzAEc2SubnetId"
+                        }
+                    },
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzBEc2SubnetId"
+                        }
+                    },
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzCEc2SubnetId"
+                        }
+                    }
+                ],
+                "TargetRole": "READ_WRITE"
+            }
         }
+            
     },
     "Outputs": {
         "PromotionsRDSDBClusterEndpoint": {
