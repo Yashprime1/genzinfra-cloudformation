@@ -202,6 +202,8 @@
                 "PolicyName": { "Fn::Sub": "${AWS::StackName}-AutoScalingPolicy" },
                 "PolicyType": "TargetTrackingScaling",
                 "ResourceId": { "Fn::Sub": "cluster:${PromotionsRDSDBCluster}" },
+                "ServiceNamespace" : "rds",
+                "ScalableDimension" : "rds:cluster:ReadReplicaCount",
                 "TargetTrackingScalingPolicyConfiguration": {
                     "TargetValue": 60.0,
                     "PredefinedMetricSpecification": {
