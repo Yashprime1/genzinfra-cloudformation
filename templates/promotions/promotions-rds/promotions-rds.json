@@ -149,6 +149,68 @@
                 ]
             },
             "Type": "AWS::RDS::DBCluster"
+        },
+        "PromotionsRDSDBAutoScalingIAMRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": { "Service": [ "application-autoscaling.amazonaws.com" ] },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyName": "AutoScalingPolicy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "application-autoscaling:*",
+                                        "cloudwatch:*",
+                                        "rds:DescribeDBClusters",
+                                        "rds:ModifyDBCluster"
+                                    ],
+                                    "Resource": "*"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "PromotionsRDSDBReadApplicationAutoScalingScalableTarget": {
+            "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+            "Properties": {
+                "MaxCapacity": 5,
+                "MinCapacity": 1,
+                "ResourceId": { "Fn::Sub": "cluster:${PromotionsRDSDBCluster}" },
+                "RoleARN": { "Fn::GetAtt": [ "PromotionsRDSDBAutoScalingIAMRole", "Arn" ] },
+                "ScalableDimension": "rds:cluster:ReadReplicaCount",
+                "ServiceNamespace": "rds"
+            }
+        },
+        "PromotionsRDSDBApplicationAutoScalingScalingPolicy": {
+            "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+            "Properties": {
+                "PolicyName": { "Fn::Sub": "${AWS::StackName}-AutoScalingPolicy" },
+                "PolicyType": "TargetTrackingScaling",
+                "ResourceId": { "Fn::Sub": "cluster:${PromotionsRDSDBCluster}" },
+                "TargetTrackingScalingPolicyConfiguration": {
+                    "TargetValue": 60.0,
+                    "PredefinedMetricSpecification": {
+                        "PredefinedMetricType": "RDSReaderAverageCPUUtilization"
+                    },
+                    "ScaleInCooldown": 60,
+                    "ScaleOutCooldown": 60
+                }
+            }
         }
     },
     "Outputs": {
