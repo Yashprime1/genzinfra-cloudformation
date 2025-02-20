@@ -239,7 +239,7 @@
             "Type": "AWS::RDS::DBProxy",
             "Properties": {
                 "DBProxyName": "my-rds-proxy",
-                "EngineFamily": "MYSQL",
+                "EngineFamily": "aurora-postgresql16",
                 "RoleArn": {
                     "Fn::GetAtt": ["RdsProxyRole", "Arn"]
                 },
