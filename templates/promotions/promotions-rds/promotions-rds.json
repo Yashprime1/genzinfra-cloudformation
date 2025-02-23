@@ -286,7 +286,21 @@
                     "Ref": "RdsProxy"
                 },
                 "VpcSubnetIds": [
-                    "subnet-08c431bc2268fe13f"
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzAEc2SubnetId"
+                        }
+                    },
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzBEc2SubnetId"
+                        }
+                    },
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzCEc2SubnetId"
+                        }
+                    }
                 ],
                 "TargetRole": "READ_WRITE"
             }
