@@ -1387,11 +1387,6 @@
               ],
               "MountPoints": [
                 {
-                  "ContainerPath": "/etc/letsencrypt",
-                  "SourceVolume": "certbot-certs",
-                  "ReadOnly": false
-                },
-                {
                   "ContainerPath": "/certs",
                   "SourceVolume": "certbot-certs-for-containers",
                   "ReadOnly": false
