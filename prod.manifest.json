@@ -139,15 +139,6 @@
                         }
                       ]
                     }
-                  },
-                  {
-                    "StackName": "eu1-Promotions-Rds",
-                    "Action": "CREATE",
-                    "TemplatePath": "templates/promotions/promotions-rds/promotions-rds.json",
-                    "Parameters": {
-                      "NetworkStack": "eu1"
-                    },
-                    "StackPolicy": {}
                   }
             ]
         }

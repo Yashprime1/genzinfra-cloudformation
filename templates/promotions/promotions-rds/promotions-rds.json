@@ -281,26 +281,16 @@
         "RdsProxyEndpoint": {
             "Type": "AWS::RDS::DBProxyEndpoint",
             "Properties": {
-                "DBProxyEndpointName": "my-proxy-endpoint",
+                "DBProxyEndpointName": "my-proxy-endpoint-2",
                 "DBProxyName": {
                     "Ref": "RdsProxy"
                 },
                 "VpcSubnetIds": [
-                    {
-                        "Fn::ImportValue": {
-                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzAEc2SubnetId"
-                        }
-                    },
-                    {
-                        "Fn::ImportValue": {
-                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzBEc2SubnetId"
-                        }
-                    },
-                    {
-                        "Fn::ImportValue": {
-                            "Fn::Sub": "${NetworkStack}-PromotionRDSAzCEc2SubnetId"
-                        }
-                    }
+                    "subnet-08c431bc2268fe13f",
+                    "subnet-016a95a7d12de5661"
+                ],
+                "VpcSecurityGroupIds":[
+                    "sg-03f9f731ace63b22c"
                 ],
                 "TargetRole": "READ_WRITE"
             }
