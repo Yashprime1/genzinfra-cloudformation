@@ -1290,6 +1290,11 @@
                   "SourceVolume": "stack-name-file"
                 },
                 {
+                  "ContainerPath": "/etc/letsencrypt",
+                  "SourceVolume": "certbot-certs",
+                  "ReadOnly": false
+                },
+                {
                   "ContainerPath": "/root/recordings",
                   "ReadOnly": false,
                   "SourceVolume": "root-recordings"
@@ -1381,6 +1386,11 @@
                 }
               ],
               "MountPoints": [
+                {
+                  "ContainerPath": "/etc/letsencrypt",
+                  "SourceVolume": "certbot-certs",
+                  "ReadOnly": false
+                },
                 {
                   "ContainerPath": "/certs",
                   "SourceVolume": "certbot-certs-for-containers",
