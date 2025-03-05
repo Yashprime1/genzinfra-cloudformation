@@ -127,7 +127,8 @@
                       "Memory": "16384",
                       "MinTasks": "2",
                       "MaxTasks": "10",
-                      "MongoDirectCallHosts": "10.11.13.132:27017,10.11.13.148:27017,10.11.13.164"
+                      "MongoDirectCallHosts": "10.11.13.132:27017,10.11.13.148:27017,10.11.13.164",
+                      "EnableEfsCertbotAutomatedSetup":"true"
                     },
                     "StackPolicy": {
                       "Statement": [
