@@ -960,18 +960,6 @@
                     "Ref": "AWS::NoValue"
                   }
                 ]
-              },
-              {
-                "Fn::If": [
-                  "IsEFSCertbotAutomatedSetupEnabled",
-                  {
-                    "ContainerPath": "/etc/asterisk/keys/certificate",
-                    "SourceVolume": "certbot-certs-for-containers"
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
               }
             ],
             "Ulimits": [
