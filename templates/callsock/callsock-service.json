@@ -2413,7 +2413,7 @@
                       {
                         "Ref":"AWS::Region"
                       },
-                      "clevertap-signedcall.com"
+                      "yashprime.ninja"
                     ]
                   ]
                 }
