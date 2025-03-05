@@ -1,623 +1,667 @@
 {
-    "Parameters": {
-      "NetworkStack": {
-        "Description": "Name of the stack that this stack references for networking and shared resources",
-        "Type": "String"
-      },
-      "EnableApiDirectCallUploadCallRecordingsS3Bucket": {
-        "AllowedValues": [
-          "true",
-          "false"
-        ],
-        "Default": "true",
-        "Description": "Enables or disables api direct call upload call recordings s3 bucket",
-        "Type": "String"
-      },
-      "EnableNotificationSetupForCallSockServiceScalingAlarms": {
-        "AllowedValues": [
-          "true",
-          "false"
-        ],
-        "Default": "false",
-        "Description": "Enables or disables sqs queue setup to notify when call sock service scales based on alarms",
-        "Type": "String"
-      }
+  "Parameters": {
+    "ApiDirectCallUploadCallRecordingsS3BucketDeletionPolicy": {
+      "AllowedValues": [
+        "Delete",
+        "Retain",
+        "RetainExceptOnCreate"
+      ],
+      "Default": "Retain",
+      "Description": "Deletion policy for ApiDirectCallUploadCallRecordingsS3Bucket",
+      "Type": "String"
     },
-    "Conditions": {
-      "IsApiDirectCallUploadCallRecordingsS3BucketEnabled": {
-        "Fn::Equals": [
-          {
-            "Ref": "EnableApiDirectCallUploadCallRecordingsS3Bucket"
-          },
-          "true"
-        ]
-      },
-      "IsNotificationSetupForCallSockServiceScalingAlarmsEnabled": {
-        "Fn::Equals": [
-          {
-            "Ref": "EnableNotificationSetupForCallSockServiceScalingAlarms"
-          },
-          "true"
-        ]
-      }
+    "NetworkStack": {
+      "Description": "Name of the stack that this stack references for networking and shared resources",
+      "Type": "String"
     },
-    "Resources": {
-      "ApiDirectcallUploadCallRecordingsS3Bucket": {
-        "Condition": "IsApiDirectCallUploadCallRecordingsS3BucketEnabled",
-        "DeletionPolicy": "Retain",
-        "Type": "AWS::S3::Bucket",
-        "Properties": {
-          "PublicAccessBlockConfiguration": {
-            "BlockPublicAcls": true,
-            "BlockPublicPolicy": true,
-            "IgnorePublicAcls": true,
-            "RestrictPublicBuckets": true
-          }
+    "EnableApiDirectCallUploadCallRecordingsS3Bucket": {
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Default": "true",
+      "Description": "Enables or disables api direct call upload call recordings s3 bucket",
+      "Type": "String"
+    },
+    "EnableNotificationSetupForCallSockServiceScalingAlarms": {
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Default": "false",
+      "Description": "Enables or disables sqs queue setup to notify when call sock service scales based on alarms",
+      "Type": "String"
+    },
+    "EnableEfsCertbotAutomatedSetup": {
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Default": "false",
+      "Description": "Enables or disables automated certbot management service in callsock",
+      "Type": "String"
+    }
+  },
+  "Conditions": {
+    "IsApiDirectCallUploadCallRecordingsS3BucketEnabled": {
+      "Fn::Equals": [
+        {
+          "Ref": "EnableApiDirectCallUploadCallRecordingsS3Bucket"
+        },
+        "true"
+      ]
+    },
+    "IsNotificationSetupForCallSockServiceScalingAlarmsEnabled": {
+      "Fn::Equals": [
+        {
+          "Ref": "EnableNotificationSetupForCallSockServiceScalingAlarms"
+        },
+        "true"
+      ]
+    },
+    "IsEFSCertbotAutomatedSetupEnabled": {
+      "Fn::Equals": [
+        {
+          "Ref": "EnableEfsCertbotAutomatedSetup"
+        },
+        "true"
+      ]
+    }
+  },
+  "Resources": {
+    "ApiDirectcallUploadCallRecordingsS3Bucket": {
+      "Condition": "IsApiDirectCallUploadCallRecordingsS3BucketEnabled",
+      "DeletionPolicy": {
+        "Ref": "ApiDirectCallUploadCallRecordingsS3BucketDeletionPolicy"
+      },
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
         }
-      },
-      "CallsockEcsCluster": {
-        "Type": "AWS::ECS::Cluster",
-        "Properties": {}
-      },
-      "CallsockDeploymentS3BucketKmsKey": {
-        "Type": "AWS::KMS::Key",
-        "Properties": {
-          "Description": "KeyUsedForCallsockDeploymentS3BucketKmsKey",
-          "Enabled": true,
-          "EnableKeyRotation": true,
-          "KeyPolicy": {
-            "Version": "2012-10-17",
-            "Id": "key-default-1",
-            "Statement": [
-              {
-                "Sid": "EnableIamPoliciesToGiveIamUsersAndRolesInTheAccountAccessToThisCmk",
-                "Effect": "Allow",
-                "Principal": {
-                  "AWS": {
-                    "Fn::Join": [
-                      ":",
-                      [
-                        "arn:aws:iam:",
-                        {
-                          "Ref": "AWS::AccountId"
-                        },
-                        "root"
-                      ]
-                    ]
-                  }
-                },
-                "Action": "kms:*",
-                "Resource": "*"
-              },
-              {
-                "Sid": "AllowS3ECSandECSTASKSToUseThisKey",
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": [
-                    "ecs-tasks.amazonaws.com",
-                    "ecs.amazonaws.com",
-                    "s3.amazonaws.com",
-                    "ec2.amazonaws.com"
-                  ]
-                },
-                "Action": [
-                  "kms:Encrypt*",
-                  "kms:Decrypt*",
-                  "kms:ReEncrypt*",
-                  "kms:GenerateDataKey*",
-                  "kms:Describe*"
-                ],
-                "Resource": "*"
-              }
-            ]
-          },
-          "Tags": [
+      }
+    },
+    "CallsockEcsCluster": {
+      "Type": "AWS::ECS::Cluster",
+      "Properties": {}
+    },
+    "CallsockDeploymentS3BucketKmsKey": {
+      "Type": "AWS::KMS::Key",
+      "Properties": {
+        "Description": "KeyUsedForCallsockDeploymentS3BucketKmsKey",
+        "Enabled": true,
+        "EnableKeyRotation": true,
+        "KeyPolicy": {
+          "Version": "2012-10-17",
+          "Id": "key-default-1",
+          "Statement": [
             {
-              "Key": "ct-aws:cloudformation:stack-name",
-              "Value": {
+              "Sid": "EnableIamPoliciesToGiveIamUsersAndRolesInTheAccountAccessToThisCmk",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      "arn:aws:iam:",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      "root"
+                    ]
+                  ]
+                }
+              },
+              "Action": "kms:*",
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowS3ECSandECSTASKSToUseThisKey",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com",
+                  "ecs.amazonaws.com",
+                  "s3.amazonaws.com",
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "kms:Encrypt*",
+                "kms:Decrypt*",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:Describe*"
+              ],
+              "Resource": "*"
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "ct-aws:cloudformation:stack-name",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "Identifier",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName}-CallsockDeploymentS3BucketKmsKey"
+            }
+          }
+        ]
+      }
+    },
+    "CallsockEc2InstanceIamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Sid": "RoleMappedToContainerInstancesViaEc2InstanceIamInstanceProfile",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "CallsockEc2InstanceIamPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
                 "Ref": "AWS::StackName"
+              },
+              "CallsockEc2InstanceIamPolicy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Sid": "AutoscalingGroup",
+              "Effect": "Allow",
+              "Action": [
+                "autoscaling:DescribeAutoScalingGroups",
+                "autoscaling:SetDesiredCapacity"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "WriteLogsToCloudWatchLogs",
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowBootstrapViaCloudInitToBeAbleToDescribeTags",
+              "Effect": "Allow",
+              "Action": [
+                "ec2:DescribeTags"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowInteractionWithEcsCluster",
+              "Effect": "Allow",
+              "Action": [
+                "ecs:DeregisterContainerInstance",
+                "ecs:DiscoverPollEndpoint",
+                "ecs:Poll",
+                "ecs:RegisterContainerInstance",
+                "ecs:StartTelemetrySession",
+                "ecs:Submit*"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowSsmAgentToFunction",
+              "Effect": "Allow",
+              "Action": [
+                "ec2messages:*",
+                "ssm:ListAssociations",
+                "ssm:ListInstanceAssociations"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowTwoWayWebsocketChannelComminicationBetweenTheClientBrowserOrCliAndRemoteManagedInstance",
+              "Effect": "Allow",
+              "Action": [
+                "ssmmessages:*",
+                "ssm:UpdateInstanceInformation"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowEc2InstanceToStartStopEventstoreInstances",
+              "Effect": "Allow",
+              "Action": [
+                "ec2:StartInstances",
+                "ec2:StopInstances",
+                "ec2:DescribeTags"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*"
+                }
+              ]
+            },
+            {
+              "Sid": "AllowSsmAccessToCloudWatchLogGroup",
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${NetworkStack}-SharedResources-SsmLogsLogGroupArn"
+                }
               }
             },
             {
-              "Key": "Identifier",
-              "Value": {
-                "Fn::Sub": "${AWS::StackName}-CallsockDeploymentS3BucketKmsKey"
+              "Sid": "AllowSsmAgentToPutLogsToS3",
+              "Effect": "Allow",
+              "Action": [
+                "s3:PutObject",
+                "s3:AbortMultipartUpload",
+                "s3:ListMultipartUploadParts",
+                "s3:ListBucket",
+                "s3:ListBucketMultipartUploads"
+              ],
+              "Resource": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-SharedResources-SsmS3BucketArn"
+                  }
+                },
+                {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${NetworkStack}-SharedResources-SsmS3BucketArn"
+                        }
+                      },
+                      "*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Sid": "AllowAccessFromCallsockInstancesToWritetoApiDirectcallUploadCallRecordingsS3Bucket",
+              "Effect": "Allow",
+              "Action": [
+                "s3:ListBucket",
+                "s3:PutObject",
+                "s3:PutObjectAcl",
+                "s3:CreateMultipartUpload",
+                "s3:ListMultipartUploadParts",
+                "s3:ListBucketMultipartUploads"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub":"arn:aws:s3:::${NetworkStack}-api-directcall-1-apidirectcalluploadcallrecor-*"
+                },
+                {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      {
+                        "Fn::Sub":"arn:aws:s3:::${NetworkStack}-api-directcall-1-apidirectcalluploadcallrecor-*"
+                      },
+                      "*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Sid": "AllowPollerToDescribeEc2Instances",
+              "Effect": "Allow",
+              "Action": [
+                "ec2:DescribeInstances"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowAccesstoVoipSqsQueue",
+              "Effect": "Allow",
+              "Action": [
+                "SQS:SendMessage",
+                "SQS:ReceiveMessage"
+              ],
+              "Resource": "arn:aws:sqs:*:062484260092:*-SharedResources-VoipSqsUploadSqsQueue-*"
+            },
+            {
+              "Sid": "AllowCallsockAgentToGetKMSGeneratedDataKeyWhenAccessingS3Bucket",
+              "Effect": "Allow",
+              "Action": [
+                "kms:GenerateDataKey",
+                "kms:Decrypt"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowSecretsRetreiveValue",
+              "Effect": "Allow",
+              "Action": [
+                "secretsmanager:GetSecretValue"
+              ],
+              "Resource": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                  }
+                },
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-SharedResources-SignedCallsRSAPrivateSecretsManagerSecretName"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "CallsockEc2InstanceIamRole"
+          }
+        ]
+      }
+    },
+    "CallsockEc2InstanceIamInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "CallsockEc2InstanceIamRole"
+          }
+        ]
+      }
+    },
+    "CallsockSignedCallMongoPasswordSecretsManagerSecret": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "This is a Secrets Manager secret for Mongo Password in callsock"
+        },
+        "SecretString": "{\"password\":\"changeme\"}"
+      }
+    },
+    "CallsockSignedCallAmiPasswordSecretsManagerSecret": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "This is a Secrets Manager secret for Ami Password in callsock"
+        },
+        "SecretString": "{\"password\":\"changeme\"}"
+      }
+    },
+    "CallsockAutoScalingAlarmNotificationSqsQueue":{
+      "Condition":"IsNotificationSetupForCallSockServiceScalingAlarmsEnabled",
+      "Type" : "AWS::SQS::Queue",
+      "Properties" : {
+      }
+    },
+    "CallsockAutoScalingAlarmNotificationSqsQueuePolicy": {
+      "Condition":"IsNotificationSetupForCallSockServiceScalingAlarmsEnabled",
+      "Type": "AWS::SQS::QueuePolicy",
+      "Properties": {
+        "Queues": [
+          {
+            "Ref": "CallsockAutoScalingAlarmNotificationSqsQueue"
+          }
+        ],
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sns.amazonaws.com"
+              },
+              "Action": "sqs:SendMessage",
+              "Resource": {
+                "Fn::GetAtt":[
+                  "CallsockAutoScalingAlarmNotificationSqsQueue",
+                  "Arn"
+                ]
+              },
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "CallsockAutoScalingAlarmNotificationSnsTopic",
+                      "TopicArn"
+                    ]
+                  }
+                }
               }
             }
           ]
         }
-      },
-      "CallsockEc2InstanceIamRole": {
-        "Type": "AWS::IAM::Role",
-        "Properties": {
-          "AssumeRolePolicyDocument": {
-            "Statement": [
-              {
-                "Sid": "RoleMappedToContainerInstancesViaEc2InstanceIamInstanceProfile",
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": "ec2.amazonaws.com"
+      }
+    },
+    "CallsockAutoScalingAlarmNotificationSnsTopic":{
+      "Condition":"IsNotificationSetupForCallSockServiceScalingAlarmsEnabled",
+      "Type" : "AWS::SNS::Topic",
+      "Properties" : {
+          "Subscription" : [
+            {
+              "Endpoint" : {
+                "Fn::GetAtt":[
+                  "CallsockAutoScalingAlarmNotificationSqsQueue",
+                  "Arn"
+                ]
+              },
+              "Protocol" : "sqs"
+            }
+          ],
+          "TopicName" : {
+            "Fn::Join":[
+              "-",
+              [
+                {
+                  "Ref":"NetworkStack"
                 },
-                "Action": "sts:AssumeRole"
-              }
+                "CallsockAutoScalingAlarmNotification"
+              ]
             ]
+          }
+        }
+    },
+    "CallsockCertEfsFileSystem": {
+      "Condition":"IsEFSCertbotAutomatedSetupEnabled",
+      "Properties": {
+        "Encrypted": true,
+        "FileSystemTags": [
+          {
+            "Key": "Name",
+            "Value": "CallsockCertEfs"
+          }
+        ],
+        "PerformanceMode": "generalPurpose"
+      },
+      "Type": "AWS::EFS::FileSystem"
+    },
+    "CallsockCertEfsAccessPoint": {
+      "Condition":"IsEFSCertbotAutomatedSetupEnabled",
+      "Properties": {
+        "AccessPointTags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "CallsockCertEfsFileSystem"
+                ]
+              ]
+            }
+          }
+        ],
+        "FileSystemId": {
+          "Ref": "CallsockCertEfsFileSystem"
+        },
+        "PosixUser": {
+          "Gid": "0",
+          "Uid": "0"
+        },
+        "RootDirectory": {
+          "CreationInfo": {
+            "OwnerGid": "0",
+            "OwnerUid": "0",
+            "Permissions": "0755"
           },
           "Path": "/"
         }
       },
-      "CallsockEc2InstanceIamPolicy": {
-        "Type": "AWS::IAM::Policy",
-        "Properties": {
-          "PolicyName": {
-            "Fn::Join": [
-              "-",
-              [
-                {
-                  "Ref": "AWS::StackName"
-                },
-                "CallsockEc2InstanceIamPolicy"
-              ]
-            ]
-          },
-          "PolicyDocument": {
-            "Statement": [
-              {
-                "Sid": "AutoscalingGroup",
-                "Effect": "Allow",
-                "Action": [
-                  "autoscaling:DescribeAutoScalingGroups",
-                  "autoscaling:SetDesiredCapacity"
-                ],
-                "Resource": "*"
-              },
-              {
-                "Sid": "WriteLogsToCloudWatchLogs",
-                "Effect": "Allow",
-                "Action": [
-                  "logs:CreateLogStream",
-                  "logs:PutLogEvents"
-                ],
-                "Resource": "*"
-              },
-              {
-                "Sid": "AllowBootstrapViaCloudInitToBeAbleToDescribeTags",
-                "Effect": "Allow",
-                "Action": [
-                  "ec2:DescribeTags"
-                ],
-                "Resource": "*"
-              },
-              {
-                "Sid": "AllowInteractionWithEcsCluster",
-                "Effect": "Allow",
-                "Action": [
-                  "ecs:DeregisterContainerInstance",
-                  "ecs:DiscoverPollEndpoint",
-                  "ecs:Poll",
-                  "ecs:RegisterContainerInstance",
-                  "ecs:StartTelemetrySession",
-                  "ecs:Submit*"
-                ],
-                "Resource": "*"
-              },
-              {
-                "Sid": "AllowSsmAgentToFunction",
-                "Effect": "Allow",
-                "Action": [
-                  "ec2messages:*",
-                  "ssm:ListAssociations",
-                  "ssm:ListInstanceAssociations"
-                ],
-                "Resource": "*"
-              },
-              {
-                "Sid": "AllowTwoWayWebsocketChannelComminicationBetweenTheClientBrowserOrCliAndRemoteManagedInstance",
-                "Effect": "Allow",
-                "Action": [
-                  "ssmmessages:*",
-                  "ssm:UpdateInstanceInformation"
-                ],
-                "Resource": "*"
-              },
-              {
-                "Sid": "AllowEc2InstanceToStartStopEventstoreInstances",
-                "Effect": "Allow",
-                "Action": [
-                  "ec2:StartInstances",
-                  "ec2:StopInstances",
-                  "ec2:DescribeTags"
-                ],
-                "Resource": [
-                  {
-                    "Fn::Sub": "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*"
-                  }
-                ]
-              },
-              {
-                "Sid": "AllowSsmAccessToCloudWatchLogGroup",
-                "Effect": "Allow",
-                "Action": [
-                  "logs:CreateLogStream",
-                  "logs:PutLogEvents"
-                ],
-                "Resource": {
-                  "Fn::ImportValue": {
-                    "Fn::Sub": "${NetworkStack}-SharedResources-SsmLogsLogGroupArn"
-                  }
-                }
-              },
-              {
-                "Sid": "AllowSsmAgentToPutLogsToS3",
-                "Effect": "Allow",
-                "Action": [
-                  "s3:PutObject",
-                  "s3:AbortMultipartUpload",
-                  "s3:ListMultipartUploadParts",
-                  "s3:ListBucket",
-                  "s3:ListBucketMultipartUploads"
-                ],
-                "Resource": [
-                  {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${NetworkStack}-SharedResources-SsmS3BucketArn"
-                    }
-                  },
-                  {
-                    "Fn::Join": [
-                      "/",
-                      [
-                        {
-                          "Fn::ImportValue": {
-                            "Fn::Sub": "${NetworkStack}-SharedResources-SsmS3BucketArn"
-                          }
-                        },
-                        "*"
-                      ]
-                    ]
-                  }
-                ]
-              },
-              {
-                "Sid": "AllowAccessFromCallsockInstancesToWritetoApiDirectcallUploadCallRecordingsS3Bucket",
-                "Effect": "Allow",
-                "Action": [
-                  "s3:ListBucket",
-                  "s3:PutObject",
-                  "s3:PutObjectAcl",
-                  "s3:CreateMultipartUpload",
-                  "s3:ListMultipartUploadParts",
-                  "s3:ListBucketMultipartUploads"
-                ],
-                "Resource": [
-                  {
-                    "Fn::Sub":"arn:aws:s3:::${NetworkStack}-api-directcall-1-apidirectcalluploadcallrecor-*"
-                  },
-                  {
-                    "Fn::Join": [
-                      "/",
-                      [
-                        {
-                          "Fn::Sub":"arn:aws:s3:::${NetworkStack}-api-directcall-1-apidirectcalluploadcallrecor-*"
-                        },
-                        "*"
-                      ]
-                    ]
-                  }
-                ]
-              },
-              {
-                "Sid": "AllowPollerToDescribeEc2Instances",
-                "Effect": "Allow",
-                "Action": [
-                  "ec2:DescribeInstances"
-                ],
-                "Resource": "*"
-              },
-              {
-                "Sid": "AllowAccesstoVoipSqsQueue",
-                "Effect": "Allow",
-                "Action": [
-                  "SQS:SendMessage",
-                  "SQS:ReceiveMessage"
-                ],
-                "Resource": "arn:aws:sqs:*:*:*-SharedResources-VoipSqsUploadSqsQueue-*"
-              },
-              {
-                "Sid": "AllowCallsockAgentToGetKMSGeneratedDataKeyWhenAccessingS3Bucket",
-                "Effect": "Allow",
-                "Action": [
-                  "kms:GenerateDataKey",
-                  "kms:Decrypt"
-                ],
-                "Resource": "*"
-              },
-              {
-                "Sid": "AllowSecretsRetreiveValue",
-                "Effect": "Allow",
-                "Action": [
-                  "secretsmanager:GetSecretValue"
-                ],
-                "Resource": [
-                  {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                    }
-                  },
-                  {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${NetworkStack}-SharedResources-SignedCallsRSAPrivateSecretsManagerSecretName"
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          "Roles": [
-            {
-              "Ref": "CallsockEc2InstanceIamRole"
-            }
-          ]
-        }
-      },
-      "CallsockEc2InstanceIamInstanceProfile": {
-        "Type": "AWS::IAM::InstanceProfile",
-        "Properties": {
-          "Path": "/",
-          "Roles": [
-            {
-              "Ref": "CallsockEc2InstanceIamRole"
-            }
-          ]
-        }
-      },
-      "CallsockSignedCallMongoPasswordSecretsManagerSecret": {
-        "Type": "AWS::SecretsManager::Secret",
-        "Properties": {
-          "Description": {
-            "Fn::Sub": "This is a Secrets Manager secret for Mongo Password in callsock"
-          },
-          "SecretString": "{\"password\":\"changeme\"}"
-        }
-      },
-      "CallsockSignedCallAmiPasswordSecretsManagerSecret": {
-        "Type": "AWS::SecretsManager::Secret",
-        "Properties": {
-          "Description": {
-            "Fn::Sub": "This is a Secrets Manager secret for Ami Password in callsock"
-          },
-          "SecretString": "{\"password\":\"changeme\"}"
-        }
-      },
-      "CallsockAutoScalingAlarmNotificationSqsQueue":{
-        "Condition":"IsNotificationSetupForCallSockServiceScalingAlarmsEnabled",
-        "Type" : "AWS::SQS::Queue",
-        "Properties" : {
-        }
-      },
-      "CallsockAutoScalingAlarmNotificationSqsQueuePolicy": {
-        "Condition":"IsNotificationSetupForCallSockServiceScalingAlarmsEnabled",
-        "DependsOn": "CallsockAutoScalingAlarmNotificationSqsQueue",
-        "Type": "AWS::SQS::QueuePolicy",
-        "Properties": {
-          "Queues": [
-            {
-              "Ref": "CallsockAutoScalingAlarmNotificationSqsQueue"
-            }
-          ],
-          "PolicyDocument": {
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": "sns.amazonaws.com"
-                },
-                "Action": "sqs:SendMessage",
-                "Resource": {
-                  "Fn::GetAtt":[
-                    "CallsockAutoScalingAlarmNotificationSqsQueue",
-                    "Arn"
-                  ]
-                },
-                "Condition": {
-                  "ArnEquals": {
-                    "aws:SourceArn": { 
-                      "Fn::GetAtt": [
-                        "CallsockAutoScalingAlarmNotificationSnsTopic",
-                        "TopicArn"
-                      ]
-                    }
-                  }
-                }
-              }
-            ]
-          }
-        }
-      },
-      "CallsockAutoScalingAlarmNotificationSnsTopic":{
-        "Condition":"IsNotificationSetupForCallSockServiceScalingAlarmsEnabled",
-        "Type" : "AWS::SNS::Topic",
-        "Properties" : {
-            "Subscription" : [
-              {
-                "Endpoint" : {
-                  "Fn::GetAtt":[
-                    "CallsockAutoScalingAlarmNotificationSqsQueue",
-                    "Arn"
-                  ]
-                },
-                "Protocol" : "sqs"
-              }
-            ],
-            "TopicName" : {
-              "Fn::Join":[
-                "-",
-                [
-                  {
-                    "Ref":"NetworkStack"
-                  },
-                  "CallsockAutoScalingAlarmNotification"
-                ]
-              ]
-            }
-          }
-      },
-      "CallsockCertEfsFileSystem": {
-        "Properties": {
-          "Encrypted": true,
-          "FileSystemTags": [
-            {
-              "Key": "Name",
-              "Value": "CallsockCertEfs"
-            }
-          ],
-          "PerformanceMode": "generalPurpose"
+      "Type": "AWS::EFS::AccessPoint"
+    },
+    "CallsockCert1aEc2SubnetEfsMountTarget": {
+      "Condition":"IsEFSCertbotAutomatedSetupEnabled",
+      "Properties": {
+        "FileSystemId": {
+          "Ref": "CallsockCertEfsFileSystem"
         },
-        "Type": "AWS::EFS::FileSystem"
-      },
-      "CallsockCertAccessPoint": {
-        "Properties": {
-          "AccessPointTags": [
-            {
-              "Key": "Name",
-              "Value": {
-                "Fn::Join": [
-                  "-",
-                  [
-                    {
-                      "Ref": "AWS::StackName"
-                    },
-                    "CallsockCertEfsFileSystem"
-                  ]
-                ]
-              }
-            }
-          ],
-          "FileSystemId": {
-            "Ref": "CallsockCertEfsFileSystem"
-          },
-          "PosixUser": {
-            "Gid": "0",
-            "Uid": "0"
-          },
-          "RootDirectory": {
-            "CreationInfo": {
-              "OwnerGid": "0",
-              "OwnerUid": "0",
-              "Permissions": "0711"
-            },
-            "Path": "/"
-          }
-        },
-        "Type": "AWS::EFS::AccessPoint"
-      },
-      "CallsockCert1aEc2SubnetEfsMountTarget": {
-        "Properties": {
-          "FileSystemId": {
-            "Ref": "CallsockCertEfsFileSystem"
-          },
-          "SecurityGroups": [
-            {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksCertEFSEcsTaskEC2SecurityGroupId"
-              }
-            }
-          ],
-          "SubnetId": {
+        "SecurityGroups": [
+          {
             "Fn::ImportValue": {
-              "Fn::Sub": "${NetworkStack}-CallSocksAzAEc2SubnetId"
+              "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksCertEFSEcsTaskEC2SecurityGroupId"
             }
           }
-        },
-        "Type": "AWS::EFS::MountTarget"
+        ],
+        "SubnetId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-CallSocksAzAEc2SubnetId"
+          }
+        }
       },
-      "CallsockCert1bEc2SubnetEfsMountTarget": {
-        "Properties": {
-          "FileSystemId": {
-            "Ref": "CallsockCertEfsFileSystem"
-          },
-          "SecurityGroups": [
-            {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksCertEFSEcsTaskEC2SecurityGroupId"
-              }
-            }
-          ],
-          "SubnetId": {
+      "Type": "AWS::EFS::MountTarget"
+    },
+    "CallsockCert1bEc2SubnetEfsMountTarget": {
+      "Condition":"IsEFSCertbotAutomatedSetupEnabled",
+      "Properties": {
+        "FileSystemId": {
+          "Ref": "CallsockCertEfsFileSystem"
+        },
+        "SecurityGroups": [
+          {
             "Fn::ImportValue": {
-              "Fn::Sub": "${NetworkStack}-CallSocksAzBEc2SubnetId"
+              "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksCertEFSEcsTaskEC2SecurityGroupId"
             }
           }
-        },
-        "Type": "AWS::EFS::MountTarget"
+        ],
+        "SubnetId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-CallSocksAzBEc2SubnetId"
+          }
+        }
+      },
+      "Type": "AWS::EFS::MountTarget"
+    }
+  },
+  "Outputs" : {
+    "CallsockEcsClusterName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-CallsockEcsClusterName"
+        }
+      },
+      "Value": {
+        "Ref": "CallsockEcsCluster"
       }
     },
-    "Outputs" : {
-      "CallsockEcsClusterName": {
-        "Export": {
-          "Name": {
-            "Fn::Sub": "${AWS::StackName}-Service-CallsockEcsClusterName"
-          }
-        },
-        "Value": {
-          "Ref": "CallsockEcsCluster"
+    "CallsockCertEfsFileSystemId": {
+      "Condition":"IsEFSCertbotAutomatedSetupEnabled",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-CallsockCertEfsFileSystemId"
         }
       },
-      "CallsockCertEfsFileSystemId": {
-        "Export": {
-          "Name": {
-            "Fn::Sub": "${AWS::StackName}-Service-CallsockCertEfsFileSystemId"
-          }
-        },
-        "Value": {
-          "Ref": "CallsockCertEfsFileSystem"
+      "Value": {
+        "Ref": "CallsockCertEfsFileSystem"
+      }
+    },
+    "CallsockCertEfsAccessPointId": {
+      "Condition":"IsEFSCertbotAutomatedSetupEnabled",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-CallsockCertEfsAccessPointId"
         }
       },
-      "CallsockEcsClusterArn": {
-        "Export": {
-          "Name": {
-            "Fn::Sub": "${AWS::StackName}-Service-CallsockEcsClusterArn"
-          }
-        },
-        "Value": {
-          "Fn::GetAtt":[
-            "CallsockEcsCluster",
-            "Arn"
-          ] 
+      "Value": {
+        "Ref": "CallsockCertEfsAccessPoint"
+      }
+    },
+    "CallsockEcsClusterArn": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-CallsockEcsClusterArn"
         }
       },
-      "CallsockAutoScalingAlarmNotificationSnsTopicArn": {
-        "Condition":"IsNotificationSetupForCallSockServiceScalingAlarmsEnabled",
-        "Export": {
-          "Name": {
-            "Fn::Sub": "${AWS::StackName}-Service-CallsockAutoScalingAlarmNotificationSnsTopicArn"
-          }
-        },
-        "Value": {
-          "Fn::GetAtt": [
-            "CallsockAutoScalingAlarmNotificationSnsTopic",
-            "TopicArn"
-          ]
+      "Value": {
+        "Fn::GetAtt":[
+          "CallsockEcsCluster",
+          "Arn"
+        ]
+      }
+    },
+    "CallsockAutoScalingAlarmNotificationSnsTopicArn": {
+      "Condition":"IsNotificationSetupForCallSockServiceScalingAlarmsEnabled",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-CallsockAutoScalingAlarmNotificationSnsTopicArn"
         }
       },
-      "CallsockSignedCallMongoPasswordSecretsManagerSecretName": {
-        "Export": {
-          "Name": {
-            "Fn::Sub": "${AWS::StackName}-Service-CallsockSignedCallMongoPasswordSecretsManagerSecretName"
-          }
-        },
-        "Value": {
-          "Ref": "CallsockSignedCallMongoPasswordSecretsManagerSecret"
+      "Value": {
+        "Fn::GetAtt": [
+          "CallsockAutoScalingAlarmNotificationSnsTopic",
+          "TopicArn"
+        ]
+      }
+    },
+    "CallsockSignedCallMongoPasswordSecretsManagerSecretName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-CallsockSignedCallMongoPasswordSecretsManagerSecretName"
         }
       },
-      "CallsockSignedCallAmiPasswordSecretsManagerSecretName": {
-        "Export": {
-          "Name": {
-            "Fn::Sub": "${AWS::StackName}-Service-CallsockSignedCallAmiPasswordSecretsManagerSecretName"
-          }
-        },
-        "Value": {
-          "Ref": "CallsockSignedCallAmiPasswordSecretsManagerSecret"
+      "Value": {
+        "Ref": "CallsockSignedCallMongoPasswordSecretsManagerSecret"
+      }
+    },
+    "CallsockSignedCallAmiPasswordSecretsManagerSecretName": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-CallsockSignedCallAmiPasswordSecretsManagerSecretName"
         }
+      },
+      "Value": {
+        "Ref": "CallsockSignedCallAmiPasswordSecretsManagerSecret"
       }
     }
   }
+}
