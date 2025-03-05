@@ -712,7 +712,7 @@
                 ":",
                 [
                   {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/postgres"
+                    "Fn::Sub": "artifactory.clevertap.net/clevertap/postgres"
                   },
                   {
                     "Ref": "PostgresContainerTag"
@@ -861,7 +861,7 @@
                 ":",
                 [
                   {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/asterisk"
+                    "Fn::Sub": "artifactory.clevertap.net/clevertap/asterisk"
                   },
                   {
                     "Ref": "AsteriskContainerTag"
@@ -1350,7 +1350,7 @@
                 ":",
                 [
                   {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/callsock"
+                    "Fn::Sub": "artifactory.clevertap.net/clevertap/callsock"
                   },
                   {
                     "Ref": "ContainerTag"
@@ -1712,7 +1712,7 @@
                 ":",
                 [
                   {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/postgres"
+                    "Fn::Sub": "artifactory.clevertap.net/clevertap/postgres"
                   },
                   {
                     "Ref": "PostgresContainerTag"
@@ -1840,7 +1840,7 @@
                 ":",
                 [
                   {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/asterisk"
+                    "Fn::Sub": "artifactory.clevertap.net/clevertap/asterisk"
                   },
                   {
                     "Ref": "AsteriskContainerTag"
@@ -2321,7 +2321,7 @@
                 ":",
                 [
                   {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/callsock"
+                    "Fn::Sub": "artifactory.clevertap.net/clevertap/callsock"
                   },
                   {
                     "Ref": "ContainerTag"
@@ -2432,7 +2432,7 @@
           {
             "Name": "cert-refresher",
             "Image": {
-              "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/certbot-dns-route53:v3.2.0"
+              "Fn::Sub": "artifactory.clevertap.net/clevertap/certbot-dns-route53:v3.2.0"
             },
             "LogConfiguration": {
               "LogDriver": "splunk",
