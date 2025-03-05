@@ -1461,18 +1461,6 @@
                     "Ref": "AWS::NoValue"
                   }
                 ]
-              },
-              {
-                "Fn::If": [
-                  "IsEFSCertbotAutomatedSetupEnabled",
-                  {
-                    "ContainerPath": "/home/callsock/release/libs/certificate",
-                    "SourceVolume": "certbot-certs-for-containers"
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
               }
             ],
             "Ulimits": [
