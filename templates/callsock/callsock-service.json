@@ -1848,45 +1848,14 @@
                 ]
               ]
             },
-            "LogConfiguration": {
-              "LogDriver": "splunk",
-              "Options": {
-                "labels": "stack",
-                "splunk-format": "raw",
-                "splunk-index": "asterisk",
-                "splunk-source": "stdout",
-                "splunk-sourcetype": "stdout",
-                "splunk-url": {
-                  "Fn::Sub": "https://${NetworkStack}.splunk-hec.clevertap-internal.io"
-                },
-                "splunk-verify-connection": "false"
-              },
-              "SecretOptions": [
-                {
-                  "Name": "splunk-token",
-                  "ValueFrom": {
-                    "Fn::Join": [
-                      ":",
-                      [
-                        {
-                          "Fn::ImportValue": {
-                            "Fn::Join": [
-                              "-",
-                              [
-                                {
-                                  "Ref": "NetworkStack"
-                                },
-                                "SharedResources-SplunkTokenSecretsManagerSecret"
-                              ]
-                            ]
-                          }
-                        },
-                        "splunk-token::"
-                      ]
-                    ]
-                  }
+              "LogConfiguration":{
+                "LogDriver" :"awslogs",
+                "Options":{
+                  "awslogs-create-group":"true",
+                  "awslogs-group":"application-logs",
+                  "awslogs-region":"eu-west-1",
+                  "awslogs-stream-prefix":"asterisk-logs"
                 }
-              ]
             },
             "RepositoryCredentials": {
               "CredentialsParameter": {
@@ -2329,45 +2298,14 @@
                 ]
               ]
             },
-            "LogConfiguration": {
-              "LogDriver": "splunk",
-              "Options": {
-                "labels": "stack",
-                "splunk-format": "raw",
-                "splunk-index": "callsock-stdout",
-                "splunk-source": "stdout",
-                "splunk-sourcetype": "stdout",
-                "splunk-url": {
-                  "Fn::Sub": "https://${NetworkStack}.splunk-hec.clevertap-internal.io"
-                },
-                "splunk-verify-connection": "false"
-              },
-              "SecretOptions": [
-                {
-                  "Name": "splunk-token",
-                  "ValueFrom": {
-                    "Fn::Join": [
-                      ":",
-                      [
-                        {
-                          "Fn::ImportValue": {
-                            "Fn::Join": [
-                              "-",
-                              [
-                                {
-                                  "Ref": "NetworkStack"
-                                },
-                                "SharedResources-SplunkTokenSecretsManagerSecret"
-                              ]
-                            ]
-                          }
-                        },
-                        "splunk-token::"
-                      ]
-                    ]
-                  }
+              "LogConfiguration":{
+                "LogDriver" :"awslogs",
+                "Options":{
+                  "awslogs-create-group":"true",
+                  "awslogs-group":"application-logs-callsock",
+                  "awslogs-region":"eu-west-1",
+                  "awslogs-stream-prefix":"asterisk-logs"
                 }
-              ]
             },
             "RepositoryCredentials": {
               "CredentialsParameter": {
@@ -2434,45 +2372,14 @@
             "Image": {
               "Fn::Sub": "artifactory.clevertap.net/clevertap/certbot-dns-route53:v3.2.0"
             },
-            "LogConfiguration": {
-              "LogDriver": "splunk",
-              "Options": {
-                "labels": "stack",
-                "splunk-format": "raw",
-                "splunk-index": "asterisk",
-                "splunk-source": "certs-refresher-stdout",
-                "splunk-sourcetype": "stdout",
-                "splunk-url": {
-                  "Fn::Sub": "https://${NetworkStack}.splunk-hec.clevertap-internal.io"
-                },
-                "splunk-verify-connection": "false"
-              },
-              "SecretOptions": [
-                {
-                  "Name": "splunk-token",
-                  "ValueFrom": {
-                    "Fn::Join": [
-                      ":",
-                      [
-                        {
-                          "Fn::ImportValue": {
-                            "Fn::Join": [
-                              "-",
-                              [
-                                {
-                                  "Ref": "NetworkStack"
-                                },
-                                "SharedResources-SplunkTokenSecretsManagerSecret"
-                              ]
-                            ]
-                          }
-                        },
-                        "splunk-token::"
-                      ]
-                    ]
-                  }
+              "LogConfiguration":{
+                "LogDriver" :"awslogs",
+                "Options":{
+                  "awslogs-create-group":"true",
+                  "awslogs-group":"application-logs-cert",
+                  "awslogs-region":"eu-west-1",
+                  "awslogs-stream-prefix":"asterisk-logs"
                 }
-              ]
             },
             "RepositoryCredentials": {
               "CredentialsParameter": {
