@@ -2635,9 +2635,6 @@
           "Ref": "CallSockV4EcsTaskDefinition"
         },
         "PropagateTags": "SERVICE",
-        "ServiceName": {
-          "Ref": "AWS::StackName"
-        },
         "Tags": [
           {
             "Key": "ct-aws:cloudformation:stack-name",
