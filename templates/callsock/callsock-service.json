@@ -90,13 +90,6 @@
       "Type": "String",
       "Default": "postgres-master-1"
     },
-    "SplunkForwarderImageName": {
-      "Default": "splunk-forwarder",
-      "Type": "String"
-    },
-    "SplunkForwarderImageTag": {
-      "Type": "String"
-    },
     "CPU": {
       "Default": "8192",
       "Type": "String"
@@ -1498,69 +1491,6 @@
             ]
           },
           {
-            "Environment": [
-              {
-                "Name": "APPLICATION_NAME",
-                "Value": "asterisk"
-              },
-              {
-                "Name": "SPLUNK_START_ARGS",
-                "Value": "--accept-license"
-              },
-              {
-                "Name": "SPLUNK_PASSWORD",
-                "Value": "aliceInWonderland"
-              },
-              {
-                "Name": "SPLUNK_USER",
-                "Value": "root"
-              },
-              {
-                "Name": "STACK_NAME",
-                "Value": {
-                  "Ref": "AWS::StackName"
-                }
-              }
-            ],
-            "Image": {
-              "Fn::Join": [
-                "/",
-                [
-                  {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap"
-                  },
-                  {
-                    "Fn::Sub": "${SplunkForwarderImageName}:${SplunkForwarderImageTag}"
-                  }
-                ]
-              ]
-            },
-            "MemoryReservation": 128,
-            "MountPoints": [
-              {
-                "ContainerPath": "/var/log/asterisk",
-                "SourceVolume": "logs"
-              }
-            ],
-            "Name": "splunk-forwarder",
-            "Privileged": false,
-            "RepositoryCredentials": {
-              "CredentialsParameter": {
-                "Fn::ImportValue": {
-                  "Fn::Join": [
-                    "-",
-                    [
-                      {
-                        "Ref": "NetworkStack"
-                      },
-                      "SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                    ]
-                  ]
-                }
-              }
-            }
-          },
-          {
             "Fn::If":[
               "IsCertbotAutomatedSetupEnabled",
               {
@@ -2522,69 +2452,6 @@
                 "Protocol": "tcp"
               }
             ]
-          },
-          {
-            "Environment": [
-              {
-                "Name": "APPLICATION_NAME",
-                "Value": "asterisk"
-              },
-              {
-                "Name": "SPLUNK_START_ARGS",
-                "Value": "--accept-license"
-              },
-              {
-                "Name": "SPLUNK_PASSWORD",
-                "Value": "aliceInWonderland"
-              },
-              {
-                "Name": "SPLUNK_USER",
-                "Value": "root"
-              },
-              {
-                "Name": "STACK_NAME",
-                "Value": {
-                  "Ref": "AWS::StackName"
-                }
-              }
-            ],
-            "Image": {
-              "Fn::Join": [
-                "/",
-                [
-                  {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap"
-                  },
-                  {
-                    "Fn::Sub": "${SplunkForwarderImageName}:${SplunkForwarderImageTag}"
-                  }
-                ]
-              ]
-            },
-            "MemoryReservation": 128,
-            "MountPoints": [
-              {
-                "ContainerPath": "/var/log/asterisk",
-                "SourceVolume": "logs"
-              }
-            ],
-            "Name": "splunk-forwarder",
-            "Privileged": false,
-            "RepositoryCredentials": {
-              "CredentialsParameter": {
-                "Fn::ImportValue": {
-                  "Fn::Join": [
-                    "-",
-                    [
-                      {
-                        "Ref": "NetworkStack"
-                      },
-                      "SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                    ]
-                  ]
-                }
-              }
-            }
           },
           {
             "Name": "cert-refresher",
