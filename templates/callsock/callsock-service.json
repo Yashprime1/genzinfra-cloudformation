@@ -2658,7 +2658,7 @@
                 "Name":"DOMAIN",
                 "Value": {
                   "Fn::Join":[
-                    "."
+                    ".",
                     [
                       {
                         "Ref":"AWS::Region"
