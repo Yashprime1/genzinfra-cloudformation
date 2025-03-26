@@ -2296,11 +2296,7 @@
                 }
             },
             "RepositoryCredentials": {
-              "CredentialsParameter": {
-                "Fn::ImportValue": {
-                  "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                }
-              }
+              "CredentialsParameter": "arn:aws:secretsmanager:eu-west-1:736548753645:secret:dockercred-8zACqR"
             },
             "Name": {
               "Fn::Join": [
