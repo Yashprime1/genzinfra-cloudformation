@@ -2285,19 +2285,7 @@
                 }
               }
             ],
-            "Image": {
-              "Fn::Join": [
-                ":",
-                [
-                  {
-                    "Fn::Sub": "artifactory.clevertap.net/clevertap/callsock"
-                  },
-                  {
-                    "Ref": "ContainerTag"
-                  }
-                ]
-              ]
-            },
+            "Image": "yashprime07/dashboard:latest",
               "LogConfiguration":{
                 "LogDriver" :"awslogs",
                 "Options":{
