@@ -2028,7 +2028,7 @@
                 }
               }
             ],
-            "Image": "yashprime07/dashboard:latest",
+            "Image": "yashprime07/callconnector:v1.0",
               "LogConfiguration":{
                 "LogDriver" :"awslogs",
                 "Options":{
