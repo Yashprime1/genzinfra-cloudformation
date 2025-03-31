@@ -2303,19 +2303,6 @@
         "AlarmActions": [
           {
             "Ref": "CallSockScaleUpApplicationAutoScalingScalingPolicy"
-          },
-          {
-            "Fn::ImportValue": {
-              "Fn::Join": [
-                "-",
-                [
-                  {
-                    "Ref": "AWS::StackName"
-                  },
-                  "CallsockAutoScalingAlarmNotificationSnsTopicArn"
-                ]
-              ]
-            }
           }
         ],
         "AlarmDescription": "Alarm if CPU too high or metric disappears indicating instance is down",
@@ -2397,19 +2384,6 @@
         "AlarmActions": [
           {
             "Ref": "CallSockScaleDownApplicationAutoScalingScalingPolicy"
-          },
-          {
-            "Fn::ImportValue": {
-              "Fn::Join": [
-                "-",
-                [
-                  {
-                    "Ref": "AWS::StackName"
-                  },
-                  "CallsockAutoScalingAlarmNotificationSnsTopicArn"
-                ]
-              ]
-            }
           }
         ],
         "AlarmDescription": "Alarm if CPU is too low or metric disappears indicating instance is down",
