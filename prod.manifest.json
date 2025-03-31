@@ -129,7 +129,8 @@
                       "MinTasks": "2",
                       "MaxTasks": "10",
                       "MongoDirectCallHosts": "10.11.13.132:27017,10.11.13.148:27017,10.11.13.164",
-                      "EnableEfsCertbotAutomatedSetup":"true"
+                      "EnableEfsCertbotAutomatedSetup":"true",
+                      "EnableSetupForAutoScalingCallSockService":"true"
                     },
                     "StackPolicy": {
                       "Statement": [
