@@ -2842,7 +2842,7 @@
         "Description": "Rule to capture ECS deployment progress events and send to CallsockToAdminSignedCallStandardSqsQueue",
         "EventPattern": {
           "source": ["aws.ecs"],
-          "detail-type": ["ECS Deployment State Change"],
+          "detail-type": ["ECS Service Action"],
           "detail": {
             "clusterArn": [
               {
