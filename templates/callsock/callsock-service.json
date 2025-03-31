@@ -2835,6 +2835,35 @@
           }
         ]
       }
+    },
+    "CallSockEcsDeploymentEventRule": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "Description": "Rule to capture ECS deployment progress events and send to CallsockToAdminSignedCallStandardSqsQueue",
+        "EventPattern": {
+          "source": ["aws.ecs"],
+          "detail-type": ["ECS Deployment State Change"],
+          "detail": {
+            "clusterArn": [
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterArn"
+                }
+              }
+            ]
+          }
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${NetworkStack}-SharedResources-CallsockToAdminSignedCallStandardSqsQueueArn"
+              }
+            },
+            "Id": "EcsDeploymentEventTarget"
+          }
+        ]
+      }
     }
   }
-}
