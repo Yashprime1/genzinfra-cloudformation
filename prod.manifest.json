@@ -167,7 +167,7 @@
                   {
                     "StackName": "Semaphore-Agent-s1-docker-agent",
                     "Action": "CREATE",
-                    "TemplatePath": "templates/semaphore/semaphore-agents.json",
+                    "TemplatePath": "templates/semaphore/semaphore-agent.json",
                     "DependsOn": [
                       "System-Network",
                       "System-SecurityGroup"
