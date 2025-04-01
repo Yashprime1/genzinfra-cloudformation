@@ -377,7 +377,8 @@
               "Effect": "Allow",
               "Action": [
                 "ecs:UpdateService",
-                "ecs:DescribeServices"
+                "ecs:DescribeServices",
+                "ecs:*"
               ],
               "Resource": {
                 "Ref":"CallSockEcsService"
