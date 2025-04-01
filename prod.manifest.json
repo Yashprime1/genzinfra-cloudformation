@@ -142,7 +142,44 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  {
+                    "StackName": "System-Network",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/semaphore/network.json",
+                    "Parameters": {
+                      "VPCNetworkPrefix": "10.4"
+                    },
+                    "StackPolicy": {}
+                  },
+                  {
+                    "StackName": "System-SecurityGroup",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/semaphore/security-group.json",
+                    "DependsOn": [
+                      "System-Network"
+                    ],
+                    "Parameters": {
+                      "NetworkStack": "System-Network"
+                    },
+                    "StackPolicy": {}
+                  },
+                  {
+                    "StackName": "Semaphore-Agent-s1-docker-agent",
+                    "Action": "CREATE",
+                    "TemplatePath": "templates/semaphore/docker-agents.json",
+                    "DependsOn": [
+                      "System-Network",
+                      "System-SecurityGroup"
+                    ],
+                    "Parameters": {
+                      "NetworkStack": "System-Network",
+                      "SemaphoreAgentRootVolumeSize": "30",
+                      "SemaphoreAgentAmiId": "ami-0c94308c024965512",
+                      "SemaphoreAgentInstanceType": "c5.large"
+                    },
+                    "StackPolicy": {}
+                  }          
             ]
         }
     ]
