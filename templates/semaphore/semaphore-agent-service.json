@@ -1,0 +1,285 @@
+{
+    "Parameters": {
+      "NetworkStack": {
+        "Description": "Name of the stack that this stack references for networking",
+        "Type": "String"
+      },
+      "SemaphoreEndpoint": {
+        "Type": "String",
+        "Default": "clevertap.semaphoreci.com",
+        "Description": "Semaphore organization endpoint"
+      },
+      "SemaphoreDockerAgentsDesiredCount": {
+        "Type": "String",
+        "Description": "Semaphore Agents Count"
+      }
+    },
+    "Resources": {
+      "SemaphoreDockerAgentsEcsTaskExecutionIamRole": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "ecs-tasks.amazonaws.com"
+                  ]
+                },
+                "Action": [
+                  "sts:AssumeRole"
+                ]
+              }
+            ]
+          },
+          "Path": "/"
+        }
+      },
+      "SemaphoreDockerAgentsEcsTaskExecutionIamPolicy": {
+        "Type": "AWS::IAM::Policy",
+        "Properties": {
+          "PolicyName": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "EcsTaskExecutionIamPolicy"
+              ]
+            ]
+          },
+          "PolicyDocument": {
+            "Statement": [
+              {
+                "Sid": "AllowSecretsRetreiveValue",
+                "Effect": "Allow",
+                "Action": [
+                  "secretsmanager:GetSecretValue"
+                ],
+                "Resource": [
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${AWS::StackName}-SemaphoreAgentRegistrationTokenSecretsManagerSecretArn"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "Roles": [
+            {
+              "Ref": "SemaphoreDockerAgentsEcsTaskExecutionIamRole"
+            }
+          ]
+        }
+      },
+      "SemaphoreDockerAgentsEcsTaskIamRole": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "ecs-tasks.amazonaws.com"
+                  ]
+                },
+                "Action": [
+                  "sts:AssumeRole"
+                ]
+              }
+            ]
+          },
+          "Path": "/"
+        }
+      },
+      "SemaphoreDockerAgentsEcsTaskIamPolicy": {
+        "Type": "AWS::IAM::Policy",
+        "Properties": {
+          "PolicyName": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "TaskIamPolicy"
+              ]
+            ]
+          },
+          "PolicyDocument": {
+            "Statement": [
+              {
+                "Action": [
+                  "ssmmessages:CreateControlChannel",
+                  "ssmmessages:CreateDataChannel",
+                  "ssmmessages:OpenControlChannel",
+                  "ssmmessages:OpenDataChannel"
+                ],
+                "Effect": "Allow",
+                "Resource": "*",
+                "Sid": "AllowRunCommandsToExecuteECSCommandsInFargate"
+              },
+              {
+                "Sid": "AllowInteractionWithEcsCluster",
+                "Effect": "Allow",
+                "Action": [
+                  "ecs:DeregisterContainerInstance",
+                  "ecs:DiscoverPollEndpoint",
+                  "ecs:Poll",
+                  "ecs:RegisterContainerInstance",
+                  "ecs:StartTelemetrySession",
+                  "ecs:Submit*"
+                ],
+                "Resource": "*"
+              },
+              {
+                "Sid": "AllowSsmAgentToFunction",
+                "Effect": "Allow",
+                "Action": [
+                  "ec2messages:*",
+                  "ssm:ListAssociations",
+                  "ssm:ListInstanceAssociations"
+                ],
+                "Resource": "*"
+              },
+              {
+                "Sid": "AllowTwoWayWebsocketChannelComminicationBetweenTheClientBrowserOrCliAndRemoteManagedInstance",
+                "Effect": "Allow",
+                "Action": [
+                  "ssmmessages:*",
+                  "ssm:UpdateInstanceInformation"
+                ],
+                "Resource": "*"
+              },
+              {
+                "Sid": "AllowToDescribeEc2Instances",
+                "Effect": "Allow",
+                "Action": [
+                  "ec2:DescribeInstances"
+                ],
+                "Resource": "*"
+              }
+            ]
+          },
+          "Roles": [
+            {
+              "Ref": "SemaphoreDockerAgentsEcsTaskIamRole"
+            }
+          ]
+        }
+      },
+      "SemaphoreDockerAgentsEcsTaskDefinition":{
+        "Type":"AWS::ECS::TaskDefinition",
+        "Properties":{
+            "Family":"SemaphoreDockerAgentsEcsTaskDefinition",
+            "ContainerDefinitions":[
+                {
+                    "Environment": [
+                      {
+                        "Name" : "SEMAPHORE_AGENT_ENDPOINT",
+                        "Value" : {
+                          "Ref": "SemaphoreEndpoint"
+                        }
+                      }
+                    ],
+                    "Essential": true,
+                    "Image": "semaphoreci/agent:v2.3.0",
+                    "User":"semaphore",
+                    "MemoryReservation": "256",
+                    "Name": "SemaphoreAgent",
+                    "Privileged": false,
+                    "ReadonlyRootFilesystem": false,
+                    "Ulimits": [
+                      {
+                        "HardLimit": 983362,
+                        "Name": "nofile",
+                        "SoftLimit": 983362
+                      }
+                    ],
+                    "Secrets": [
+                      {
+                        "Name": "SEMAPHORE_AGENT_TOKEN",
+                        "ValueFrom": {
+                          "Fn::ImportValue":{
+                            "Fn::Sub": "${AWS::StackName}-SemaphoreAgentRegistrationTokenSecretsManagerSecretArn" 
+                          }
+                        }
+                      }
+                    ],
+                    "MountPoints" : [ 
+                        {
+                            "ContainerPath" : "/opt/semaphore/semaphore-agent.yml",
+                            "ReadOnly" : false,
+                            "SourceVolume" : "semaphoreagentconfig"
+                        }
+                    ]
+                  }
+            ],
+            "ExecutionRoleArn":{
+                "Ref":"SemaphoreDockerAgentsEcsTaskExecutionIamRole"
+            },
+            "TaskRoleArn":{
+                "Ref":"SemaphoreDockerAgentsEcsTaskIamRole"
+            },
+            "Volumes" : [ 
+                {
+                    "Host" : {
+                        "SourcePath" : "/opt/semaphore/semaphore-agent.yml"
+                    },
+                    "Name" : "semaphoreagentconfig"
+                }
+            ],
+            "NetworkMode":"host"
+        }
+      },
+      "SemaphoreDockerAgentsEcsService":{
+        "Type":"AWS::ECS::Service",
+        "Properties":{
+            "Cluster":{
+                "Fn::ImportValue":{
+                    "Fn::Sub": "${AWS::StackName}-SemaphoreDockerAgentsEcsClusterName"
+                }
+            },
+            "DesiredCount":{
+                "Ref":"SemaphoreDockerAgentsDesiredCount"
+            },
+            "LaunchType":"EC2",
+            "DeploymentController":{
+              "Type" :"ECS"
+            },
+            "DeploymentConfiguration": {
+                "MaximumPercent": 100,
+                "MinimumHealthyPercent": 0
+            },
+            "PlacementConstraints":[
+                {
+                    "Type":"memberOf",
+                    "Expression":{
+                        "Fn::Join":
+                            [
+                                "",
+                                [
+                                    "ec2InstanceId",
+                                    "==",
+                                    {
+                                      "Fn::ImportValue":{
+                                        "Fn::Sub": "${AWS::StackName}-SemaphoreAgentEc2InstanceId"
+                                      }
+                                    }
+                                ]
+                            ]
+                    }
+                }
+            ],
+            "TaskDefinition":{
+                "Ref":"SemaphoreDockerAgentsEcsTaskDefinition"
+            }
+        }
+      }
+    }
+  }
+  

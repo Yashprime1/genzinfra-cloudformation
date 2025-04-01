@@ -1,0 +1,343 @@
+{
+    "Parameters": {
+      "NetworkStack": {
+        "Description": "Name of the stack that this stack references for networking",
+        "Type": "String"
+      },
+      "SemaphoreAgentRootVolumeSize": {
+        "Type": "Number",
+        "Default": "30",
+        "Description": "Semaphore agent root volume size"
+      },
+      "SemaphoreAgentAmiId": {
+        "Type": "String",
+        "Description": "Semaphore Agent Ami Id"
+      },
+      "SemaphoreAgentInstanceType": {
+        "Type": "String",
+        "Description": "Semaphore Agent Instance Type"
+      }
+    },
+    "Resources": {
+      "SemaphoreAgentEc2InstanceIamRole": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Statement": [
+              {
+                "Action": "sts:AssumeRole",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "ec2.amazonaws.com"
+                }
+              }
+            ],
+            "Version": "2012-10-17"
+          },
+          "ManagedPolicyArns": [
+            {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "SemaphoreAgentEc2InstanceIamPolicy": {
+        "Type": "AWS::IAM::Policy",
+        "Properties": {
+          "PolicyDocument": {
+            "Statement": [
+              {
+                "Action": [
+                  "autoscaling:SetInstanceHealth",
+                  "autoscaling:TerminateInstanceInAutoScalingGroup"
+                ],
+                "Effect": "Allow",
+                "Resource": {
+                  "Fn::Sub": "arn:aws:autoscaling:${AWS::Region}:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/${AWS::StackName}-SemaphoreAgentAutoScalingAutoScalingGroup-*"
+                }
+              },
+              {
+                "Action": [
+                  "ec2:DescribeInstances",
+                  "kms:GenerateDataKey",
+                  "ssm:*"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              },
+              {
+                "Action": "kms:Decrypt",
+                "Effect": "Allow",
+                "Resource": {
+                  "Fn::Sub": "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/alias/aws/ssm"
+                }
+              },
+              {
+                "Action": [
+                  "cloudformation:CreateStack",
+                  "cloudformation:DeleteStack",
+                  "cloudformation:DescribeStacks",
+                  "cloudformation:DescribeStackResource",
+                  "cloudformation:UpdateStack",
+                  "cloudformation:ListStacks",
+                  "cloudformation:CreateChangeSet",
+                  "cloudformation:DeleteChangeSet",
+                  "cloudformation:DescribeChangeSet",
+                  "cloudformation:ExecuteChangeSet",
+                  "cloudformation:GetStackPolicy",
+                  "cloudformation:SetStackPolicy",
+                  "cloudformation:ValidateTemplate",
+                  "cloudformation:GetTemplate",
+                  "cloudformation:Describe*",
+                  "iam:PassRole"
+                ],
+                "Resource": "*",
+                "Effect": "Allow",
+                "Sid": "AllowCloudformationActionsAndIamPassrole"
+              },
+              {
+                "Action": [
+                  "s3:GetObject",
+                  "s3:GetObjectVersion",
+                  "s3:GetBucketVersioning",
+                  "s3:PutObject"
+                ],
+                "Resource": [
+                  "arn:aws:s3:::cfstack-init-templatess3bucket-*",
+                  "arn:aws:s3:::cfstack-init-templatess3bucket-*/*",
+                  "arn:aws:s3:::cfstack-init-sources3bucket-*",
+                  "arn:aws:s3:::cfstack-init-sources3bucket-*/*"
+                ],
+                "Effect": "Allow",
+                "Sid": "PolicyForAccessToCfstackBucket"
+              },
+              {
+                "Action": [
+                  "logs:CreateLogGroup",
+                  "logs:CreateLogStream",
+                  "logs:DescribeLogStreams",
+                  "logs:DescribeLogGroups",
+                  "logs:PutLogEvents",
+                  "logs:PutRetentionPolicy"
+                ],
+                "Effect": "Allow",
+                "Resource": {
+                  "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/semaphore/*"
+                }
+              },
+              {
+                "Action": [
+                  "secretsmanager:PutSecretValue"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              },
+              {
+                "Sid": "AllowInteractionWithEcsCluster",
+                "Effect": "Allow",
+                "Action": [
+                  "ecs:DeregisterContainerInstance",
+                  "ecs:DiscoverPollEndpoint",
+                  "ecs:Poll",
+                  "ecs:RegisterContainerInstance",
+                  "ecs:StartTelemetrySession",
+                  "ecs:Submit*"
+                ],
+                "Resource": "*"
+              },
+              {
+                "Sid": "AllowBootstrapViaCloudInitToBeAbleToDescribeTags",
+                "Effect": "Allow",
+                "Action": [
+                  "ec2:DescribeTags"
+                ],
+                "Resource": "*"
+              }
+            ],
+            "Version": "2012-10-17"
+          },
+          "PolicyName": {
+            "Fn::Sub": "${AWS::StackName}-SemaphoreAgentEc2InstanceIamPolicy"
+          },
+          "Roles": [
+            {
+              "Ref": "SemaphoreAgentEc2InstanceIamRole"
+            }
+          ]
+        }
+      },
+      "SemaphoreAgentEc2InstanceIamInstanceProfile": {
+        "Type": "AWS::IAM::InstanceProfile",
+        "Properties": {
+          "Roles": [
+            {
+              "Ref": "SemaphoreAgentEc2InstanceIamRole"
+            }
+          ]
+        }
+      },
+      "SemaphoreAgentEc2LaunchTemplate": {
+        "Type": "AWS::EC2::LaunchTemplate",
+        "Properties": {
+          "LaunchTemplateData": {
+            "BlockDeviceMappings": [
+              {
+                "DeviceName": "/dev/sda1",
+                "Ebs": {
+                  "VolumeSize": {
+                    "Ref": "SemaphoreAgentRootVolumeSize"
+                  },
+                  "VolumeType": "gp2"
+                }
+              }
+            ],
+            "IamInstanceProfile": {
+              "Arn": {
+                "Fn::GetAtt": [
+                  "SemaphoreAgentEc2InstanceIamInstanceProfile",
+                  "Arn"
+                ]
+              }
+            },
+            "ImageId": {
+              "Ref": "SemaphoreAgentAmiId"
+            },
+            "InstanceInitiatedShutdownBehavior": "terminate",
+            "InstanceType": {
+              "Ref": "SemaphoreAgentInstanceType"
+            },
+            "SecurityGroupIds": [
+              {
+                "Fn::ImportValue": "System-SecurityGroup-SemaphoreAgentEc2SecurityGroupId"
+              }
+            ],
+            "TagSpecifications": [
+              {
+                "ResourceType": "instance",
+                "Tags": [
+                  {
+                    "Key": "ct-aws:cloudformation:stack-name",
+                    "Value": {
+                      "Ref": "AWS::StackName"
+                    }
+                  },
+                  {
+                    "Key":"ecs_cluster",
+                    "Value": {
+                      "Ref": "SemaphoreDockerAgentsEcsCluster"
+                    }
+                  }
+                ]
+              },
+              {
+                "ResourceType": "volume",
+                "Tags": [
+                  {
+                    "Key": "ct-aws:cloudformation:stack-name",
+                    "Value": {
+                      "Ref": "AWS::StackName"
+                    }
+                  }
+                ]
+              }
+            ],
+            "UserData": {
+              "Fn::Base64": {
+                "Fn::Sub": "#!/bin/bash\nmkdir -p /opt/semaphore/agent && touch /opt/semaphore/semaphore-agent.yml"
+              }
+            }
+          },
+          "TagSpecifications": [
+            {
+              "ResourceType": "launch-template",
+              "Tags": [
+                {
+                  "Key": "ct-aws:cloudformation:stack-name",
+                  "Value": {
+                    "Ref": "AWS::StackName"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "SemaphoreDockerAgentsEcsCluster":{
+        "Type":"AWS::ECS::Cluster",
+        "Properties":{
+        }
+      },
+      "SemaphoreAgentRegistrationTokenSecretsManagerSecret": {
+        "Type": "AWS::SecretsManager::Secret",
+        "Properties": {
+          "Description": {
+            "Fn::Sub": "This is a Secrets Manager secret for Agent Registration"
+          },
+          "SecretString": "<replaceme>"
+        }
+      },
+      "SemaphoreDockerAgentsEc2Instance":{
+        "Type":"AWS::EC2::Instance",
+        "Properties":{
+          "LaunchTemplate":{
+            "LaunchTemplateId" : {
+              "Ref":"SemaphoreAgentEc2LaunchTemplate"
+            },
+            "Version" : {
+              "Fn::GetAtt" : [
+                "SemaphoreAgentEc2LaunchTemplate",
+                "LatestVersionNumber"
+              ]
+            }
+          },
+          "SubnetId": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${NetworkStack}-SemaphoreAgentEc2SubnetId"
+            }
+          }
+        }
+      }
+    },
+    "Outputs":{
+      "SemaphoreDockerAgentsEcsClusterName":{
+        "Export":{
+          "Name":{
+            "Fn::Sub":"${AWS::StackName}-Service-SemaphoreDockerAgentsEcsClusterName"
+          }
+        },
+        "Value":{
+          "Ref":"SemaphoreDockerAgentsEcsCluster"
+        }
+      },
+      "SemaphoreAgentEc2InstanceId":{
+        "Export":{
+          "Name":{
+            "Fn::Sub":"${AWS::StackName}-Service-SemaphoreAgentEc2InstanceId"
+          }
+        },
+        "Value":{
+          "Ref":"SemaphoreDockerAgentsEc2Instance"
+        }
+      },
+      "SemaphoreAgentRegistrationTokenSecretsManagerSecretArn": {
+        "Export": {
+          "Name": {
+            "Fn::Sub": "${AWS::StackName}-Service-SemaphoreAgentRegistrationTokenSecretsManagerSecretArn"
+          }
+        },
+        "Value": {
+          "Ref": "SemaphoreAgentRegistrationTokenSecretsManagerSecret"
+        }
+      }
+    }
+  }
+  
