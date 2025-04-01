@@ -193,28 +193,19 @@
               {
                 "DeviceName": "/dev/sda1",
                 "Ebs": {
-                  "VolumeSize": {
-                    "Ref": "SemaphoreAgentRootVolumeSize"
-                  },
+                  "VolumeSize": { "Ref": "SemaphoreAgentRootVolumeSize" },
                   "VolumeType": "gp2"
                 }
               }
             ],
             "IamInstanceProfile": {
               "Arn": {
-                "Fn::GetAtt": [
-                  "SemaphoreAgentEc2InstanceIamInstanceProfile",
-                  "Arn"
-                ]
+                "Fn::GetAtt": ["SemaphoreAgentEc2InstanceIamInstanceProfile", "Arn"]
               }
             },
-            "ImageId": {
-              "Ref": "SemaphoreAgentAmiId"
-            },
+            "ImageId": { "Ref": "SemaphoreAgentAmiId" },
             "InstanceInitiatedShutdownBehavior": "terminate",
-            "InstanceType": {
-              "Ref": "SemaphoreAgentInstanceType"
-            },
+            "InstanceType": { "Ref": "SemaphoreAgentInstanceType" },
             "SecurityGroupIds": [
               {
                 "Fn::ImportValue": "System-SecurityGroup-SemaphoreAgentEc2SecurityGroupId"
@@ -226,15 +217,11 @@
                 "Tags": [
                   {
                     "Key": "ct-aws:cloudformation:stack-name",
-                    "Value": {
-                      "Ref": "AWS::StackName"
-                    }
+                    "Value": { "Ref": "AWS::StackName" }
                   },
                   {
-                    "Key":"ecs_cluster",
-                    "Value": {
-                      "Ref": "SemaphoreDockerAgentsEcsCluster"
-                    }
+                    "Key": "ecs_cluster",
+                    "Value": { "Ref": "SemaphoreDockerAgentsEcsCluster" }
                   }
                 ]
               },
@@ -243,34 +230,45 @@
                 "Tags": [
                   {
                     "Key": "ct-aws:cloudformation:stack-name",
-                    "Value": {
-                      "Ref": "AWS::StackName"
-                    }
+                    "Value": { "Ref": "AWS::StackName" }
                   }
                 ]
               }
             ],
             "UserData": {
               "Fn::Base64": {
-                "Fn::Sub": "#!/bin/bash\nmkdir -p /opt/semaphore/agent && touch /opt/semaphore/semaphore-agent.yml"
-              }
+                "Fn::Sub": |
+                  #!/bin/bash
+                  yum install -y aws-cli jq
+      
+                  # Fetch instance metadata
+                  INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+                  AWS_REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)
+      
+                  # Get ECS cluster name from instance tag
+                  CLUSTER_NAME=$(aws ec2 describe-tags --region $AWS_REGION --filters "Name=resource-id,Values=$INSTANCE_ID" "Name=key,Values=ecs_cluster" --query 'Tags[0].Value' --output text)
+      
+                  # Configure ECS
+                  echo "ECS_CLUSTER=$CLUSTER_NAME" > /etc/ecs/ecs.config
+      
+                  # Restart ECS agent
+                  systemctl restart ecs
             }
           },
           "TagSpecifications": [
-            {
-              "ResourceType": "launch-template",
-              "Tags": [
                 {
-                  "Key": "ct-aws:cloudformation:stack-name",
-                  "Value": {
-                    "Ref": "AWS::StackName"
-                  }
+                "ResourceType": "launch-template",
+                "Tags": [
+                    {
+                    "Key": "ct-aws:cloudformation:stack-name",
+                    "Value": { "Ref": "AWS::StackName" }
+                    }
+                ]
                 }
-              ]
+            ]
             }
-          ]
         }
-      },
+      },      
       "SemaphoreDockerAgentsEcsCluster":{
         "Type":"AWS::ECS::Cluster",
         "Properties":{
