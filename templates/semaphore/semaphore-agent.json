@@ -262,18 +262,7 @@
                   ]
                 ]
                 }
-              },
-          "TagSpecifications": [
-                {
-                "ResourceType": "launch-template",
-                "Tags": [
-                    {
-                    "Key": "ct-aws:cloudformation:stack-name",
-                    "Value": { "Ref": "AWS::StackName" }
-                    }
-                ]
-                }
-            ]
+              }
             }
         }
       },      
