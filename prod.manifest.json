@@ -175,7 +175,7 @@
                     "Parameters": {
                       "NetworkStack": "System-Network",
                       "SemaphoreAgentRootVolumeSize": "30",
-                      "SemaphoreAgentAmiId": "ami-0c94308c024965512",
+                      "SemaphoreAgentAmiId": "ami-000ccf3b2856b395e",
                       "SemaphoreAgentInstanceType": "c5.large"
                     },
                     "StackPolicy": {}
