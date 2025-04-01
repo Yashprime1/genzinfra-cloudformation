@@ -237,24 +237,32 @@
             ],
             "UserData": {
               "Fn::Base64": {
-                "Fn::Sub": |
-                  #!/bin/bash
-                  yum install -y aws-cli jq
-      
-                  # Fetch instance metadata
-                  INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-                  AWS_REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)
-      
-                  # Get ECS cluster name from instance tag
-                  CLUSTER_NAME=$(aws ec2 describe-tags --region $AWS_REGION --filters "Name=resource-id,Values=$INSTANCE_ID" "Name=key,Values=ecs_cluster" --query 'Tags[0].Value' --output text)
-      
-                  # Configure ECS
-                  echo "ECS_CLUSTER=$CLUSTER_NAME" > /etc/ecs/ecs.config
-      
-                  # Restart ECS agent
-                  systemctl restart ecs
-            }
-          },
+                "Fn::Join": [
+                  "",
+                  [
+                    "#!/bin/bash\n",
+                    "yum install -y aws-cli jq\n",
+                    "\n",
+                    "# Fetch instance metadata\n",
+                    "INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)\n",
+                    "AWS_REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)\n",
+                    "\n",
+                    "# Get ECS cluster name from instance tag\n",
+                    "CLUSTER_NAME=$(aws ec2 describe-tags --region ", 
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    " --filters \"Name=resource-id,Values=$INSTANCE_ID\" \"Name=key,Values=ecs_cluster\" --query 'Tags[0].Value' --output text)\n",
+                    "\n",
+                    "# Configure ECS\n",
+                    "echo \"ECS_CLUSTER=$CLUSTER_NAME\" > /etc/ecs/ecs.config\n",
+                    "\n",
+                    "# Restart ECS agent\n",
+                    "systemctl restart ecs\n"
+                  ]
+                ]
+                }
+              },
           "TagSpecifications": [
                 {
                 "ResourceType": "launch-template",
