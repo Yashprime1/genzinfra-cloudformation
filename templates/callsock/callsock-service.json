@@ -378,11 +378,17 @@
               "Action": [
                 "ecs:UpdateService",
                 "ecs:DescribeServices",
-                "ecs:*"
               ],
               "Resource": {
                 "Ref":"CallSockEcsService"
               }
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ecs:DescribeTasks"
+              ],
+              "Resource": "*"
             },
             {
               "Sid": "AutoscalingGroup",
