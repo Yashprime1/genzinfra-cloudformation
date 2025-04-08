@@ -3036,7 +3036,7 @@
         "EnableExecuteCommand": true,
         "SchedulingStrategy": "REPLICA",
         "TaskDefinition": {
-          "Ref": "CallSockV4EcsTaskDefinition"
+          "Ref": "ScaleInMonitorEcsTaskDefinition"
         },
         "PropagateTags": "SERVICE",
         "Tags": [
