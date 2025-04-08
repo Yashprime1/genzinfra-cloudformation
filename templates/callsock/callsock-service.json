@@ -2866,7 +2866,7 @@
               {
                 "Name": "SERVICE_NAME",
                 "Value": {
-                  "Ref": "AWS::StackName"
+                  "Ref": "eu1-Callsock-1-Service-CallSockV4EcsService-2upj4pQcckdC"
                 }
               },
               {
