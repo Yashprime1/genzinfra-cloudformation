@@ -2872,7 +2872,7 @@
                 "Value":"https://sqs.eu-west-1.amazonaws.com/736548753645/eu1-SharedResources-callsock-to-admin-signedcall-sqs-queue"
               },
               {
-                "Name":"Region",
+                "Name":"REGION",
                 "Value":"eu-west-1"
               },
               {
