@@ -2846,6 +2846,233 @@
           }
         ]
       }
+    },
+    "ScaleInMonitorEcsTaskDefinition": {
+      "Type": "AWS::ECS::TaskDefinition",
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Essential": true,
+            "EntryPoint": ["/bin/bash", "-c"],
+            "Environment":[
+              {
+                "Name": "CLUSTER_NAME",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
+                  }
+                }
+              },
+              {
+                "Name": "SERVICE_NAME",
+                "Value": "scale-in-monitor"
+              },
+              {
+                "Name":"SQS_QUEUE_URL",
+                "Value":"https://sqs.eu-west-1.amazonaws.com/736548753645/eu1-SharedResources-callsock-to-admin-signedcall-sqs-queue"
+              }
+            ],
+            "Command": [
+              "LAST_PROCESSED_EVENT_ID=\"\"; while true; do echo \"Checking ECS service events at $(date)...\"; SERVICE_JSON=$(aws ecs describe-services --cluster \"$CLUSTER_NAME\" --services \"$SERVICE_NAME\" --region \"$REGION\" --query \"services[0].events\" --output json); LATEST_EVENT=$(echo \"$SERVICE_JSON\" | jq -r \".[0].message\"); LATEST_EVENT_ID=$(echo \"$SERVICE_JSON\" | jq -r \".[0].id\"); if [[ \"$LATEST_EVENT_ID\" != \"$LAST_PROCESSED_EVENT_ID\" ]]; then echo \"New event detected: $LATEST_EVENT\"; if echo \"$LATEST_EVENT\" | grep -q \"unable to scale in due to\"; then echo \"Scale-in failure detected.\"; N_TASKS=$(echo \"$LATEST_EVENT\" | grep -oP \"(\\d+) tasks under protection\" | grep -oP \"\\d+\"); if [[ -n \"$N_TASKS\" ]]; then echo \"Number of tasks under protection: $N_TASKS\"; aws sqs send-message --queue-url \"$SQS_QUEUE_URL\" --message-body \"$N_TASKS\" --region \"$REGION\"; echo \"Message sent to SQS successfully.\"; LAST_PROCESSED_EVENT_ID=\"$LATEST_EVENT_ID\"; else echo \"Failed to extract number of tasks from event.\"; fi; else echo \"Latest event is not a scale-in failure, skipping.\"; fi; else echo \"No new event to process.\"; fi; echo \"Waiting $POLL_INTERVAL seconds...\"; sleep \"$POLL_INTERVAL\"; done"
+            ],
+            "Image": "amazon/aws-cli:2.25.12",
+            "LogConfiguration":{
+              "LogDriver" :"awslogs",
+              "Options":{
+                "awslogs-create-group":"true",
+                "awslogs-group":"application-logs-callsock",
+                "awslogs-region":"eu-west-1",
+                "awslogs-stream-prefix":"asterisk-logs"
+              }
+            },
+            "RepositoryCredentials": {
+              "CredentialsParameter": "arn:aws:secretsmanager:eu-west-1:736548753645:secret:dockercred-8zACqR"
+            },
+            "Name": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "ScaleInMonitor"
+                ]
+              ]
+            },
+            "Privileged": false,
+            "ReadonlyRootFilesystem": false,
+            "MountPoints": [
+              {
+                "ContainerPath": "/etc/cfn_stackname",
+                "ReadOnly": true,
+                "SourceVolume": "stack-name-file"
+              },
+              {
+                "ContainerPath": "/root/recordings",
+                "ReadOnly": false,
+                "SourceVolume": "root-recordings"
+              },
+              {
+                "ContainerPath": "/root/dialplans",
+                "ReadOnly": false,
+                "SourceVolume": "root-dialplans"
+              },
+              {
+                "ContainerPath": "/var/log/asterisk",
+                "SourceVolume": "logs"
+              },
+              {
+                "ContainerPath": "/home/callsock/release/libs/certificate",
+                "SourceVolume": "certbot-certs-for-containers"
+              }
+            ],
+            "Ulimits": [
+              {
+                "HardLimit": 900000,
+                "Name": "nofile",
+                "SoftLimit": 900000
+              }
+            ],
+            "PortMappings": [
+              {
+                "ContainerPort": 3001,
+                "HostPort": 3001,
+                "Protocol": "tcp"
+              }
+            ]
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "CallSockEcsTaskExecutionIamRole",
+            "Arn"
+          ]
+        },
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "CallSockEcsTaskIamRole",
+            "Arn"
+          ]
+        },
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "NetworkMode": "awsvpc",
+        "Volumes": [
+          {
+            "Name": "stack-name-file"
+          },
+          {
+            "Name": "root-recordings"
+          },
+          {
+            "Name": "root-dialplans"
+          },
+          {
+            "Name": "logs"
+          },
+          {
+            "Name":"certbot-certs-for-containers"
+          },
+          {
+            "EFSVolumeConfiguration" : {
+              "AuthorizationConfig": {
+                "AccessPointId": {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${AWS::StackName}-CallsockCertEfsAccessPointId"
+                  }
+                }
+              },
+              "FilesystemId" : {
+                "Fn::ImportValue":{
+                  "Fn::Sub": "${AWS::StackName}-CallsockCertEfsFileSystemId"
+                }
+              },
+              "TransitEncryption": "ENABLED"
+            },
+            "Name":"certbot-efs-certs"
+          }     
+        ],
+        "Cpu": {
+          "Ref": "CPU"
+        },
+        "Memory": {
+          "Ref": "Memory"
+        },
+        "RequiresCompatibilities": [
+          "FARGATE"
+        ]
+      }
+    },
+    "ScaleInMonitorEcsService": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
+          }
+        },
+        "DeploymentConfiguration": {
+          "Fn::If": [
+            "IsDeploymentCircuitBreakerConfigurationEnabled",
+            {
+              "MaximumPercent": "200",
+              "MinimumHealthyPercent": "100",
+              "DeploymentCircuitBreaker": {
+                "Enable": true,
+                "Rollback": true
+              }
+            },
+            {
+              "MaximumPercent": "200",
+              "MinimumHealthyPercent": "100"
+            }
+          ]
+        },
+        "DesiredCount": {
+          "Ref": "DesiredCount"
+        },
+        "LaunchType": "FARGATE",
+        "EnableExecuteCommand": true,
+        "SchedulingStrategy": "REPLICA",
+        "TaskDefinition": {
+          "Ref": "CallSockV4EcsTaskDefinition"
+        },
+        "PropagateTags": "SERVICE",
+        "Tags": [
+          {
+            "Key": "ct-aws:cloudformation:stack-name",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ],
+        "ServiceName": "scale-in-monitor",
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "ENABLED",
+            "SecurityGroups": [
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+                }
+              }
+            ],
+            "Subnets": [
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${NetworkStack}-CallSocksAzAEc2SubnetId"
+                }
+              },
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${NetworkStack}-CallSocksAzBEc2SubnetId"
+                }
+              }
+            ]
+          }
+        }
+      }
     }
   }
 }
