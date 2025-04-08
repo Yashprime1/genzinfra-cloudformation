@@ -2877,7 +2877,7 @@
               },
               {
                 "Name":"POLL_INTERVAL",
-                "Value":"100000"
+                "Value":"10"
               }
             ],
             "Command": [
