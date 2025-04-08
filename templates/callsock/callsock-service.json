@@ -2879,7 +2879,6 @@
                 "Name":"POLL_INTERVAL",
                 "Value":"100000"
               }
-              POLL_INTERVAL
             ],
             "Command": [
               "yum update -y && yum install -y jq && LAST_PROCESSED_EVENT_ID=\"\"; while true; do echo \"Checking ECS service events at $(date)...\"; SERVICE_JSON=$(aws ecs describe-services --cluster \"$CLUSTER_NAME\" --services \"$SERVICE_NAME\" --region \"$REGION\" --query \"services[0].events\" --output json); LATEST_EVENT=$(echo \"$SERVICE_JSON\" | jq -r \".[0].message\"); LATEST_EVENT_ID=$(echo \"$SERVICE_JSON\" | jq -r \".[0].id\"); if [[ \"$LATEST_EVENT_ID\" != \"$LAST_PROCESSED_EVENT_ID\" ]]; then echo \"New event detected: $LATEST_EVENT\"; if echo \"$LATEST_EVENT\" | grep -q \"unable to scale in due to\"; then echo \"Scale-in failure detected.\"; N_TASKS=$(echo \"$LATEST_EVENT\" | grep -oP \"(\\d+) tasks under protection\" | grep -oP \"\\d+\"); if [[ -n \"$N_TASKS\" ]]; then echo \"Number of tasks under protection: $N_TASKS\"; aws sqs send-message --queue-url \"$SQS_QUEUE_URL\" --message-body \"$N_TASKS\" --region \"$REGION\"; echo \"Message sent to SQS successfully.\"; LAST_PROCESSED_EVENT_ID=\"$LATEST_EVENT_ID\"; else echo \"Failed to extract number of tasks from event.\"; fi; else echo \"Latest event is not a scale-in failure, skipping.\"; fi; else echo \"No new event to process.\"; fi; echo \"Waiting $POLL_INTERVAL seconds...\"; sleep \"$POLL_INTERVAL\"; done"
