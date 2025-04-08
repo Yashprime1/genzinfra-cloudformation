@@ -2865,9 +2865,7 @@
               },
               {
                 "Name": "SERVICE_NAME",
-                "Value": {
-                  "Ref": "eu1-Callsock-1-Service-CallSockV4EcsService-2upj4pQcckdC"
-                }
+                "Value": "eu1-Callsock-1-Service-CallSockV4EcsService-2upj4pQcckdC"
               },
               {
                 "Name":"SQS_QUEUE_URL",
