@@ -2865,7 +2865,9 @@
               },
               {
                 "Name": "SERVICE_NAME",
-                "Value": "scale-in-monitor"
+                "Value": {
+                  "Ref": "AWS::StackName"
+                }
               },
               {
                 "Name":"SQS_QUEUE_URL",
