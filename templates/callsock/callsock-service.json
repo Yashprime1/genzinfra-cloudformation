@@ -2870,6 +2870,10 @@
               {
                 "Name":"SQS_QUEUE_URL",
                 "Value":"https://sqs.eu-west-1.amazonaws.com/736548753645/eu1-SharedResources-callsock-to-admin-signedcall-sqs-queue"
+              },
+              {
+                "Name":"Region",
+                "Value":"eu-west-1"
               }
             ],
             "Command": [
