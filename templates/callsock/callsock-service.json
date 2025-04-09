@@ -1933,7 +1933,7 @@
                   {
                     "Ref": "AWS::StackName"
                   },
-                  "CallSock"
+                  "callconnector"
                 ]
               ]
             },
