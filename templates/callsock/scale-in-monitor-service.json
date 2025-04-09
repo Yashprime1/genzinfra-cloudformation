@@ -248,13 +248,6 @@
                 "awslogs-stream-prefix":"scale-in-monitor-logs"
               }
             },
-            "RepositoryCredentials": {
-              "CredentialsParameter": {
-                "Fn::ImportValue": {
-                  "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                }
-              }
-            },
             "Name": {
               "Fn::Join": [
                 "-",
