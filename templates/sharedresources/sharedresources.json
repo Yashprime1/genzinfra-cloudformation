@@ -415,6 +415,14 @@
     "VoipSqsUploadSqsQueue": {
       "Properties": {},
       "Type": "AWS::SQS::Queue"
+    },
+    "ScaleInMonitorToAdminSignedCallStandardSqsQueue": {
+      "Properties": {
+        "QueueName": {
+          "Fn::Sub": "${AWS::StackName}-scalein-monitor-to-admin-signedcall-sqs-queue"
+        }
+      },
+      "Type": "AWS::SQS::Queue"
     }
   },
   "Outputs": {
@@ -617,6 +625,29 @@
       },
       "Value": {
         "Ref": "MongoUserCredentialsSecretsManagerSecret"
+      }
+    },
+    "ScaleInMonitorToAdminSignedCallStandardSqsQueueArn": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-ScaleInMonitorToAdminSignedCallStandardSqsQueueArn"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "ScaleInMonitorToAdminSignedCallStandardSqsQueue",
+          "Arn"
+        ]
+      }
+    },
+    "ScaleInMonitorToAdminSignedCallStandardSqsQueueUrl": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-ScaleInMonitorToAdminSignedCallStandardSqsQueueUrl"
+        }
+      },
+      "Value": {
+        "Ref": "ScaleInMonitorToAdminSignedCallStandardSqsQueue"
       }
     }
   }

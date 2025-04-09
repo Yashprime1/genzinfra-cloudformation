@@ -144,42 +144,29 @@
                     }
                   },
                   {
-                    "StackName": "System-Network",
+                    "StackName": "eu1-ScaleIn-Monitor-Service",
                     "Action": "CREATE",
-                    "TemplatePath": "templates/semaphore/network.json",
+                    "TemplatePath": "templates/callsock/scale-in-monitor-service.json",
                     "Parameters": {
-                      "VPCNetworkPrefix": "10.4"
+                      "NetworkStack": "eu1",
+                      "ContainerTag": "{{ ContainerTag }}",
+                      "DesiredCount": "1",
+                      "CPU": "8192",
+                      "Memory": "16384",
+                      "MinTasks": "2",
+                      "MaxTasks": "10"
                     },
-                    "StackPolicy": {}
-                  },
-                  {
-                    "StackName": "System-SecurityGroup",
-                    "Action": "CREATE",
-                    "TemplatePath": "templates/semaphore/security-group.json",
-                    "DependsOn": [
-                      "System-Network"
-                    ],
-                    "Parameters": {
-                      "NetworkStack": "System-Network"
-                    },
-                    "StackPolicy": {}
-                  },
-                  {
-                    "StackName": "Semaphore-Agent-s1-docker-agent",
-                    "Action": "CREATE",
-                    "TemplatePath": "templates/semaphore/semaphore-agent.json",
-                    "DependsOn": [
-                      "System-Network",
-                      "System-SecurityGroup"
-                    ],
-                    "Parameters": {
-                      "NetworkStack": "System-Network",
-                      "SemaphoreAgentRootVolumeSize": "30",
-                      "SemaphoreAgentAmiId": "ami-000ccf3b2856b395e",
-                      "SemaphoreAgentInstanceType": "c5.large"
-                    },
-                    "StackPolicy": {}
-                  }          
+                    "StackPolicy": {
+                      "Statement": [
+                        {
+                          "Action": "Update:*",
+                          "Effect": "Allow",
+                          "Principal": "*",
+                          "Resource": "*"
+                        }
+                      ]
+                    }
+                  }
             ]
         }
     ]

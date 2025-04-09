@@ -3082,5 +3082,32 @@
         }
       }
     }
+  },
+  "Outputs": {
+    "CallSockEcsServiceArn": {
+      "Description": "The ARN of the CallSock ECS Service",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-CallSockEcsServiceArn"
+        }
+      },
+      "Value": {
+        "Ref": "CallSockEcsService"
+      }
+    },
+    "CallSockEcsServiceName": {
+      "Description": "The Name of the CallSock ECS Service",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-CallSockEcsServiceName"
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "CallSockEcsService",
+          "Name"
+        ]
+      }
+    }
   }
 }
