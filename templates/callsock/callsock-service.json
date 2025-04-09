@@ -2484,8 +2484,8 @@
             ],
             "PortMappings": [
               {
-                "ContainerPort": 3001,
-                "HostPort": 3001,
+                "ContainerPort": 3002,
+                "HostPort": 3002,
                 "Protocol": "tcp"
               }
             ]
