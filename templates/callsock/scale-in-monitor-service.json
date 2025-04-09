@@ -92,20 +92,6 @@
               ]
             },
             {
-              "Sid": "AllowSecretsRetreiveSplunkToken",
-              "Effect": "Allow",
-              "Action": [
-                "secretsmanager:GetSecretValue"
-              ],
-              "Resource": [
-                {
-                  "Fn::ImportValue": {
-                    "Fn::Sub": "${NetworkStack}-SharedResources-SplunkTokenSecretsManagerSecret"
-                  }
-                }
-              ]
-            },
-            {
               "Sid": "AlloLogssToCreateLogGroup",
               "Effect": "Allow",
               "Action": [
