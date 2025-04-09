@@ -4,10 +4,6 @@
       "Description": "Name of the stack that this stack references for networking and shared resources",
       "Type": "String"
     },
-    "ContainerTag": {
-      "Description": "Build Tag for the container",
-      "Type": "String"
-    },
     "DesiredCount": {
       "Default": "0",
       "Type": "Number"
