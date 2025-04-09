@@ -1,0 +1,363 @@
+{
+  "Parameters": {
+    "NetworkStack": {
+      "Description": "Name of the stack that this stack references for networking and shared resources",
+      "Type": "String"
+    },
+    "ContainerTag": {
+      "Description": "Build Tag for the container",
+      "Type": "String"
+    },
+    "DesiredCount": {
+      "Default": "0",
+      "Type": "Number"
+    },
+    "CPU": {
+      "Default": "8192",
+      "Type": "String"
+    },
+    "Memory": {
+      "Default": "16384",
+      "Type": "String"
+    },
+    "MinTasks": {
+      "Type": "String",
+      "Default": "0"
+    },
+    "MaxTasks": {
+      "Type": "String",
+      "Default": "10"
+    }
+  },
+  "Resources": {
+    "ScaleInMonitorEcsTaskExecutionIamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "ScaleInMonitorEcsTaskExecutionIamPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "ExecutionIamPolicy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Sid": "AllowSecretsRetreiveValue",
+              "Effect": "Allow",
+              "Action": [
+                "secretsmanager:GetSecretValue"
+              ],
+              "Resource": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                  }
+                }
+              ]
+            },
+            {
+              "Sid": "AllowSecretsRetreiveSplunkToken",
+              "Effect": "Allow",
+              "Action": [
+                "secretsmanager:GetSecretValue"
+              ],
+              "Resource": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-SharedResources-SplunkTokenSecretsManagerSecret"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "ScaleInMonitorEcsTaskExecutionIamRole"
+          }
+        ]
+      }
+    },
+    "ScaleInMonitorEcsTaskIamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "ScaleInMonitorEcsTaskIamPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "TaskIamPolicy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ssmmessages:CreateControlChannel",
+                "ssmmessages:CreateDataChannel",
+                "ssmmessages:OpenControlChannel",
+                "ssmmessages:OpenDataChannel"
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+              "Sid": "AllowRunCommandsToExecuteECSCommandsInFargate"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ecs:DescribeServices"
+              ],
+              "Resource": {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${NetworkStack}-Callsock-1-Service-CallSockEcsServiceArn"
+                }
+              }
+            },
+            {
+              "Sid": "AllowCallsockToPublishToCallsockToAdminSignedCallStandardSqsQueue",
+              "Effect": "Allow",
+              "Action": [
+                "sqs:SendMessage"
+              ],
+              "Resource": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-SharedResources-ScaleInMonitorToAdminSignedCallStandardSqsQueueArn"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "ScaleInMonitorEcsTaskIamRole"
+          }
+        ]
+      }
+    },
+    "ScaleInMonitorEcsTaskDefinition": {
+      "Type": "AWS::ECS::TaskDefinition",
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Essential": true,
+            "EntryPoint": ["/bin/bash", "-c"],
+            "Environment":[
+              {
+                "Name": "CLUSTER_NAME",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
+                  }
+                }
+              },
+              {
+                "Name": "SERVICE_NAME",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-Callsock-1-Service-CallSockEcsServiceName"
+                  }
+                }
+              },
+              {
+                "Name":"SQS_QUEUE_URL",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-SharedResources-ScaleInMonitorToAdminSignedCallStandardSqsQueueUrl"
+                  }
+                }
+              },
+              {
+                "Name":"REGION",
+                "Value":{
+                  "Ref":"AWS::Region"
+                }
+              },
+              {
+                "Name":"POLL_INTERVAL",
+                "Value":"10"
+              }
+            ],
+            "Command": [
+              "yum update -y && yum install -y jq && LAST_PROCESSED_EVENT_ID=\"\"; while true; do echo \"Checking ECS service events at $(date)...\"; SERVICE_JSON=$(aws ecs describe-services --cluster \"$CLUSTER_NAME\" --services \"$SERVICE_NAME\" --region \"$REGION\" --query \"services[0].events\" --output json); LATEST_EVENT=$(echo \"$SERVICE_JSON\" | jq -r \".[0].message\"); LATEST_EVENT_ID=$(echo \"$SERVICE_JSON\" | jq -r \".[0].id\"); if [[ \"$LATEST_EVENT_ID\" != \"$LAST_PROCESSED_EVENT_ID\" ]]; then echo \"New event detected: $LATEST_EVENT\"; if echo \"$LATEST_EVENT\" | grep -q \"unable to scale in due to\"; then echo \"Scale-in failure detected.\"; N_TASKS=$(echo \"$LATEST_EVENT\" | grep -oP \"(\\d+) tasks under protection\" | grep -oP \"\\d+\"); if [[ -n \"$N_TASKS\" ]]; then echo \"Number of tasks under protection: $N_TASKS\"; aws sqs send-message --queue-url \"$SQS_QUEUE_URL\" --message-body \"$N_TASKS\" --region \"$REGION\"; echo \"Message sent to SQS successfully.\"; LAST_PROCESSED_EVENT_ID=\"$LATEST_EVENT_ID\"; else echo \"Failed to extract number of tasks from event.\"; fi; else echo \"Latest event is not a scale-in failure, skipping.\"; fi; else echo \"No new event to process.\"; fi; echo \"Waiting $POLL_INTERVAL seconds...\"; sleep \"$POLL_INTERVAL\"; done"
+            ],
+            "Image": {
+               "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/aws-cli:2.25.12"
+            },
+            "LogConfiguration":{
+              "LogDriver" :"awslogs",
+              "Options":{
+                "awslogs-create-group":"true",
+                "awslogs-group":"scale-in-monitor",
+                "awslogs-region":"eu-west-1",
+                "awslogs-stream-prefix":"scale-in-monitor-logs"
+              }
+            },
+            "RepositoryCredentials": {
+              "CredentialsParameter": {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
+                }
+              }
+            },
+            "Name": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "ScaleInMonitor"
+                ]
+              ]
+            },
+            "Privileged": false,
+            "ReadonlyRootFilesystem": false,
+            "Ulimits": [
+              {
+                "HardLimit": 900000,
+                "Name": "nofile",
+                "SoftLimit": 900000
+              }
+            ]
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "ScaleInMonitorEcsTaskExecutionIamRole",
+            "Arn"
+          ]
+        },
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "ScaleInMonitorEcsTaskIamRole",
+            "Arn"
+          ]
+        },
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "NetworkMode": "awsvpc",
+        "Cpu": {
+          "Ref": "CPU"
+        },
+        "Memory": {
+          "Ref": "Memory"
+        },
+        "RequiresCompatibilities": [
+          "FARGATE"
+        ]
+      }
+    },
+    "ScaleInMonitorEcsService": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": "200",
+          "MinimumHealthyPercent": "100"
+        },
+        "DesiredCount": {
+          "Ref": "DesiredCount"
+        },
+        "LaunchType": "FARGATE",
+        "EnableExecuteCommand": true,
+        "SchedulingStrategy": "REPLICA",
+        "TaskDefinition": {
+          "Ref": "ScaleInMonitorEcsTaskDefinition"
+        },
+        "PropagateTags": "SERVICE",
+        "Tags": [
+          {
+            "Key": "ct-aws:cloudformation:stack-name",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ],
+        "ServiceName": {
+          "Ref":"AWS::StackName"
+        },
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "ENABLED",
+            "SecurityGroups": [
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${NetworkStack}-SecurityGroup-CallSocksEcsTaskEC2SecurityGroupId"
+                }
+              }
+            ],
+            "Subnets": [
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${NetworkStack}-CallSocksAzAEc2SubnetId"
+                }
+              },
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${NetworkStack}-CallSocksAzBEc2SubnetId"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
