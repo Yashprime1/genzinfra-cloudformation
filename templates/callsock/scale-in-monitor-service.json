@@ -194,7 +194,7 @@
                 "Name": "CLUSTER_NAME",
                 "Value": {
                   "Fn::ImportValue": {
-                    "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
+                    "Fn::Sub": "${NetworkStack}-Callsock-1-Service-CallSockEcsClusterName"
                   }
                 }
               },
@@ -301,7 +301,7 @@
       "Properties": {
         "Cluster": {
           "Fn::ImportValue": {
-            "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
+            "Fn::Sub": "${NetworkStack}-Callsock-1-Service-CallSockEcsClusterName"
           }
         },
         "DeploymentConfiguration": {
