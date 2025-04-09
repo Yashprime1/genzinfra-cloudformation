@@ -90,6 +90,34 @@
                   }
                 }
               ]
+            },
+            {
+              "Sid": "AllowSecretsRetreiveSplunkToken",
+              "Effect": "Allow",
+              "Action": [
+                "secretsmanager:GetSecretValue"
+              ],
+              "Resource": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-SharedResources-SplunkTokenSecretsManagerSecret"
+                  }
+                }
+              ]
+            },
+            {
+              "Sid": "AllowSecretsRetreiveSplunkToken",
+              "Effect": "Allow",
+              "Action": [
+                "logs:*"
+              ],
+              "Resource": [
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-SharedResources-SplunkTokenSecretsManagerSecret"
+                  }
+                }
+              ]
             }
           ]
         },
