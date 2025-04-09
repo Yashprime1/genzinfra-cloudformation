@@ -194,7 +194,7 @@
                 "Name": "CLUSTER_NAME",
                 "Value": {
                   "Fn::ImportValue": {
-                    "Fn::Sub": "${NetworkStack}-Callsock-1-Service-CallSockEcsClusterName"
+                    "Fn::Sub": "${NetworkStack}-Callsock-1-Service-CallsockEcsClusterName"
                   }
                 }
               },
