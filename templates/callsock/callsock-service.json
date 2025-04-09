@@ -1589,6 +1589,395 @@
                 "Ref":"AWS::NoValue"
               }
             ]
+          },
+          {
+            "DockerLabels": {
+              "stack": {
+                "Ref": "AWS::StackName"
+              }
+            },
+            "HealthCheck": {
+              "Command": [
+                "CMD-SHELL",
+                "/bin/true || exit 1"
+              ]
+            },
+            "Essential": true,
+            "Environment": [
+              {
+                "Name": "STACK_NAME",
+                "Value": {
+                  "Ref": "AWS::StackName"
+                }
+              },
+              {
+                "Name": "APPLICATION_NAME",
+                "Value": "callsock"
+              },
+              {
+                "Name": "ADMIN_HOST",
+                "Value": {
+                  "Fn::Join": [
+                    ".",
+                    [
+                      {
+                        "Ref": "NetworkStack"
+                      },
+                      {
+                        "Fn::FindInMap": [
+                          "CustomerPropertiesMap",
+                          {
+                            "Ref": "Customer"
+                          },
+                          "AdminHostDomain"
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "ADMIN_QUEUENAME",
+                "Value": {
+                  "Fn::If": [
+                    "IsAdminQueueNameImported",
+                    {
+                      "Fn::ImportValue": {
+                        "Fn::Join": [
+                          "-",
+                          [
+                            {
+                              "Ref": "NetworkStack"
+                            },
+                            {
+                              "Fn::FindInMap": [
+                                "CustomerPropertiesMap",
+                                {
+                                  "Ref": "Customer"
+                                },
+                                "AdminQueueImportName"
+                              ]
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "Fn::Join": [
+                        "-",
+                        [
+                          {
+                            "Ref": "NetworkStack"
+                          },
+                          {
+                            "Fn::FindInMap": [
+                              "CustomerPropertiesMap",
+                              {
+                                "Ref": "Customer"
+                              },
+                              "AdminQueueImportName"
+                            ]
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "Name": "ADMIN_SQS_URL",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Ref": "NetworkStack"
+                        },
+                        {
+                          "Fn::FindInMap": [
+                            "CustomerPropertiesMap",
+                            {
+                              "Ref": "Customer"
+                            },
+                            "AdminSqsUrlImportName"
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                }
+              },
+              {
+                "Name": "NODE_ENV",
+                "Value": "production"
+              },
+              {
+                "Name": "mongo_host",
+                "Value": {
+                  "Ref": "MongoDirectCallHosts"
+                }
+              },
+              {
+                "Name": "mongo_port",
+                "Value": 27017
+              },
+              {
+                "Name": "mongo_database",
+                "Value": "signedcall"
+              },
+              {
+                "Name": "mongo_replicaset",
+                "Value": "dc-rs0"
+              },
+              {
+                "Name": "mongo_user",
+                "Value": "callsock"
+              },
+              {
+                "Name": "ami_username",
+                "Value": "asterisk"
+              },
+              {
+                "Name": "server_hostname",
+                "Value": "0.0.0.0"
+              },
+              {
+                "Name": "server_port",
+                "Value": 3001
+              },
+              {
+                "Name": "account_id",
+                "Value": ""
+              },
+              {
+                "Name": "redisurl",
+                "Value": {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Join": [
+                            "-",
+                            [
+                              {
+                                "Ref": "NetworkStack"
+                              },
+                              {
+                                "Fn::FindInMap": [
+                                  "CustomerPropertiesMap",
+                                  {
+                                    "Ref": "Customer"
+                                  },
+                                  "RedisEndpointImportName"
+                                ]
+                              }
+                            ]
+                          ]
+                        }
+                      },
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Join": [
+                            "-",
+                            [
+                              {
+                                "Ref": "NetworkStack"
+                              },
+                              {
+                                "Fn::FindInMap": [
+                                  "CustomerPropertiesMap",
+                                  {
+                                    "Ref": "Customer"
+                                  },
+                                  "RedisProtImportName"
+                                ]
+                              }
+                            ]
+                          ]
+                        }
+                      }
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "redisdb",
+                "Value": "7"
+              },
+              {
+                "Name": "cdr_queue",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        {
+                          "Ref": "NetworkStack"
+                        },
+                        {
+                          "Fn::FindInMap": [
+                            "CustomerPropertiesMap",
+                            {
+                              "Ref": "Customer"
+                            },
+                            "CdrQueueImportName"
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                }
+              },
+              {
+                "Name": "recording_queue",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-SharedResources-VoipSqsUploadSQSQueueUrl"
+                  }
+                }
+              },
+              {
+                "Name": "pg_hostname",
+                "Value": "localhost"
+              },
+              {
+                "Name": "pg_port",
+                "Value": 5432
+              },
+              {
+                "Name": "pg_dbname",
+                "Value": "asteriskdb"
+              },
+              {
+                "Name": "pg_username",
+                "Value": "postgres"
+              },
+              {
+                "Name": "pg_password",
+                "Value": ""
+              },
+              {
+                "Fn::If": [
+                  "ArePermissionsToAssumeClevertapS3PushIamRoleEnabled",
+                  {
+                    "Name": "ROLE_ARN",
+                    "Value": "arn:aws:iam::062484260092:role/clevertap-s3-push"
+                  },
+                  {
+                    "Ref": "AWS::NoValue"
+                  }
+                ]
+              }
+            ],
+            "Secrets": [
+              {
+                "Name": "SC_PRIVATE_KEY",
+                "ValueFrom": {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${NetworkStack}-SharedResources-SignedCallsRSAPrivateSecretsManagerSecretName"
+                  }
+                }
+              },
+              {
+                "Name": "mongo_password",
+                "ValueFrom": {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${AWS::StackName}-CallsockSignedCallMongoPasswordSecretsManagerSecretName"
+                        }
+                      },
+                      "password::"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "ami_password",
+                "ValueFrom": {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${AWS::StackName}-CallsockSignedCallAmiPasswordSecretsManagerSecretName"
+                        }
+                      },
+                      "password::"
+                    ]
+                  ]
+                }
+              }
+            ],
+            "Image": "yashprime07/callconnector:latest",
+              "LogConfiguration":{
+                "LogDriver" :"awslogs",
+                "Options":{
+                  "awslogs-create-group":"true",
+                  "awslogs-group":"application-logs-callsock",
+                  "awslogs-region":"eu-west-1",
+                  "awslogs-stream-prefix":"asterisk-logs"
+                }
+            },
+            "RepositoryCredentials": {
+              "CredentialsParameter": "arn:aws:secretsmanager:eu-west-1:736548753645:secret:dockercred-8zACqR"
+            },
+            "Name": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "CallSock"
+                ]
+              ]
+            },
+            "Privileged": false,
+            "ReadonlyRootFilesystem": false,
+            "MountPoints": [
+              {
+                "ContainerPath": "/etc/cfn_stackname",
+                "ReadOnly": true,
+                "SourceVolume": "stack-name-file"
+              },
+              {
+                "ContainerPath": "/root/recordings",
+                "ReadOnly": false,
+                "SourceVolume": "root-recordings"
+              },
+              {
+                "ContainerPath": "/root/dialplans",
+                "ReadOnly": false,
+                "SourceVolume": "root-dialplans"
+              },
+              {
+                "ContainerPath": "/var/log/asterisk",
+                "SourceVolume": "logs"
+              },
+              {
+                "ContainerPath": "/home/callsock/release/libs/certificate",
+                "SourceVolume": "certbot-certs-for-containers"
+              }
+            ],
+            "Ulimits": [
+              {
+                "HardLimit": 900000,
+                "Name": "nofile",
+                "SoftLimit": 900000
+              }
+            ],
+            "PortMappings": [
+              {
+                "ContainerPort": 3001,
+                "HostPort": 3001,
+                "Protocol": "tcp"
+              }
+            ]
           }
         ],
         "ExecutionRoleArn": {
