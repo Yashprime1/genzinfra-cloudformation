@@ -1591,10 +1591,6 @@
               {
                 "ContainerPath": "/var/log/asterisk",
                 "SourceVolume": "logs"
-              },
-              {
-                "ContainerPath": "/home/callsock/release/libs/certificate",
-                "SourceVolume": "certbot-certs-for-containers"
               }
             ],
             "Ulimits": [
