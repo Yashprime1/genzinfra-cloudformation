@@ -2356,17 +2356,6 @@
                     }
                   }
                 ]
-            },
-            "InputTransformer": {
-              "InputPathsMap": {
-                "cluster": "$.detail.clusterArn",
-                "service": "$.detail.serviceName",
-                "status": "$.detail.eventName",
-                "reason": "$.detail.reason",
-                "deploymentId": "$.detail.deploymentId",
-                "time": "$.time"
-              },
-              "InputTemplate": "{\n  \"clusterArn\": <cluster>,\n  \"serviceName\": <service>,\n  \"deploymentStatus\": <status>,\n  \"reason\": <reason>,\n  \"deploymentId\": <deploymentId>,\n  \"eventTime\": <time>\n}"
             }
           }
         ]
