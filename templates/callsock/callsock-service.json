@@ -2325,41 +2325,15 @@
       "Properties": {
         "Name": "ECSDeploymentCompletionEventsRule",
         "Description": "Rule to capture ECS deployment completion events for callsock services",
-        "EventPattern": {
+        "EventPattern":{
           "source": ["aws.ecs"],
           "detail-type": ["ECS Deployment State Change"],
           "detail": {
-            "eventType": ["INFO", "WARN", "ERROR"],
-            "eventName": ["SERVICE_DEPLOYMENT_COMPLETED"],
-            "clusterName": [
+            "clusterArn": [
               {
                 "Fn::ImportValue": {
-                  "Fn::Join": [
-                    "-",
-                    [
-                      {
-                        "Ref": "AWS::StackName"
-                      },
-                      "CallsockEcsClusterName"
-                    ]
-                  ]
+                  "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterArn"
                 }
-              }
-            ],
-            "serviceName": [
-              {
-                "Ref": "CallSockEcsService"
-              },
-              {
-                "Fn::If": [
-                  "IsEFSCertbotAutomatedSetupEnabled",
-                  {
-                    "Ref": "CallSockV4EcsService"
-                  },
-                  {
-                    "Ref": "AWS::NoValue" 
-                  }
-                ]
               }
             ]
           }
