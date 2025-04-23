@@ -37,6 +37,35 @@
       },
       "Type": "AWS::SQS::Queue"
     },
+    "CallsockToAdminSignedCallStandardSqsQueuePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "SQS:SendMessage"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com"
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "CallsockToAdminSignedCallStandardSqsQueue",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        },
+        "Queues": [
+          {
+            "Ref": "CallsockToAdminSignedCallStandardSqsQueue"
+          }
+        ]
+      },
+      "Type": "AWS::SQS::QueuePolicy"
+    },
     "SsmOutputS3Bucket": {
       "Properties": {
         "BucketEncryption": {
