@@ -2323,7 +2323,7 @@
     "CallSockEcsDeploymentCompletionEventsRule": {
       "Type": "AWS::Events::Rule",
       "Properties": {
-        "Name": "ECS Deployment Completion Events Rule",
+        "Name": "ECSDeploymentCompletionEventsRule",
         "Description": "Rule to capture ECS deployment completion events for callsock services",
         "EventPattern": {
           "source": ["aws.ecs"],
