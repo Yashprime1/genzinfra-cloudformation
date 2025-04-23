@@ -2320,19 +2320,46 @@
         ]
       }
     },
-    "CallSockEcsDeploymentEventRule": {
+    "CallSockEcsDeploymentCompletionEventsRule": {
       "Type": "AWS::Events::Rule",
       "Properties": {
-        "Description": "Rule to capture ECS deployment progress events and send to CallsockToAdminSignedCallStandardSqsQueue",
+        "Name": "ECS Deployment Completion Events Rule",
+        "Description": "Rule to capture ECS deployment completion events for callsock services",
         "EventPattern": {
           "source": ["aws.ecs"],
-          "detail-type": ["ECS Service Action"],
+          "detail-type": ["ECS Deployment State Change"],
           "detail": {
-            "clusterArn": [
+            "eventType": ["INFO", "WARN", "ERROR"],
+            "eventName": ["SERVICE_DEPLOYMENT_COMPLETED"],
+            "clusterName": [
               {
                 "Fn::ImportValue": {
-                  "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterArn"
+                  "Fn::Join": [
+                    "-",
+                    [
+                      {
+                        "Ref": "AWS::StackName"
+                      },
+                      "CallsockEcsClusterName"
+                    ]
+                  ]
                 }
+              }
+            ],
+            "serviceName": [
+              {
+                "Ref": "CallSockEcsService"
+              },
+              {
+                "Fn::If": [
+                  "IsEFSCertbotAutomatedSetupEnabled",
+                  {
+                    "Ref": "CallSockV4EcsService"
+                  },
+                  {
+                    "Ref": "AWS::NoValue" 
+                  }
+                ]
               }
             ]
           }
@@ -2340,12 +2367,33 @@
         "State": "ENABLED",
         "Targets": [
           {
+            "Id": "ECSDeploymentEventsQueueTarget",
             "Arn": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${NetworkStack}-SharedResources-CallsockToAdminSignedCallStandardSqsQueueArn"
-              }
+                "Fn::If": [
+                  "ArePermissionsForCallSockToAdminSwiggySignedCallSqsQueueEnabled",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-SharedResources-CallsockToAdminSwiggySignedCallSqsQueueArn"
+                    }
+                  },
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${NetworkStack}-SharedResources-CallsockToAdminSignedCallStandardSqsQueueArn"
+                    }
+                  }
+                ]
             },
-            "Id": "EcsDeploymentEventTarget"
+            "InputTransformer": {
+              "InputPathsMap": {
+                "cluster": "$.detail.clusterArn",
+                "service": "$.detail.serviceName",
+                "status": "$.detail.eventName",
+                "reason": "$.detail.reason",
+                "deploymentId": "$.detail.deploymentId",
+                "time": "$.time"
+              },
+              "InputTemplate": "{\n  \"clusterArn\": <cluster>,\n  \"serviceName\": <service>,\n  \"deploymentStatus\": <status>,\n  \"reason\": <reason>,\n  \"deploymentId\": <deploymentId>,\n  \"eventTime\": <time>\n}"
+            }
           }
         ]
       }
