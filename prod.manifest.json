@@ -110,7 +110,8 @@
                     "TemplatePath": "templates/callsock/callsock.json",
                     "Parameters": {
                       "NetworkStack": "eu1",
-                      "EnableEfsCertbotAutomatedSetup":"true"
+                      "EnableEfsCertbotAutomatedSetup":"true",
+                      "EnableNotificationSetupForCallSockServiceScalingAlarms": "true"
                     },
                     "StackPolicy": {}
                   },
