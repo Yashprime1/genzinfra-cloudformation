@@ -1808,7 +1808,7 @@
               },
               {
                 "Fn::GetAtt": [
-                  "CallSockEcsService",
+                  "CallSockV4EcsService",
                   "Name"
                 ]
               }
