@@ -208,6 +208,26 @@
         },
         "true"
       ]
+    },
+    "IsEFSCertbotAutomatedSetupEnabledAndSetupForAutoScalingCallSockServiceEnabled": {
+      "Fn::And": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "EnableEfsCertbotAutomatedSetup"
+            },
+            "true"
+          ]
+        },
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "EnableSetupForAutoScalingCallSockService"
+            },
+            "true"
+          ]
+        }
+      ]
     }
   },
   "Mappings": {
