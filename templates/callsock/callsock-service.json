@@ -1882,7 +1882,7 @@
         "Namespace": "AWS/ECS",
         "Period": 60,
         "Statistic": "Average",
-        "Threshold": 50
+        "Threshold": 2500
       },
       "Type": "AWS::CloudWatch::Alarm"
     },
@@ -1976,7 +1976,7 @@
         "Namespace": "AWS/ECS",
         "Period": 60,
         "Statistic": "Average",
-        "Threshold": 30
+        "Threshold": 1000
       },
       "Type": "AWS::CloudWatch::Alarm"
     },
@@ -2117,7 +2117,7 @@
         "Namespace": "AWS/ECS",
         "Period": 60,
         "Statistic": "Average",
-        "Threshold": 50
+        "Threshold": 2500
       },
       "Type": "AWS::CloudWatch::Alarm"
     },
@@ -2211,7 +2211,7 @@
         "Namespace": "AWS/ECS",
         "Period": 60,
         "Statistic": "Average",
-        "Threshold": 30
+        "Threshold": 1000
       },
       "Type": "AWS::CloudWatch::Alarm"
     },
