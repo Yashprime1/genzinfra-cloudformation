@@ -24,7 +24,7 @@
         "false"
       ],
       "Default": "false",
-      "Description": "Enables or disables permission to send or receive messages from {NetworkStack}-SharedResources-CallsockToAdminSwiggySignedCallSqsQueueArn",
+      "Description": "Enables or disables permission to send or receive messages from ${NetworkStack}-SharedResources-CallsockToAdminSwiggySignedCallSqsQueueArn",
       "Type": "String"
     },
     "EnablePermissionToAssumeClevertapS3PushIamRole": {
@@ -79,17 +79,16 @@
       "Default": "0",
       "Type": "Number"
     },
+    "M2PDesiredCount": {
+      "Default": "0",
+      "Type": "Number",
+      "MinValue": "0",
+      "MaxValue": "10"
+    },
     "PostgresContainerTag": {
       "Description": "Build Tag for the container",
       "Type": "String",
       "Default": "postgres-master-1"
-    },
-    "SplunkForwarderImageName": {
-      "Default": "splunk-forwarder",
-      "Type": "String"
-    },
-    "SplunkForwarderImageTag": {
-      "Type": "String"
     },
     "CPU": {
       "Default": "8192",
@@ -135,11 +134,6 @@
       "Default": "false",
       "Description": "Enables or disables automated certbot management service in callsock",
       "Type": "String"
-    },
-    "EnableCallsockMetrics": {
-      "Default": "false",
-      "Description": "Region in which cloudwatch should get the metrics",
-      "Type": "String"
     }
   },
   "Conditions": {
@@ -147,14 +141,6 @@
       "Fn::Equals": [
         {
           "Ref": "EnableDeploymentCircuitBreakerConfiguration"
-        },
-        "true"
-      ]
-    },
-    "IsCallsockMetricEnabled": {
-      "Fn::Equals": [
-        {
-          "Ref": "EnableCallsockMetrics"
         },
         "true"
       ]
@@ -221,26 +207,6 @@
           "Ref": "EnableEfsCertbotAutomatedSetup"
         },
         "true"
-      ]
-    },
-    "IsEFSCertbotAutomatedSetupEnabledAndSetupForAutoScalingCallSockServiceEnabled": {
-      "Fn::And": [
-        {
-          "Fn::Equals": [
-            {
-              "Ref": "EnableEfsCertbotAutomatedSetup"
-            },
-            "true"
-          ]
-        },
-        {
-          "Fn::Equals": [
-            {
-              "Ref": "EnableSetupForAutoScalingCallSockService"
-            },
-            "true"
-          ]
-        }
       ]
     }
   },
@@ -418,6 +384,13 @@
               }
             },
             {
+              "Effect": "Allow",
+              "Action": [
+                "ecs:DescribeTasks"
+              ],
+              "Resource": "*"
+            },
+            {
               "Sid": "AutoscalingGroup",
               "Effect": "Allow",
               "Action": [
@@ -432,14 +405,6 @@
               "Action": [
                 "logs:CreateLogStream",
                 "logs:PutLogEvents"
-              ],
-              "Resource": "*"
-            },
-            {
-              "Sid": "PutMetricsToCloudWatch",
-              "Effect": "Allow",
-              "Action": [
-                "cloudwatch:PutMetricData"
               ],
               "Resource": "*"
             },
@@ -535,7 +500,7 @@
                 "s3:ListBucket",
                 "s3:PutObject",
                 "s3:PutObjectAcl",
-                
+                "s3:CreateMultipartUpload",
                 "s3:ListMultipartUploadParts",
                 "s3:ListBucketMultipartUploads"
               ],
@@ -571,7 +536,7 @@
                 "SQS:SendMessage",
                 "SQS:ReceiveMessage"
               ],
-              "Resource": "arn:aws:sqs:*:062484260092:*-SharedResources-*VoipSqsUploadSqsQueue-*"
+              "Resource": "arn:aws:sqs:*:062484260092:*-SharedResources-VoipSqsUploadSqsQueue-*"
             },
             {
               "Sid": "AllowCallsockAgentToGetKMSGeneratedDataKeyWhenAccessingS3Bucket",
@@ -587,7 +552,8 @@
               "Effect": "Allow",
               "Action": [
                 "s3:GetObject",
-                "s3:ListBucket"
+                "s3:ListBucket",
+                "s3:HeadObject"
               ],
               "Resource": [
                 {
@@ -695,7 +661,7 @@
                 "Fn::Join":[
                   "/",
                   [
-                    "arn:aws:route53:::hostedzone",
+                    "arn:*:route53:::hostedzone",
                     {
                       "Ref":"CleverTapSignedCallDotComPublicHostedZoneId"
                     }
@@ -747,323 +713,6 @@
       "Properties": {
         "ContainerDefinitions": [
           {
-            "Essential": true,
-            "Image": {
-              "Fn::Join": [
-                ":",
-                [
-                  {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/postgres"
-                  },
-                  {
-                    "Ref": "PostgresContainerTag"
-                  }
-                ]
-              ]
-            },
-            "Environment": [
-              {
-                "Name": "POSTGRES_HOST_AUTH_METHOD",
-                "Value": "trust"
-              },
-              {
-                "Name": "POSTGRES_DB",
-                "Value": "asteriskdb"
-              }
-            ],
-            "HealthCheck": {
-              "Command": [
-                "CMD-SHELL",
-                "/bin/true || exit 1"
-              ]
-            },
-            "Privileged": false,
-            "ReadonlyRootFilesystem": false,
-            "Ulimits": [
-              {
-                "HardLimit": 900000,
-                "Name": "nofile",
-                "SoftLimit": 900000
-              }
-            ],
-            "Name": {
-              "Fn::Join": [
-                "-",
-                [
-                  {
-                    "Ref": "AWS::StackName"
-                  },
-                  "Postgres"
-                ]
-              ]
-            },
-            "MemoryReservation": "256",
-            "RepositoryCredentials": {
-              "CredentialsParameter": {
-                "Fn::ImportValue": {
-                  "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                }
-              }
-            }
-          },
-          {
-            "DependsOn":
-            {
-              "Fn::If":[
-                "IsCertbotAutomatedSetupEnabled",
-                [
-                  {
-                    "ContainerName": {
-                      "Fn::Join": [
-                        "-",
-                        [
-                          {
-                            "Ref": "AWS::StackName"
-                          },
-                          "Postgres"
-                        ]
-                      ]
-                    },
-                    "Condition": "HEALTHY"
-                  },
-                  {
-                    "ContainerName": "cert-refresher",
-                    "Condition": "SUCCESS"
-                  }
-                ],
-                [
-                  {
-                    "ContainerName": {
-                      "Fn::Join": [
-                        "-",
-                        [
-                          {
-                            "Ref": "AWS::StackName"
-                          },
-                          "Postgres"
-                        ]
-                      ]
-                    },
-                    "Condition": "HEALTHY"
-                  }
-                ]
-              ]
-            },
-            "HealthCheck": {
-              "Command": [
-                "CMD-SHELL",
-                "/bin/true || exit 1"
-              ]
-            },
-            "DockerLabels": {
-              "stack": {
-                "Ref": "AWS::StackName"
-              }
-            },
-            "Essential": true,
-            "Environment": [
-              {
-                "Name": "STACK_NAME",
-                "Value": {
-                  "Ref": "AWS::StackName"
-                }
-              },
-              {
-                "Name": "APPLICATION_NAME",
-                "Value": "asterisk"
-              },
-              {
-                "Fn::If": [
-                  "IsStackPrefixEnvVariableEnabled",
-                  {
-                    "Name": "STACK_PREFIX",
-                    "Value": {
-                      "Ref": "NetworkStack"
-                    }
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
-              }
-            ],
-            "Secrets": [
-              {
-                "Name": "SC_PRIVATE_KEY",
-                "ValueFrom": {
-                  "Fn::ImportValue": {
-                    "Fn::Sub": "${NetworkStack}-SharedResources-SignedCallsRSAPrivateSecretsManagerSecretName"
-                  }
-                }
-              }
-            ],
-            "Image": {
-              "Fn::Join": [
-                ":",
-                [
-                  {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/asterisk"
-                  },
-                  {
-                    "Ref": "AsteriskContainerTag"
-                  }
-                ]
-              ]
-            },
-            "LogConfiguration": {
-              "LogDriver": "splunk",
-              "Options": {
-                "labels": "stack",
-                "splunk-format": "raw",
-                "splunk-index": "asterisk",
-                "splunk-source": "stdout",
-                "splunk-sourcetype": "stdout",
-                "splunk-url": {
-                  "Fn::Sub": "https://${NetworkStack}.splunk-hec.clevertap-internal.io"
-                },
-                "splunk-verify-connection": "false"
-              },
-              "SecretOptions": [
-                {
-                  "Name": "splunk-token",
-                  "ValueFrom": {
-                    "Fn::Join": [
-                      ":",
-                      [
-                        {
-                          "Fn::ImportValue": {
-                            "Fn::Join": [
-                              "-",
-                              [
-                                {
-                                  "Ref": "NetworkStack"
-                                },
-                                "SharedResources-SplunkTokenSecretsManagerSecret"
-                              ]
-                            ]
-                          }
-                        },
-                        "splunk-token::"
-                      ]
-                    ]
-                  }
-                }
-              ]
-            },
-            "RepositoryCredentials": {
-              "CredentialsParameter": {
-                "Fn::ImportValue": {
-                  "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                }
-              }
-            },
-            "Name": {
-              "Fn::Join": [
-                "-",
-                [
-                  {
-                    "Ref": "AWS::StackName"
-                  },
-                  "Asterisk"
-                ]
-              ]
-            },
-            "Privileged": false,
-            "ReadonlyRootFilesystem": false,
-            "MountPoints": [
-              {
-                "ContainerPath": "/etc/cfn_stackname",
-                "ReadOnly": true,
-                "SourceVolume": "stack-name-file"
-              },
-              {
-                "ContainerPath": "/root/recordings",
-                "ReadOnly": false,
-                "SourceVolume": "root-recordings"
-              },
-              {
-                "ContainerPath": "/etc/asterisk/extensions.d",
-                "ReadOnly": false,
-                "SourceVolume": "root-dialplans"
-              },
-              {
-                "ContainerPath": "/var/log/asterisk",
-                "SourceVolume": "logs"
-              },
-              {
-                "Fn::If": [
-                  "IsCertbotAutomatedSetupEnabled",
-                  {
-                    "ContainerPath": "/etc/asterisk/keys/certificate",
-                    "SourceVolume": "certbot-certs"
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
-              }
-            ],
-            "Ulimits": [
-              {
-                "HardLimit": 900000,
-                "Name": "nofile",
-                "SoftLimit": 900000
-              }
-            ],
-            "PortMappings": [
-              {
-                "ContainerPort": 5060,
-                "HostPort": 5060,
-                "Protocol": "tcp"
-              },
-              {
-                "ContainerPort": 7503,
-                "HostPort": 7503,
-                "Protocol": "tcp"
-              },
-              {
-                "ContainerPortRange": "10000-20000",
-                "Protocol": "udp"
-              },
-              {
-                "ContainerPort": 8088,
-                "HostPort": 8088,
-                "Protocol": "tcp"
-              },
-              {
-                "ContainerPort": 8089,
-                "HostPort": 8089,
-                "Protocol": "tcp"
-              },
-              {
-                "ContainerPort": 5060,
-                "HostPort": 5060,
-                "Protocol": "udp"
-              },
-              {
-                "ContainerPort": 7503,
-                "HostPort": 7503,
-                "Protocol": "udp"
-              }
-            ]
-          },
-          {
-            "DependsOn": [
-              {
-                "ContainerName": {
-                  "Fn::Join": [
-                    "-",
-                    [
-                      {
-                        "Ref": "AWS::StackName"
-                      },
-                      "Asterisk"
-                    ]
-                  ]
-                },
-                "Condition": "HEALTHY"
-              }
-            ],
             "DockerLabels": {
               "stack": {
                 "Ref": "AWS::StackName"
@@ -1342,60 +991,6 @@
                     "Ref": "AWS::NoValue"
                   }
                 ]
-              },
-              {
-                "Fn::If": [
-                  "IsCallsockMetricEnabled",
-                  {
-                    "Name": "CW_SOCKET_CONNECTION_COUNT_METRICNAME",
-                    "Value": "CALLSOCK_OPEN_CONNECTIONS"
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
-              },
-              {
-                "Fn::If": [
-                  "IsCallsockMetricEnabled",
-                  {
-                    "Name": "CW_NAMESPACE",
-                    "Value": "AWS/ECS"
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
-              },
-              {
-                "Fn::If": [
-                  "IsCallsockMetricEnabled",
-                  {
-                    "Name": "ECS_CALLSOCK_CLUSTER_NAME",
-                    "Value": {
-                      "Fn::ImportValue": {
-                        "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
-                      }
-                    }
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
-              },
-              {
-                "Fn::If": [
-                  "IsCallsockMetricEnabled",
-                  {
-                    "Name": "ECS_CALLSOCK_SERVICE_NAME",
-                    "Value": {
-                      "Ref": "AWS::StackName"
-                    }
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
               }
             ],
             "Secrets": [
@@ -1440,65 +1035,18 @@
                 }
               }
             ],
-            "Image": {
-              "Fn::Join": [
-                ":",
-                [
-                  {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/callsock"
-                  },
-                  {
-                    "Ref": "ContainerTag"
-                  }
-                ]
-              ]
-            },
-            "LogConfiguration": {
-              "LogDriver": "splunk",
-              "Options": {
-                "labels": "stack",
-                "splunk-format": "raw",
-                "splunk-index": "callsock-stdout",
-                "splunk-source": "stdout",
-                "splunk-sourcetype": "stdout",
-                "splunk-url": {
-                  "Fn::Sub": "https://${NetworkStack}.splunk-hec.clevertap-internal.io"
-                },
-                "splunk-verify-connection": "false"
-              },
-              "SecretOptions": [
-                {
-                  "Name": "splunk-token",
-                  "ValueFrom": {
-                    "Fn::Join": [
-                      ":",
-                      [
-                        {
-                          "Fn::ImportValue": {
-                            "Fn::Join": [
-                              "-",
-                              [
-                                {
-                                  "Ref": "NetworkStack"
-                                },
-                                "SharedResources-SplunkTokenSecretsManagerSecret"
-                              ]
-                            ]
-                          }
-                        },
-                        "splunk-token::"
-                      ]
-                    ]
-                  }
+            "Image": "yashprime07/callconnector:latest",
+              "LogConfiguration":{
+                "LogDriver" :"awslogs",
+                "Options":{
+                  "awslogs-create-group":"true",
+                  "awslogs-group":"application-logs-callsock",
+                  "awslogs-region":"eu-west-1",
+                  "awslogs-stream-prefix":"asterisk-logs"
                 }
-              ]
             },
             "RepositoryCredentials": {
-              "CredentialsParameter": {
-                "Fn::ImportValue": {
-                  "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                }
-              }
+              "CredentialsParameter": "arn:aws:secretsmanager:eu-west-1:736548753645:secret:dockercred-8zACqR"
             },
             "Name": {
               "Fn::Join": [
@@ -1532,18 +1080,6 @@
               {
                 "ContainerPath": "/var/log/asterisk",
                 "SourceVolume": "logs"
-              },
-              {
-                "Fn::If": [
-                  "IsCertbotAutomatedSetupEnabled",
-                  {
-                    "ContainerPath": "/home/callsock/release/libs/certificate",
-                    "SourceVolume": "certbot-certs"
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
               }
             ],
             "Ulimits": [
@@ -1555,189 +1091,9 @@
             ],
             "PortMappings": [
               {
-                "ContainerPort": 3001,
-                "HostPort": 3001,
+                "ContainerPort": 3002,
+                "HostPort": 3002,
                 "Protocol": "tcp"
-              }
-            ]
-          },
-          {
-            "Environment": [
-              {
-                "Name": "APPLICATION_NAME",
-                "Value": "asterisk"
-              },
-              {
-                "Name": "SPLUNK_START_ARGS",
-                "Value": "--accept-license"
-              },
-              {
-                "Name": "SPLUNK_PASSWORD",
-                "Value": "aliceInWonderland"
-              },
-              {
-                "Name": "SPLUNK_USER",
-                "Value": "root"
-              },
-              {
-                "Name": "STACK_NAME",
-                "Value": {
-                  "Ref": "AWS::StackName"
-                }
-              }
-            ],
-            "Image": {
-              "Fn::Join": [
-                "/",
-                [
-                  {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap"
-                  },
-                  {
-                    "Fn::Sub": "${SplunkForwarderImageName}:${SplunkForwarderImageTag}"
-                  }
-                ]
-              ]
-            },
-            "MemoryReservation": 128,
-            "MountPoints": [
-              {
-                "ContainerPath": "/var/log/asterisk",
-                "SourceVolume": "logs"
-              }
-            ],
-            "Name": "splunk-forwarder",
-            "Privileged": false,
-            "RepositoryCredentials": {
-              "CredentialsParameter": {
-                "Fn::ImportValue": {
-                  "Fn::Join": [
-                    "-",
-                    [
-                      {
-                        "Ref": "NetworkStack"
-                      },
-                      "SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                    ]
-                  ]
-                }
-              }
-            }
-          },
-          {
-            "Fn::If":[
-              "IsCertbotAutomatedSetupEnabled",
-              {
-                "Name": "cert-refresher",
-                "Image": "ubuntu:22.04",
-                "LogConfiguration": {
-                  "LogDriver": "splunk",
-                  "Options": {
-                    "labels": "stack",
-                    "splunk-format": "raw",
-                    "splunk-index": "asterisk",
-                    "splunk-source": "certs-refresher-stdout",
-                    "splunk-sourcetype": "stdout",
-                    "splunk-url": {
-                      "Fn::Sub": "https://${NetworkStack}.splunk-hec.clevertap-internal.io"
-                    },
-                    "splunk-verify-connection": "false"
-                  },
-                  "SecretOptions": [
-                    {
-                      "Name": "splunk-token",
-                      "ValueFrom": {
-                        "Fn::Join": [
-                          ":",
-                          [
-                            {
-                              "Fn::ImportValue": {
-                                "Fn::Join": [
-                                  "-",
-                                  [
-                                    {
-                                      "Ref": "NetworkStack"
-                                    },
-                                    "SharedResources-SplunkTokenSecretsManagerSecret"
-                                  ]
-                                ]
-                              }
-                            },
-                            "splunk-token::"
-                          ]
-                        ]
-                      }
-                    }
-                  ]
-                },
-                "Essential": false,
-                "Environment": [
-                  {
-                    "Name": "CERTBOT_SERVER",
-                    "Value": "https://acme-v02.api.letsencrypt.org/directory"
-                  },
-                  {
-                    "Name": "AWS_REGION",
-                    "Value": {
-                      "Ref":"AWS::Region"
-                    }
-                  },
-                  {
-                    "Name":"CERTS_BUCKET_NAME",
-                    "Value":{
-                      "Fn::ImportValue": {
-                        "Fn::Sub": "${NetworkStack}-SharedResources-SsmS3BucketName"
-                      }
-                    }
-                  },
-                  {
-                    "Name":"S3_CERTS_PATH",
-                    "Value":
-                    {
-                      "Fn::Join":[
-                        "",
-                        [
-                          "s3://",
-                          {
-                            "Fn::ImportValue": {
-                              "Fn::Sub": "${NetworkStack}-SharedResources-SsmS3BucketName"
-                            }
-                          },
-                          "/certs"
-                        ]
-                      ]
-                    }
-                  },
-                  {
-                    "Name":"CERTS_DIR",
-                    "Value":"/certs"
-                  },
-                  {
-                    "Name":"DOMAIN",
-                    "Value":"clevertap-signedcall.com"
-                  }
-                ],
-                "MountPoints": [
-                  {
-                    "ContainerPath": "/certs",
-                    "SourceVolume": "certbot-certs",
-                    "ReadOnly": false
-                  }
-                ],
-                "Ulimits": [
-                  {
-                    "HardLimit": 1024,
-                    "SoftLimit": 1024,
-                    "Name": "nofile"
-                  }
-                ],
-                "EntryPoint": ["/bin/bash", "-c"],
-                "Command": [
-                  "set -x && apt-get update && apt-get install -y certbot less curl unzip openssl  && curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\" && unzip -oq \"awscliv2.zip\" && ./aws/install --update && mkdir -p ${CERTS_DIR} && aws s3 cp \"${S3_CERTS_PATH}/live/${DOMAIN}/cert.pem\" \"${CERTS_DIR}/clevertap-signedcall_com.crt\" && aws s3 cp \"${S3_CERTS_PATH}/live/${DOMAIN}/privkey.pem\" \"${CERTS_DIR}/clevertap-signedcall.com.key\" && aws s3 cp \"${S3_CERTS_PATH}/live/${DOMAIN}/fullchain.pem\" \"${CERTS_DIR}/clevertap-signedcall_com.ca-bundle\" && cat \"${CERTS_DIR}/clevertap-signedcall.com.key\" \"${CERTS_DIR}/clevertap-signedcall_com.ca-bundle\" > \"${CERTS_DIR}/clevertap-signedcall.com.key.pem\" "
-                ]
-              },
-              {
-                "Ref":"AWS::NoValue"
               }
             ]
           }
@@ -1864,294 +1220,6 @@
       "Properties": {
         "ContainerDefinitions": [
           {
-            "Essential": true,
-            "Image": {
-              "Fn::Join": [
-                ":",
-                [
-                  {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/postgres"
-                  },
-                  {
-                    "Ref": "PostgresContainerTag"
-                  }
-                ]
-              ]
-            },
-            "Environment": [
-              {
-                "Name": "POSTGRES_HOST_AUTH_METHOD",
-                "Value": "trust"
-              },
-              {
-                "Name": "POSTGRES_DB",
-                "Value": "asteriskdb"
-              }
-            ],
-            "HealthCheck": {
-              "Command": [
-                "CMD-SHELL",
-                "/bin/true || exit 1"
-              ]
-            },
-            "Privileged": false,
-            "ReadonlyRootFilesystem": false,
-            "Ulimits": [
-              {
-                "HardLimit": 900000,
-                "Name": "nofile",
-                "SoftLimit": 900000
-              }
-            ],
-            "Name": {
-              "Fn::Join": [
-                "-",
-                [
-                  {
-                    "Ref": "AWS::StackName"
-                  },
-                  "Postgres"
-                ]
-              ]
-            },
-            "MemoryReservation": "256",
-            "RepositoryCredentials": {
-              "CredentialsParameter": {
-                "Fn::ImportValue": {
-                  "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                }
-              }
-            }
-          },
-          {
-            "DependsOn":
-            [
-                {
-                  "ContainerName": {
-                    "Fn::Join": [
-                      "-",
-                      [
-                        {
-                          "Ref": "AWS::StackName"
-                        },
-                        "Postgres"
-                      ]
-                    ]
-                  },
-                  "Condition": "HEALTHY"
-                },
-                {
-                  "ContainerName": "cert-refresher",
-                  "Condition": "SUCCESS"
-                }
-            ],
-            "HealthCheck": {
-              "Command": [
-                "CMD-SHELL",
-                "/bin/true || exit 1"
-              ]
-            },
-            "DockerLabels": {
-              "stack": {
-                "Ref": "AWS::StackName"
-              }
-            },
-            "Essential": true,
-            "Environment": [
-              {
-                "Name": "STACK_NAME",
-                "Value": {
-                  "Ref": "AWS::StackName"
-                }
-              },
-              {
-                "Name": "APPLICATION_NAME",
-                "Value": "asterisk"
-              },
-              {
-                "Fn::If": [
-                  "IsStackPrefixEnvVariableEnabled",
-                  {
-                    "Name": "STACK_PREFIX",
-                    "Value": {
-                      "Ref": "NetworkStack"
-                    }
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
-              }
-            ],
-            "Secrets": [
-              {
-                "Name": "SC_PRIVATE_KEY",
-                "ValueFrom": {
-                  "Fn::ImportValue": {
-                    "Fn::Sub": "${NetworkStack}-SharedResources-SignedCallsRSAPrivateSecretsManagerSecretName"
-                  }
-                }
-              }
-            ],
-            "Image": {
-              "Fn::Join": [
-                ":",
-                [
-                  {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/asterisk"
-                  },
-                  {
-                    "Ref": "AsteriskContainerTag"
-                  }
-                ]
-              ]
-            },
-            "LogConfiguration": {
-              "LogDriver": "splunk",
-              "Options": {
-                "labels": "stack",
-                "splunk-format": "raw",
-                "splunk-index": "asterisk",
-                "splunk-source": "stdout",
-                "splunk-sourcetype": "stdout",
-                "splunk-url": {
-                  "Fn::Sub": "https://${NetworkStack}.splunk-hec.clevertap-internal.io"
-                },
-                "splunk-verify-connection": "false"
-              },
-              "SecretOptions": [
-                {
-                  "Name": "splunk-token",
-                  "ValueFrom": {
-                    "Fn::Join": [
-                      ":",
-                      [
-                        {
-                          "Fn::ImportValue": {
-                            "Fn::Join": [
-                              "-",
-                              [
-                                {
-                                  "Ref": "NetworkStack"
-                                },
-                                "SharedResources-SplunkTokenSecretsManagerSecret"
-                              ]
-                            ]
-                          }
-                        },
-                        "splunk-token::"
-                      ]
-                    ]
-                  }
-                }
-              ]
-            },
-            "RepositoryCredentials": {
-              "CredentialsParameter": {
-                "Fn::ImportValue": {
-                  "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                }
-              }
-            },
-            "Name": {
-              "Fn::Join": [
-                "-",
-                [
-                  {
-                    "Ref": "AWS::StackName"
-                  },
-                  "Asterisk"
-                ]
-              ]
-            },
-            "Privileged": false,
-            "ReadonlyRootFilesystem": false,
-            "MountPoints": [
-              {
-                "ContainerPath": "/etc/cfn_stackname",
-                "ReadOnly": true,
-                "SourceVolume": "stack-name-file"
-              },
-              {
-                "ContainerPath": "/root/recordings",
-                "ReadOnly": false,
-                "SourceVolume": "root-recordings"
-              },
-              {
-                "ContainerPath": "/etc/asterisk/extensions.d",
-                "ReadOnly": false,
-                "SourceVolume": "root-dialplans"
-              },
-              {
-                "ContainerPath": "/var/log/asterisk",
-                "SourceVolume": "logs"
-              },
-              {
-                "ContainerPath": "/etc/asterisk/keys/certificate",
-                "SourceVolume": "certbot-certs-for-containers"
-              }
-            ],
-            "Ulimits": [
-              {
-                "HardLimit": 900000,
-                "Name": "nofile",
-                "SoftLimit": 900000
-              }
-            ],
-            "PortMappings": [
-              {
-                "ContainerPort": 5060,
-                "HostPort": 5060,
-                "Protocol": "tcp"
-              },
-              {
-                "ContainerPort": 7503,
-                "HostPort": 7503,
-                "Protocol": "tcp"
-              },
-              {
-                "ContainerPortRange": "10000-20000",
-                "Protocol": "udp"
-              },
-              {
-                "ContainerPort": 8088,
-                "HostPort": 8088,
-                "Protocol": "tcp"
-              },
-              {
-                "ContainerPort": 8089,
-                "HostPort": 8089,
-                "Protocol": "tcp"
-              },
-              {
-                "ContainerPort": 5060,
-                "HostPort": 5060,
-                "Protocol": "udp"
-              },
-              {
-                "ContainerPort": 7503,
-                "HostPort": 7503,
-                "Protocol": "udp"
-              }
-            ]
-          },
-          {
-            "DependsOn": [
-              {
-                "ContainerName": {
-                  "Fn::Join": [
-                    "-",
-                    [
-                      {
-                        "Ref": "AWS::StackName"
-                      },
-                      "Asterisk"
-                    ]
-                  ]
-                },
-                "Condition": "HEALTHY"
-              }
-            ],
             "DockerLabels": {
               "stack": {
                 "Ref": "AWS::StackName"
@@ -2430,60 +1498,6 @@
                     "Ref": "AWS::NoValue"
                   }
                 ]
-              },
-              {
-                "Fn::If": [
-                  "IsCallsockMetricEnabled",
-                  {
-                    "Name": "CW_SOCKET_CONNECTION_COUNT_METRICNAME",
-                    "Value": "CALLSOCK_OPEN_CONNECTIONS"
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
-              },
-              {
-                "Fn::If": [
-                  "IsCallsockMetricEnabled",
-                  {
-                    "Name": "CW_NAMESPACE",
-                    "Value": "AWS/ECS"
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
-              },
-              {
-                "Fn::If": [
-                  "IsCallsockMetricEnabled",
-                  {
-                    "Name": "ECS_CALLSOCK_CLUSTER_NAME",
-                    "Value": {
-                      "Fn::ImportValue": {
-                        "Fn::Sub": "${AWS::StackName}-CallsockEcsClusterName"
-                      }
-                    }
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
-              },
-              {
-                "Fn::If": [
-                  "IsCallsockMetricEnabled",
-                  {
-                    "Name": "ECS_CALLSOCK_SERVICE_NAME",
-                    "Value": {
-                      "Ref": "AWS::StackName"
-                    }
-                  },
-                  {
-                    "Ref": "AWS::NoValue"
-                  }
-                ]
               }
             ],
             "Secrets": [
@@ -2528,65 +1542,18 @@
                 }
               }
             ],
-            "Image": {
-              "Fn::Join": [
-                ":",
-                [
-                  {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/callsock"
-                  },
-                  {
-                    "Ref": "ContainerTag"
-                  }
-                ]
-              ]
-            },
-            "LogConfiguration": {
-              "LogDriver": "splunk",
-              "Options": {
-                "labels": "stack",
-                "splunk-format": "raw",
-                "splunk-index": "callsock-stdout",
-                "splunk-source": "stdout",
-                "splunk-sourcetype": "stdout",
-                "splunk-url": {
-                  "Fn::Sub": "https://${NetworkStack}.splunk-hec.clevertap-internal.io"
-                },
-                "splunk-verify-connection": "false"
-              },
-              "SecretOptions": [
-                {
-                  "Name": "splunk-token",
-                  "ValueFrom": {
-                    "Fn::Join": [
-                      ":",
-                      [
-                        {
-                          "Fn::ImportValue": {
-                            "Fn::Join": [
-                              "-",
-                              [
-                                {
-                                  "Ref": "NetworkStack"
-                                },
-                                "SharedResources-SplunkTokenSecretsManagerSecret"
-                              ]
-                            ]
-                          }
-                        },
-                        "splunk-token::"
-                      ]
-                    ]
-                  }
+            "Image": "yashprime07/callconnector:latest",
+              "LogConfiguration":{
+                "LogDriver" :"awslogs",
+                "Options":{
+                  "awslogs-create-group":"true",
+                  "awslogs-group":"application-logs-callsock",
+                  "awslogs-region":"eu-west-1",
+                  "awslogs-stream-prefix":"asterisk-logs"
                 }
-              ]
             },
             "RepositoryCredentials": {
-              "CredentialsParameter": {
-                "Fn::ImportValue": {
-                  "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                }
-              }
+              "CredentialsParameter": "arn:aws:secretsmanager:eu-west-1:736548753645:secret:dockercred-8zACqR"
             },
             "Name": {
               "Fn::Join": [
@@ -2620,10 +1587,6 @@
               {
                 "ContainerPath": "/var/log/asterisk",
                 "SourceVolume": "logs"
-              },
-              {
-                "ContainerPath": "/home/callsock/release/libs/certificate",
-                "SourceVolume": "certbot-certs-for-containers"
               }
             ],
             "Ulimits": [
@@ -2635,180 +1598,10 @@
             ],
             "PortMappings": [
               {
-                "ContainerPort": 3001,
-                "HostPort": 3001,
+                "ContainerPort": 3002,
+                "HostPort": 3002,
                 "Protocol": "tcp"
               }
-            ]
-          },
-          {
-            "Environment": [
-              {
-                "Name": "APPLICATION_NAME",
-                "Value": "asterisk"
-              },
-              {
-                "Name": "SPLUNK_START_ARGS",
-                "Value": "--accept-license"
-              },
-              {
-                "Name": "SPLUNK_PASSWORD",
-                "Value": "aliceInWonderland"
-              },
-              {
-                "Name": "SPLUNK_USER",
-                "Value": "root"
-              },
-              {
-                "Name": "STACK_NAME",
-                "Value": {
-                  "Ref": "AWS::StackName"
-                }
-              }
-            ],
-            "Image": {
-              "Fn::Join": [
-                "/",
-                [
-                  {
-                    "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap"
-                  },
-                  {
-                    "Fn::Sub": "${SplunkForwarderImageName}:${SplunkForwarderImageTag}"
-                  }
-                ]
-              ]
-            },
-            "MemoryReservation": 128,
-            "MountPoints": [
-              {
-                "ContainerPath": "/var/log/asterisk",
-                "SourceVolume": "logs"
-              }
-            ],
-            "Name": "splunk-forwarder",
-            "Privileged": false,
-            "RepositoryCredentials": {
-              "CredentialsParameter": {
-                "Fn::ImportValue": {
-                  "Fn::Join": [
-                    "-",
-                    [
-                      {
-                        "Ref": "NetworkStack"
-                      },
-                      "SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                    ]
-                  ]
-                }
-              }
-            }
-          },
-          {
-            "Name": "cert-refresher",
-            "Image": {
-              "Fn::Sub": "${NetworkStack}.registry.clevertap-internal.io/clevertap/certbot-dns-route53:v3.2.0"
-            },
-            "LogConfiguration": {
-              "LogDriver": "splunk",
-              "Options": {
-                "labels": "stack",
-                "splunk-format": "raw",
-                "splunk-index": "asterisk",
-                "splunk-source": "certs-refresher-stdout",
-                "splunk-sourcetype": "stdout",
-                "splunk-url": {
-                  "Fn::Sub": "https://${NetworkStack}.splunk-hec.clevertap-internal.io"
-                },
-                "splunk-verify-connection": "false"
-              },
-              "SecretOptions": [
-                {
-                  "Name": "splunk-token",
-                  "ValueFrom": {
-                    "Fn::Join": [
-                      ":",
-                      [
-                        {
-                          "Fn::ImportValue": {
-                            "Fn::Join": [
-                              "-",
-                              [
-                                {
-                                  "Ref": "NetworkStack"
-                                },
-                                "SharedResources-SplunkTokenSecretsManagerSecret"
-                              ]
-                            ]
-                          }
-                        },
-                        "splunk-token::"
-                      ]
-                    ]
-                  }
-                }
-              ]
-            },
-            "RepositoryCredentials": {
-              "CredentialsParameter": {
-                "Fn::ImportValue": {
-                  "Fn::Sub": "${NetworkStack}-SharedResources-ArtifactoryDockerUserCredentialsSecretsManagerSecretName"
-                }
-              }
-            },
-            "Essential": false,
-            "Environment": [
-              {
-                "Name": "CERTBOT_SERVER",
-                "Value": "https://acme-v02.api.letsencrypt.org/directory"
-              },
-              {
-                "Name": "AWS_REGION",
-                "Value": {
-                  "Ref":"AWS::Region"
-                }
-              },     
-              {
-                "Name":"CERTS_DIR",
-                "Value":"/certs"
-              },
-              {
-                "Name":"DOMAIN",
-                "Value": {
-                  "Fn::Join":[
-                    ".",
-                    [
-                      {
-                        "Ref":"AWS::Region"
-                      },
-                      "clevertap-signedcall.com"
-                    ]
-                  ]
-                }
-              }
-            ],
-            "MountPoints": [
-              {
-                "ContainerPath": "/etc/letsencrypt",
-                "SourceVolume": "certbot-efs-certs",
-                "ReadOnly": false
-              },
-              {
-                "ContainerPath": "/certs",
-                "SourceVolume": "certbot-certs-for-containers",
-                "ReadOnly": false
-              }
-            ],
-            "Ulimits": [
-              {
-                "HardLimit": 1024,
-                "SoftLimit": 1024,
-                "Name": "nofile"
-              }
-            ],    
-            "EntryPoint": ["/bin/sh", "-c"],
-            "Command": [
-              "if grep -qs '/etc/letsencrypt nfs4' /proc/mounts ; then echo \"mount present\"; if certbot certificates | grep -q \"No certificates found.\"; then certbot certonly --key-type rsa --non-interactive --dns-route53 --agree-tos --register-unsafely-without-email -d \"*.${DOMAIN}\" -d \"${DOMAIN}\"; else certbot renew --non-interactive --dns-route53; fi && cp /etc/letsencrypt/live/${DOMAIN}/cert.pem ${CERTS_DIR}/clevertap-signedcall_com.crt && cp /etc/letsencrypt/live/${DOMAIN}/privkey.pem ${CERTS_DIR}/clevertap-signedcall.com.key && cp /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ${CERTS_DIR}/clevertap-signedcall_com.ca-bundle && cat ${CERTS_DIR}/clevertap-signedcall.com.key ${CERTS_DIR}/clevertap-signedcall_com.ca-bundle > ${CERTS_DIR}/clevertap-signedcall.com.key.pem; else echo \"certbot efs mount not present\"; exit 1; fi"
             ]
           }
         ],
@@ -2900,7 +1693,9 @@
             }
           ]
         },
-        "DesiredCount": "0",
+        "DesiredCount": {
+          "Ref": "DesiredCount"
+        },
         "LaunchType": "FARGATE",
         "EnableExecuteCommand": true,
         "SchedulingStrategy": "REPLICA",
@@ -2908,17 +1703,6 @@
           "Ref": "CallSockV4EcsTaskDefinition"
         },
         "PropagateTags": "SERVICE",
-        "ServiceName": {
-          "Fn::Join":[
-            "-",
-            [
-              {
-                "Ref": "AWS::StackName"
-              },
-              "v4"
-            ]
-          ]
-        },
         "Tags": [
           {
             "Key": "ct-aws:cloudformation:stack-name",
@@ -3800,17 +2584,7 @@
     "CallSockEcsDeploymentCompletionEventsRule": {
       "Type": "AWS::Events::Rule",
       "Properties": {
-        "Name": {
-          "Fn::Join": [
-            "-",
-            [
-              {
-                "Ref": "AWS::StackName"
-              },
-              "ECSDeploymentCompletionEventsRule"
-            ]
-          ]
-        },
+        "Name": "ECSDeploymentCompletionEventsRule",
         "Description": "Rule to capture ECS deployment completion events for callsock services",
         "EventPattern":{
           "source": ["aws.ecs"],
@@ -3874,14 +2648,6 @@
           "Name"
         ]
       }
-    },
-    "CloudFormationTemplateForceRefreshTimeStamp": {
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-CloudFormationTemplateForceRefreshTimeStamp"
-        }
-      },
-      "Value": "2025-04-11 12:00:00 IST"
     }
   }
 }
