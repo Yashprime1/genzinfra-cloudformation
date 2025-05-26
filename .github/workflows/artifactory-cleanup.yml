@@ -13,9 +13,9 @@ on:
     - cron: '0 2 * * 0'
 
 env:
-  ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+  ARTIFACTORY_URL: "https://artifactory.clevertap.net"
   ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-  ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_TOKEN }}
   VALUES_JSON_PATH: "values.json"  # Adjust path as needed
 
 jobs:

@@ -8,10 +8,10 @@ from urllib.parse import urljoin
 import base64
 
 class ArtifactoryAnalyzer:
-    def __init__(self, base_url, username, token):
+    def __init__(self, base_url, username, password):
         self.base_url = base_url.rstrip('/')
         self.session = requests.Session()
-        self.session.auth = (username, token)
+        self.session.auth = (username, password)
         self.session.headers.update({
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -222,15 +222,15 @@ def main():
     # Get environment variables
     artifactory_url = os.getenv('ARTIFACTORY_URL')
     username = os.getenv('ARTIFACTORY_USERNAME')
-    token = os.getenv('ARTIFACTORY_TOKEN')
+    password = os.getenv('ARTIFACTORY_PASSWORD')
     values_json_path = os.getenv('VALUES_JSON_PATH', 'values.json')
     
-    if not all([artifactory_url, username, token]):
+    if not all([artifactory_url, username, password]):
         print("Error: Missing required environment variables")
-        print("Required: ARTIFACTORY_URL, ARTIFACTORY_USERNAME, ARTIFACTORY_TOKEN")
+        print("Required: ARTIFACTORY_URL, ARTIFACTORY_USERNAME, ARTIFACTORY_PASSWORD")
         sys.exit(1)
     
-    analyzer = ArtifactoryAnalyzer(artifactory_url, username, token)
+    analyzer = ArtifactoryAnalyzer(artifactory_url, username, password)
     cleanup_candidates = analyzer.analyze_containers(values_json_path)
     
     # Set output for GitHub Actions
