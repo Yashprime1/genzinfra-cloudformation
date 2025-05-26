@@ -37,7 +37,7 @@ jobs:
 
     - name: Run container analysis
       run: |
-        python analyze_containers.py
+        python scripts/artifactory/analyze_containers.py
 
     - name: Upload cleanup candidates
       if: always()
