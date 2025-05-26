@@ -1,0 +1,78 @@
+name: Artifactory Container Cleanup Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run mode (only analyze, do not delete)'
+        required: false
+        default: 'true'
+        type: boolean
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+
+env:
+  ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
+  VALUES_JSON_PATH: "cloudformation/configuration/values.json"  # Adjust path as needed
+
+jobs:
+  analyze-containers:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Generate GitHub App Token
+      id: generate-github-token
+      uses: tibdex/github-app-token@v1.8.0
+      with:
+        app_id: ${{ secrets.CLEVERTAP_SNE_BOT_ID }}
+        private_key: ${{ secrets.CLEVERTAP_SNE_BOT_PRIVATE_ACCESS_KEY }}
+
+    - name: Checkout Infra-Actions Repository
+      uses: actions/checkout@v3
+
+    - name: Checkout CloudFormation Configuration Repository
+      uses: actions/checkout@v3
+      with:
+        repository: CleverTap-SNE/Cloudformation-Configuration
+        path: cloudformation/configuration
+        token: ${{ steps.generate-github-token.outputs.token }}
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install requests python-dateutil
+
+    - name: Run container analysis
+      run: |
+        python analyze_containers.py
+
+    - name: Upload cleanup candidates
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: cleanup-candidates
+        path: cleanup_candidates.json
+        retention-days: 30
+
+    - name: Create summary comment
+      run: |
+        echo "## Artifactory Container Cleanup Analysis Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Analysis Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Cleanup Candidates Found:** $(cat cleanup_candidates.json 2>/dev/null | jq length 2>/dev/null || echo 'N/A')" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Action Items" >> $GITHUB_STEP_SUMMARY
+        echo "1. Review the uploaded cleanup_candidates.json artifact" >> $GITHUB_STEP_SUMMARY
+        echo "2. Verify that identified containers are safe to remove" >> $GITHUB_STEP_SUMMARY
+        echo "3. Consider implementing automated cleanup for confirmed candidates" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+        echo "- Download the cleanup_candidates.json artifact to review detailed results" >> $GITHUB_STEP_SUMMARY
+        echo "- Update values.json if any missing references are identified" >> $GITHUB_STEP_SUMMARY
