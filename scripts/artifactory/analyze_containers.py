@@ -157,7 +157,7 @@ class ArtifactoryAnalyzer:
                     
                     # Get artifact information
                     artifact_info = self.get_artifact_info(repo_name, image_name, tag)
-                    
+                    print(artifact_info)
                     if artifact_info:
                         created_date_str = artifact_info.get('created')
                         if created_date_str:
