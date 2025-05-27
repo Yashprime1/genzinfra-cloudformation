@@ -1,7 +1,7 @@
 import requests
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dateutil import parser
 import sys
 from urllib.parse import urljoin
@@ -144,8 +144,9 @@ class ArtifactoryAnalyzer:
         # Load referenced images from values.json
         referenced_images = self.load_values_json(values_json_path)
         
-        # Calculate cutoff date
-        cutoff_date = datetime.now() - timedelta(days=months_threshold * 30)
+        # Calculate cutoff date (make it timezone-aware to match parsed dates)
+        from datetime import timezone
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=months_threshold * 30)
         print(f"Analyzing containers older than: {cutoff_date.strftime('%Y-%m-%d')}")
         print(f"Referenced images in values.json: {len(referenced_images)}")
         print("=" * 60)
@@ -195,9 +196,12 @@ class ArtifactoryAnalyzer:
                                     if isinstance(date_str, str):
                                         # Handle ISO format with timezone (most common)
                                         created_date = parser.parse(date_str)
+                                        # Ensure timezone awareness for comparison
+                                        if created_date.tzinfo is None:
+                                            created_date = created_date.replace(tzinfo=timezone.utc)
                                     elif isinstance(date_str, (int, float)):
-                                        # Handle timestamp as number
-                                        created_date = datetime.fromtimestamp(date_str / 1000 if date_str > 1e10 else date_str)
+                                        # Handle timestamp as number  
+                                        created_date = datetime.fromtimestamp(date_str / 1000 if date_str > 1e10 else date_str, tz=timezone.utc)
                                     
                                     if created_date:
                                         date_source = field
@@ -231,7 +235,7 @@ class ArtifactoryAnalyzer:
                                     'tag': tag,
                                     'full_name': full_image_name,
                                     'created_date': created_date.isoformat(),
-                                    'age_days': (datetime.now() - created_date).days,
+                                    'age_days': (datetime.now(timezone.utc) - created_date).days,
                                     'date_source': date_source
                                 })
                         else:
