@@ -281,7 +281,7 @@ class ArtifactoryAnalyzer:
             repo_name = repo['key']
             print(f"\nAnalyzing repository: {repo_name}")
             print("-" * 40)
-            if not repo_name.equals("clevertap"):
+            if repo_name != "clevertap":
                 continue
             # Initialize repository data structure
             cleanup_data[repo_name] = {
@@ -304,7 +304,7 @@ class ArtifactoryAnalyzer:
             cleanup_data[repo_name]['summary']['total_images'] = len(images)
             
             for image_name in images:
-                if not image_name.equals(component_name):
+                if image_name != component_name:
                     continue
                 print(f"  Image: {image_name}")
             
