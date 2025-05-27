@@ -49,91 +49,9 @@ class ArtifactoryAnalyzer:
         except Exception as e:
             print(f"    Docker Registry API v2 failed: {e}")
         
-        # Method 2: Browse repository structure using Artifactory REST API
-        try:
-            url = f"{self.base_url}/artifactory/api/storage/{repo_name}"
-            response = self.session.get(url)
-            if response.status_code == 200:
-                data = response.json()
-                children = data.get('children', [])
-                
-                # Look for directories that could be Docker images
-                for child in children:
-                    if child.get('folder', False):
-                        image_name = child.get('uri', '').strip('/')
-                        if image_name and not image_name.startswith('.'):
-                            # Verify this is actually a Docker image by checking for manifest files
-                            if self.verify_docker_image(repo_name, image_name):
-                                images.append(image_name)
-                
-                if images:
-                    print(f"    Found {len(images)} images using Artifactory Storage API")
-                    return images
-        except Exception as e:
-            print(f"    Artifactory Storage API failed: {e}")
-        
-        # Method 3: Try direct repository browsing with common Docker paths
-        try:
-            # Some setups have images under specific paths
-            common_paths = ['', 'docker', 'library']
-            
-            for path in common_paths:
-                browse_path = f"{repo_name}/{path}" if path else repo_name
-                url = f"{self.base_url}/artifactory/api/storage/{browse_path}"
-                response = self.session.get(url)
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    children = data.get('children', [])
-                    
-                    for child in children:
-                        if child.get('folder', False):
-                            image_name = child.get('uri', '').strip('/')
-                            if image_name and not image_name.startswith('.'):
-                                full_image_path = f"{path}/{image_name}" if path else image_name
-                                if self.verify_docker_image(repo_name, full_image_path):
-                                    images.append(full_image_path)
-                    
-                    if images:
-                        print(f"    Found {len(images)} images using path: {browse_path}")
-                        return images
-        except Exception as e:
-            print(f"    Direct browsing failed: {e}")
         
         print(f"    No Docker images found in repository {repo_name}")
         return []
-    
-    def verify_docker_image(self, repo_name, image_path):
-        """Verify if a path contains a Docker image by looking for typical Docker artifacts"""
-        try:
-            url = f"{self.base_url}/artifactory/api/storage/{repo_name}/{image_path}"
-            response = self.session.get(url)
-            
-            if response.status_code == 200:
-                data = response.json()
-                children = data.get('children', [])
-                
-                # Look for common Docker artifacts
-                docker_indicators = [
-                    'manifest.json', 'latest', 'sha256:', 'blobs', 'manifests'
-                ]
-                
-                child_uris = [child.get('uri', '').strip('/') for child in children]
-                
-                # Check if any children indicate this is a Docker image
-                for indicator in docker_indicators:
-                    if any(indicator in uri for uri in child_uris):
-                        return True
-                
-                # Check if children are version tags (common pattern)
-                version_patterns = ['.', 'v', 'latest', 'master', 'main']
-                for uri in child_uris:
-                    if any(pattern in uri for pattern in version_patterns) or uri.replace('.', '').replace('-', '').isalnum():
-                        return True
-            
-            return False
-        except:
-            return False
     
     def get_image_tags(self, repo_name, image_name):
         """Get all tags for a Docker image using multiple approaches"""
