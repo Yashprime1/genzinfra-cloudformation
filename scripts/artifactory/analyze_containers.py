@@ -432,7 +432,7 @@ def main():
     artifactory_url = os.getenv('ARTIFACTORY_URL')
     username = os.getenv('ARTIFACTORY_USERNAME')
     password = os.getenv('ARTIFACTORY_PASSWORD')
-    values_json_path = os.getenv('VALUES_JSON_PATH', 'values.json')
+    values_json_path = os.getenv('VALUES_JSON_PATH', '../../values.json')
     
     if not all([artifactory_url, username, password]):
         print("Error: Missing required environment variables")
