@@ -32,7 +32,7 @@ class ArtifactoryAnalyzer:
             print(f"Error getting repositories: {e}")
             return []
     
-    def get_docker_images(self, repo_name):
+    def get_docker_images(self, repo_name,component_name):
         """Get all Docker images in a repository"""
         images = []
         
@@ -256,7 +256,7 @@ class ArtifactoryAnalyzer:
             'summary_csv': csv_file
         }
     
-    def analyze_containers(self, values_json_path, months_threshold=3):
+    def analyze_containers(self, values_json_path,component_name, months_threshold=3):
         """Analyze containers and identify candidates for cleanup"""
         print("Starting Artifactory container analysis...")
         print("=" * 60)
@@ -277,12 +277,12 @@ class ArtifactoryAnalyzer:
         # Get all Docker repositories
         repositories = self.get_repositories()
         print(f"Found {len(repositories)} Docker repositories")
-        
         for repo in repositories:
             repo_name = repo['key']
             print(f"\nAnalyzing repository: {repo_name}")
             print("-" * 40)
-            
+            if not repo_name.equals("clevertap"):
+                continue
             # Initialize repository data structure
             cleanup_data[repo_name] = {
                 'repository_info': repo,
@@ -295,7 +295,7 @@ class ArtifactoryAnalyzer:
             }
             
             # Get all images in repository
-            images = self.get_docker_images(repo_name)
+            images = self.get_docker_images(repo_name,component_name)
             
             if not images:
                 print(f"  No Docker images found in {repo_name}")
@@ -304,8 +304,10 @@ class ArtifactoryAnalyzer:
             cleanup_data[repo_name]['summary']['total_images'] = len(images)
             
             for image_name in images:
+                if not image_name.equals(component_name):
+                    continue
                 print(f"  Image: {image_name}")
-                
+            
                 # Initialize image data structure
                 cleanup_data[repo_name]['images'][image_name] = {
                     'all_artifacts': [],
@@ -512,6 +514,7 @@ def main():
     artifactory_url = os.getenv('ARTIFACTORY_URL')
     username = os.getenv('ARTIFACTORY_USERNAME')
     password = os.getenv('ARTIFACTORY_PASSWORD')
+    component_name = os.getenv('COMPONENT_NAME')
     values_json_path = os.getenv('VALUES_JSON_PATH', 'values.json')
     
     if not all([artifactory_url, username, password]):
@@ -520,7 +523,7 @@ def main():
         sys.exit(1)
     
     analyzer = ArtifactoryAnalyzer(artifactory_url, username, password)
-    result = analyzer.analyze_containers(values_json_path)
+    result = analyzer.analyze_containers(values_json_path,component_name)
     
     # Set output for GitHub Actions
     if 'GITHUB_OUTPUT' in os.environ:
