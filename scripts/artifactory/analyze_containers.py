@@ -52,38 +52,6 @@ class ArtifactoryAnalyzer:
         print(f"    No Docker images found in repository {repo_name}")
         return []
     
-    def verify_docker_image(self, repo_name, image_path):
-        """Verify if a path contains a Docker image by looking for typical Docker artifacts"""
-        try:
-            url = f"{self.base_url}/artifactory/api/storage/{repo_name}/{image_path}"
-            response = self.session.get(url)
-            
-            if response.status_code == 200:
-                data = response.json()
-                children = data.get('children', [])
-                
-                # Look for common Docker artifacts
-                docker_indicators = [
-                    'manifest.json', 'latest', 'sha256:', 'blobs', 'manifests'
-                ]
-                
-                child_uris = [child.get('uri', '').strip('/') for child in children]
-                
-                # Check if any children indicate this is a Docker image
-                for indicator in docker_indicators:
-                    if any(indicator in uri for uri in child_uris):
-                        return True
-                
-                # Check if children are version tags (common pattern)
-                version_patterns = ['.', 'v', 'latest', 'master', 'main']
-                for uri in child_uris:
-                    if any(pattern in uri for pattern in version_patterns) or uri.replace('.', '').replace('-', '').isalnum():
-                        return True
-            
-            return False
-        except:
-            return False
-    
     def get_image_tags(self, repo_name, image_name):
         """Get all tags for a Docker image using multiple approaches"""
         tags = []
@@ -378,12 +346,9 @@ class ArtifactoryAnalyzer:
                         created_date = None
                         date_source = None
                         
-                        print(f"    DEBUG - Artifact info keys: {list(artifact_info.keys())}")
-                        
                         for field in date_fields:
                             date_str = artifact_info.get(field)
                             if date_str:
-                                print(f"    DEBUG - Trying to parse {field}='{date_str}'")
                                 try:
                                     # Try different date parsing approaches
                                     if isinstance(date_str, str):
@@ -398,11 +363,9 @@ class ArtifactoryAnalyzer:
                                     
                                     if created_date:
                                         date_source = field
-                                        print(f"    DEBUG - Successfully parsed {field} to {created_date}")
                                         break
                                         
                                 except Exception as date_error:
-                                    print(f"    DEBUG - Failed to parse {field}='{date_str}': {date_error}")
                                     continue
                         
                         if created_date:
@@ -448,7 +411,6 @@ class ArtifactoryAnalyzer:
                             # Show date field values for debugging
                             for field in date_fields:
                                 value = artifact_info.get(field, 'NOT FOUND')
-                                print(f"    DEBUG - {field}: {value}")
                             
                             # Add to all artifacts even without date
                             artifact_data.update({
