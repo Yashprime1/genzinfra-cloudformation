@@ -8,6 +8,11 @@ on:
         required: false
         default: 'true'
         type: boolean
+      component_name:
+        description: 'Component name to analyze'
+        required: true
+        default: 'dashboard'
+        type: string
   schedule:
     # Run weekly on Sundays at 2 AM UTC
     - cron: '0 2 * * 0'
@@ -16,6 +21,7 @@ env:
   ARTIFACTORY_URL: "https://artifactory.clevertap.net"
   ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
   ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_TOKEN }}
+  COMPONENT_NAME: ${{  github.event.inputs.component_name }}
   VALUES_JSON_PATH: "values.json"  # Adjust path as needed
 
 jobs:
