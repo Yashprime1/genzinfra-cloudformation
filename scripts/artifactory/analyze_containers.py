@@ -33,30 +33,166 @@ class ArtifactoryAnalyzer:
             return []
     
     def get_docker_images(self, repo_name):
-        """Get all Docker images in a repository"""
+        """Get all Docker images in a repository using multiple approaches"""
+        images = []
+        
+        # Method 1: Try Docker Registry API v2
         try:
             url = f"{self.base_url}/artifactory/api/docker/{repo_name}/v2/_catalog"
             response = self.session.get(url)
-            response.raise_for_status()
-            
-            data = response.json()
-            return data.get('repositories', [])
+            if response.status_code == 200:
+                data = response.json()
+                images = data.get('repositories', [])
+                if images:
+                    print(f"    Found {len(images)} images using Docker Registry API v2")
+                    return images
         except Exception as e:
-            print(f"Error getting images from {repo_name}: {e}")
-            return []
+            print(f"    Docker Registry API v2 failed: {e}")
+        
+        # Method 2: Browse repository structure using Artifactory REST API
+        try:
+            url = f"{self.base_url}/artifactory/api/storage/{repo_name}"
+            response = self.session.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                children = data.get('children', [])
+                
+                # Look for directories that could be Docker images
+                for child in children:
+                    if child.get('folder', False):
+                        image_name = child.get('uri', '').strip('/')
+                        if image_name and not image_name.startswith('.'):
+                            # Verify this is actually a Docker image by checking for manifest files
+                            if self.verify_docker_image(repo_name, image_name):
+                                images.append(image_name)
+                
+                if images:
+                    print(f"    Found {len(images)} images using Artifactory Storage API")
+                    return images
+        except Exception as e:
+            print(f"    Artifactory Storage API failed: {e}")
+        
+        # Method 3: Try direct repository browsing with common Docker paths
+        try:
+            # Some setups have images under specific paths
+            common_paths = ['', 'docker', 'library']
+            
+            for path in common_paths:
+                browse_path = f"{repo_name}/{path}" if path else repo_name
+                url = f"{self.base_url}/artifactory/api/storage/{browse_path}"
+                response = self.session.get(url)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    children = data.get('children', [])
+                    
+                    for child in children:
+                        if child.get('folder', False):
+                            image_name = child.get('uri', '').strip('/')
+                            if image_name and not image_name.startswith('.'):
+                                full_image_path = f"{path}/{image_name}" if path else image_name
+                                if self.verify_docker_image(repo_name, full_image_path):
+                                    images.append(full_image_path)
+                    
+                    if images:
+                        print(f"    Found {len(images)} images using path: {browse_path}")
+                        return images
+        except Exception as e:
+            print(f"    Direct browsing failed: {e}")
+        
+        print(f"    No Docker images found in repository {repo_name}")
+        return []
+    
+    def verify_docker_image(self, repo_name, image_path):
+        """Verify if a path contains a Docker image by looking for typical Docker artifacts"""
+        try:
+            url = f"{self.base_url}/artifactory/api/storage/{repo_name}/{image_path}"
+            response = self.session.get(url)
+            
+            if response.status_code == 200:
+                data = response.json()
+                children = data.get('children', [])
+                
+                # Look for common Docker artifacts
+                docker_indicators = [
+                    'manifest.json', 'latest', 'sha256:', 'blobs', 'manifests'
+                ]
+                
+                child_uris = [child.get('uri', '').strip('/') for child in children]
+                
+                # Check if any children indicate this is a Docker image
+                for indicator in docker_indicators:
+                    if any(indicator in uri for uri in child_uris):
+                        return True
+                
+                # Check if children are version tags (common pattern)
+                version_patterns = ['.', 'v', 'latest', 'master', 'main']
+                for uri in child_uris:
+                    if any(pattern in uri for pattern in version_patterns) or uri.replace('.', '').replace('-', '').isalnum():
+                        return True
+            
+            return False
+        except:
+            return False
     
     def get_image_tags(self, repo_name, image_name):
-        """Get all tags for a Docker image"""
+        """Get all tags for a Docker image using multiple approaches"""
+        tags = []
+        
+        # Method 1: Try Docker Registry API v2
         try:
             url = f"{self.base_url}/artifactory/api/docker/{repo_name}/v2/{image_name}/tags/list"
             response = self.session.get(url)
-            response.raise_for_status()
-            
-            data = response.json()
-            return data.get('tags', [])
+            if response.status_code == 200:
+                data = response.json()
+                tags = data.get('tags', [])
+                if tags:
+                    return tags
         except Exception as e:
-            print(f"Error getting tags for {image_name}: {e}")
-            return []
+            print(f"      Docker API tags failed: {e}")
+        
+        # Method 2: Browse image directory structure
+        try:
+            url = f"{self.base_url}/artifactory/api/storage/{repo_name}/{image_name}"
+            response = self.session.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                children = data.get('children', [])
+                
+                for child in children:
+                    if child.get('folder', False):
+                        tag_name = child.get('uri', '').strip('/')
+                        if tag_name and not tag_name.startswith('.'):
+                            tags.append(tag_name)
+                
+                if tags:
+                    return tags
+        except Exception as e:
+            print(f"      Storage API tags failed: {e}")
+        
+        # Method 3: Look for common tag patterns
+        try:
+            # Check for files that might represent tags
+            url = f"{self.base_url}/artifactory/api/storage/{repo_name}/{image_name}"
+            response = self.session.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                children = data.get('children', [])
+                
+                # Look for files that might be manifests with tag-like names
+                for child in children:
+                    if not child.get('folder', False):
+                        file_name = child.get('uri', '').strip('/')
+                        # Common Docker file patterns
+                        if (file_name.endswith('.json') or 
+                            'sha256:' in file_name or 
+                            file_name in ['latest', 'master', 'main'] or
+                            file_name.replace('.', '').replace('-', '').isalnum()):
+                            tags.append(file_name.replace('.json', ''))
+        except Exception as e:
+            print(f"      File pattern search failed: {e}")
+        
+        return list(set(tags)) if tags else ['latest']  # Default to 'latest' if no tags found
     
     def get_artifact_info(self, repo_name, image_name, tag):
         """Get detailed information about an artifact"""
@@ -67,6 +203,11 @@ class ArtifactoryAnalyzer:
                 f"{image_name}/{tag}",
                 f"{image_name}/{tag}/latest",
                 f"docker/{image_name}/{tag}",
+                f"{image_name}/{tag}.json",
+                f"{image_name}/manifest-{tag}.json",
+                # Add more specific paths for your setup
+                f"{image_name}/{tag}/sha256",
+                f"{image_name}/tags/{tag}",
             ]
             
             for artifact_path in paths_to_try:
@@ -94,6 +235,18 @@ class ArtifactoryAnalyzer:
                             'lastModified': child.get('lastModified'),
                             'size': child.get('size', 0)
                         }
+            
+            # Last resort: try to get any information about the image directory
+            image_url = f"{self.base_url}/artifactory/api/storage/{repo_name}/{image_name}"
+            response = self.session.get(image_url)
+            if response.status_code == 200:
+                image_info = response.json()
+                return {
+                    'created': image_info.get('created', image_info.get('lastModified')),
+                    'lastModified': image_info.get('lastModified'),
+                    'size': image_info.get('size', 0),
+                    'note': 'Image-level info (tag-specific info not available)'
+                }
             
             print(f"    Could not find artifact info for {image_name}:{tag} (tried {len(paths_to_try)} paths)")
             return None
@@ -165,6 +318,10 @@ class ArtifactoryAnalyzer:
             
             # Get all images in repository
             images = self.get_docker_images(repo_name)
+            
+            if not images:
+                print(f"  No Docker images found in {repo_name}")
+                continue
             
             for image_name in images:
                 print(f"  Image: {image_name}")
