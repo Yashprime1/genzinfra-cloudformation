@@ -1,4 +1,4 @@
-import requests
+ import requests
 import json
 import os
 from datetime import datetime, timedelta
@@ -61,25 +61,45 @@ class ArtifactoryAnalyzer:
     def get_artifact_info(self, repo_name, image_name, tag):
         """Get detailed information about an artifact"""
         try:
-            # Construct the path for the manifest
-            artifact_path = f"{image_name}/{tag}/manifest.json"
-            url = f"{self.base_url}/artifactory/api/storage/{repo_name}/{artifact_path}"
+            # Try multiple path structures for different Artifactory setups
+            paths_to_try = [
+                f"{image_name}/{tag}/manifest.json",
+                f"{image_name}/{tag}",
+                f"{image_name}/{tag}/latest",
+                f"docker/{image_name}/{tag}",
+            ]
             
-            response = self.session.get(url)
-            if response.status_code == 404:
-                # Try alternative path structure
-                artifact_path = f"{image_name}/{tag}"
+            for artifact_path in paths_to_try:
                 url = f"{self.base_url}/artifactory/api/storage/{repo_name}/{artifact_path}"
                 response = self.session.get(url)
+                
+                if response.status_code == 200:
+                    artifact_info = response.json()
+                    # Debug: print the raw response to understand the structure
+                    if not artifact_info.get('created'):
+                        print(f"    DEBUG - No 'created' field. Available fields: {list(artifact_info.keys())}")
+                    return artifact_info
             
+            # If no path worked, try getting folder info
+            folder_url = f"{self.base_url}/artifactory/api/storage/{repo_name}/{image_name}"
+            response = self.session.get(folder_url)
             if response.status_code == 200:
-                return response.json()
-            else:
-                print(f"Could not find artifact info for {image_name}:{tag}")
-                return None
+                folder_info = response.json()
+                # Look for children that match our tag
+                children = folder_info.get('children', [])
+                for child in children:
+                    if child.get('uri', '').strip('/') == tag:
+                        return {
+                            'created': child.get('lastModified', folder_info.get('lastModified')),
+                            'lastModified': child.get('lastModified'),
+                            'size': child.get('size', 0)
+                        }
+            
+            print(f"    Could not find artifact info for {image_name}:{tag} (tried {len(paths_to_try)} paths)")
+            return None
                 
         except Exception as e:
-            print(f"Error getting artifact info for {image_name}:{tag}: {e}")
+            print(f"    Error getting artifact info for {image_name}:{tag}: {e}")
             return None
     
     def load_values_json(self, file_path):
@@ -157,41 +177,69 @@ class ArtifactoryAnalyzer:
                     
                     # Get artifact information
                     artifact_info = self.get_artifact_info(repo_name, image_name, tag)
-                    print(artifact_info)
+                    
                     if artifact_info:
-                        created_date_str = artifact_info.get('created')
-                        if created_date_str:
-                            try:
-                                created_date = parser.parse(created_date_str)
-                                is_old = created_date < cutoff_date
-                                is_referenced = any(ref_img in full_image_name or full_image_name in ref_img 
-                                                    for ref_img in referenced_images)
-                                
-                                status = []
-                                if is_old:
-                                    status.append("OLD")
-                                if is_referenced:
-                                    status.append("REFERENCED")
-                                if not status:
-                                    status.append("RECENT")
-                                
-                                print(f"    Tag: {tag:20} | Date: {created_date.strftime('%Y-%m-%d')} | Status: {', '.join(status)}")
-                                
-                                # Add to cleanup candidates if old and not referenced
-                                if is_old and not is_referenced:
-                                    cleanup_candidates.append({
-                                        'repository': repo_name,
-                                        'image': image_name,
-                                        'tag': tag,
-                                        'full_name': full_image_name,
-                                        'created_date': created_date.isoformat(),
-                                        'age_days': (datetime.now() - created_date).days
-                                    })
-                                
-                            except Exception as e:
-                                print(f"    Tag: {tag:20} | Date: ERROR parsing date | Status: UNKNOWN")
+                        # Try multiple date fields and formats
+                        date_fields = ['created', 'lastModified', 'lastUpdated']
+                        created_date = None
+                        date_source = None
+                        
+                        print(f"    DEBUG - Artifact info keys: {list(artifact_info.keys())}")
+                        
+                        for field in date_fields:
+                            date_str = artifact_info.get(field)
+                            if date_str:
+                                print(f"    DEBUG - Trying to parse {field}='{date_str}'")
+                                try:
+                                    # Try different date parsing approaches
+                                    if isinstance(date_str, str):
+                                        # Handle ISO format with timezone (most common)
+                                        created_date = parser.parse(date_str)
+                                    elif isinstance(date_str, (int, float)):
+                                        # Handle timestamp as number
+                                        created_date = datetime.fromtimestamp(date_str / 1000 if date_str > 1e10 else date_str)
+                                    
+                                    if created_date:
+                                        date_source = field
+                                        print(f"    DEBUG - Successfully parsed {field} to {created_date}")
+                                        break
+                                        
+                                except Exception as date_error:
+                                    print(f"    DEBUG - Failed to parse {field}='{date_str}': {date_error}")
+                                    continue
+                        
+                        if created_date:
+                            is_old = created_date < cutoff_date
+                            is_referenced = any(ref_img in full_image_name or full_image_name in ref_img 
+                                                for ref_img in referenced_images)
+                            
+                            status = []
+                            if is_old:
+                                status.append("OLD")
+                            if is_referenced:
+                                status.append("REFERENCED")
+                            if not status:
+                                status.append("RECENT")
+                            
+                            print(f"    Tag: {tag:20} | Date: {created_date.strftime('%Y-%m-%d')} ({date_source}) | Status: {', '.join(status)}")
+                            
+                            # Add to cleanup candidates if old and not referenced
+                            if is_old and not is_referenced:
+                                cleanup_candidates.append({
+                                    'repository': repo_name,
+                                    'image': image_name,
+                                    'tag': tag,
+                                    'full_name': full_image_name,
+                                    'created_date': created_date.isoformat(),
+                                    'age_days': (datetime.now() - created_date).days,
+                                    'date_source': date_source
+                                })
                         else:
-                            print(f"    Tag: {tag:20} | Date: NOT AVAILABLE | Status: UNKNOWN")
+                            print(f"    Tag: {tag:20} | Date: NO PARSEABLE DATE | Available fields: {list(artifact_info.keys())}")
+                            # Show date field values for debugging
+                            for field in date_fields:
+                                value = artifact_info.get(field, 'NOT FOUND')
+                                print(f"    DEBUG - {field}: {value}")
                     else:
                         print(f"    Tag: {tag:20} | Date: INFO NOT AVAILABLE | Status: UNKNOWN")
         
