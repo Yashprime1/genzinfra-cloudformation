@@ -189,7 +189,7 @@ class ArtifactoryAnalyzer:
                                 artifact_path = f"{repo_name}/{image_name}/{candidate['tag']}"
                                 f.write(f"# Delete {candidate['full_name']} (created: {candidate['created_date'][:10]}, {candidate['age_days']} days old)\n")
                                 f.write(f"curl -X DELETE -u $ARTIFACTORY_USERNAME:$ARTIFACTORY_PASSWORD \\\n")
-                                f.write(f"  '$ARTIFACTORY_URL/artifactory/{artifact_path}'\n")
+                                f.write(f"  \"$ARTIFACTORY_URL/artifactory/{artifact_path}\"\n")
                                 f.write(f"echo 'Deleted: {candidate['full_name']}'\n\n")
         
         os.chmod(commands_file, 0o755)  # Make script executable
