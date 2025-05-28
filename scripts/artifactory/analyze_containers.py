@@ -284,7 +284,7 @@ class ArtifactoryAnalyzer:
         print(f"GitHub Actions artifact saved to: cleanup_candidates.json ({len(cleanup_candidates)} candidates)")
         return 'cleanup_candidates.json'
 
-        def analyze_containers(self, values_json_path,component_name, months_threshold=3):
+    def analyze_containers(self, values_json_path,component_name, months_threshold=3):
             """Analyze containers and identify candidates for cleanup"""
             print("Starting Artifactory container analysis...")
             print("=" * 60)
