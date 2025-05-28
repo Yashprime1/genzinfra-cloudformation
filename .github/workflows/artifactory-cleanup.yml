@@ -13,15 +13,18 @@ on:
         required: true
         default: 'dashboard'
         type: string
-  schedule:
-    # Run weekly on Sundays at 2 AM UTC
-    - cron: '0 2 * * 0'
+      months_threshold:
+        description: 'Months threshold for cleanup candidates'
+        required: false
+        default: '12'
+        type: string
 
 env:
   ARTIFACTORY_URL: "https://artifactory.clevertap.net"
   ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
   ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_TOKEN }}
-  COMPONENT_NAME: ${{  github.event.inputs.component_name }}
+  COMPONENT_NAME: ${{ github.event.inputs.component_name }}
+  MONTHS_THRESHOLD: ${{ github.event.inputs.months_threshold }}
   VALUES_JSON_PATH: "values.json"  # Adjust path as needed
 
 jobs:
@@ -45,14 +48,50 @@ jobs:
       run: |
         python scripts/artifactory/analyze_containers.py
 
+    - name: Execute cleanup commands
+      if: ${{ github.event.inputs.dry_run == 'false' }}
+      run: |
+        echo "🚀 Executing cleanup commands (dry_run is false)..."
+        
+        # Find the most recent cleanup commands file
+        CLEANUP_SCRIPT=$(find . -name "cleanup_commands_*.sh" -type f | sort -r | head -1)
+        
+        if [ -n "$CLEANUP_SCRIPT" ] && [ -f "$CLEANUP_SCRIPT" ]; then
+          echo "Found cleanup script: $CLEANUP_SCRIPT"
+          
+          # Make the script executable
+          chmod +x "$CLEANUP_SCRIPT"
+          
+          # Count commands to be executed
+          COMMAND_COUNT=$(grep -c "curl.*DELETE" "$CLEANUP_SCRIPT" 2>/dev/null || echo "0")
+          echo "Number of deletion commands to execute: $COMMAND_COUNT"
+          
+          if [ "$COMMAND_COUNT" -gt 0 ]; then
+            echo "Executing cleanup commands..."
+            
+            # Execute the cleanup script
+            bash "$CLEANUP_SCRIPT"
+            
+            echo "✅ Cleanup execution completed"
+            echo "CLEANUP_EXECUTED=true" >> $GITHUB_ENV
+            echo "COMMANDS_EXECUTED=$COMMAND_COUNT" >> $GITHUB_ENV
+          else
+            echo "ℹ️ No cleanup commands found to execute"
+            echo "CLEANUP_EXECUTED=false" >> $GITHUB_ENV
+            echo "COMMANDS_EXECUTED=0" >> $GITHUB_ENV
+          fi
+        else
+          echo "⚠️ No cleanup commands script found"
+          echo "CLEANUP_EXECUTED=false" >> $GITHUB_ENV
+          echo "COMMANDS_EXECUTED=0" >> $GITHUB_ENV
+        fi
+
     - name: Upload all cleanup artifacts
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: cleanup-analysis-results
         path: |
-          cleanup_report_*.json
-          cleanup_*_*.json
           cleanup_commands_*.sh
           cleanup_summary_*.csv
         retention-days: 30
@@ -66,10 +105,23 @@ jobs:
         echo "## Artifactory Container Cleanup Analysis Results" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "- **Analysis Date:** $(date)" >> $GITHUB_STEP_SUMMARY
-        echo "- **Component Analyzed:** ${{ github.event.inputs.component_name || 'dashboard' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Component Analyzed:** ${{ github.event.inputs.component_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Dry Run Mode:** ${{ github.event.inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Total Images Analyzed:** $TOTAL_ANALYZED" >> $GITHUB_STEP_SUMMARY
         echo "- **Cleanup Candidates Found:** $CLEANUP_COUNT" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Add execution status if cleanup was attempted
+        if [ "${{ github.event.inputs.dry_run }}" = "false" ]; then
+          echo "### Cleanup Execution Status" >> $GITHUB_STEP_SUMMARY
+          if [ "${CLEANUP_EXECUTED:-false}" = "true" ]; then
+            echo "- **Status:** ✅ Cleanup executed successfully" >> $GITHUB_STEP_SUMMARY
+            echo "- **Commands Executed:** ${COMMANDS_EXECUTED:-0}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Status:** ⚠️ No cleanup commands executed" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+        fi
         
         # List generated files
         echo "### Generated Files" >> $GITHUB_STEP_SUMMARY
@@ -81,14 +133,3 @@ jobs:
           fi
         done
         echo "" >> $GITHUB_STEP_SUMMARY
-        
-        echo "### Action Items" >> $GITHUB_STEP_SUMMARY
-        echo "1. Review the uploaded cleanup analysis artifacts" >> $GITHUB_STEP_SUMMARY
-        echo "2. Check the cleanup_summary_*.csv for an overview" >> $GITHUB_STEP_SUMMARY
-        echo "3. Review cleanup_commands_*.sh before executing any deletions" >> $GITHUB_STEP_SUMMARY
-        echo "4. Verify that identified containers are safe to remove" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
-        echo "- Download the cleanup-analysis-results artifact to review detailed results" >> $GITHUB_STEP_SUMMARY
-        echo "- Update values.json if any missing references are identified" >> $GITHUB_STEP_SUMMARY
-        echo "- Execute cleanup commands manually after verification" >> $GITHUB_STEP_SUMMARY

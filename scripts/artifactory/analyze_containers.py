@@ -169,46 +169,6 @@ class ArtifactoryAnalyzer:
         """Create cleanup artifacts organized by repository and image"""
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         
-        # Create detailed cleanup report
-        cleanup_report = {
-            'generated_at': datetime.now(timezone.utc).isoformat(),
-            'summary': {
-                'total_repositories': len(cleanup_data),
-                'total_images': sum(len(repo_data['images']) for repo_data in cleanup_data.values()),
-                'total_cleanup_candidates': sum(
-                    len(image_data['cleanup_candidates']) 
-                    for repo_data in cleanup_data.values() 
-                    for image_data in repo_data['images'].values()
-                )
-            },
-            'repositories': cleanup_data
-        }
-        
-        # Save main cleanup report
-        cleanup_report_file = f'cleanup_report_{timestamp}.json'
-        with open(cleanup_report_file, 'w') as f:
-            json.dump(cleanup_report, f, indent=2)
-        print(f"Detailed cleanup report saved to: {cleanup_report_file}")
-        
-        # Create repository-specific artifacts
-        for repo_name, repo_data in cleanup_data.items():
-            if repo_data['images']:
-                repo_file = f'cleanup_{repo_name}_{timestamp}.json'
-                with open(repo_file, 'w') as f:
-                    json.dump({
-                        'repository': repo_name,
-                        'generated_at': datetime.now(timezone.utc).isoformat(),
-                        'summary': {
-                            'total_images': len(repo_data['images']),
-                            'total_cleanup_candidates': sum(
-                                len(image_data['cleanup_candidates']) 
-                                for image_data in repo_data['images'].values()
-                            )
-                        },
-                        'images': repo_data['images']
-                    }, f, indent=2)
-                print(f"Repository-specific cleanup file saved to: {repo_file}")
-        
         # Create cleanup commands script
         commands_file = f'cleanup_commands_{timestamp}.sh'
         with open(commands_file, 'w') as f:
@@ -251,7 +211,6 @@ class ArtifactoryAnalyzer:
         print(f"Summary CSV saved to: {csv_file}")
         
         return {
-            'cleanup_report': cleanup_report_file,
             'commands_script': commands_file,
             'summary_csv': csv_file
         }
@@ -284,7 +243,7 @@ class ArtifactoryAnalyzer:
         print(f"GitHub Actions artifact saved to: cleanup_candidates.json ({len(cleanup_candidates)} candidates)")
         return 'cleanup_candidates.json'
 
-    def analyze_containers(self, values_json_path,component_name, months_threshold=3):
+    def analyze_containers(self, values_json_path,component_name, months_threshold):
             """Analyze containers and identify candidates for cleanup"""
             print("Starting Artifactory container analysis...")
             print("=" * 60)
@@ -545,6 +504,7 @@ def main():
     username = os.getenv('ARTIFACTORY_USERNAME')
     password = os.getenv('ARTIFACTORY_PASSWORD')
     component_name = os.getenv('COMPONENT_NAME')
+    months_threshold = int(os.getenv('MONTHS_THRESHOLD')) 
     values_json_path = os.getenv('VALUES_JSON_PATH', 'values.json')
     
     if not all([artifactory_url, username, password]):
@@ -553,7 +513,7 @@ def main():
         sys.exit(1)
     
     analyzer = ArtifactoryAnalyzer(artifactory_url, username, password)
-    result = analyzer.analyze_containers(values_json_path,component_name)
+    result = analyzer.analyze_containers(values_json_path,component_name, months_threshold)
     
     # Set output for GitHub Actions
     if 'GITHUB_OUTPUT' in os.environ:
