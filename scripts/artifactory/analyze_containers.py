@@ -132,30 +132,29 @@ class ArtifactoryAnalyzer:
             return None
     
     def load_values_json(self, file_path):
-        """Load and parse values.json to extract referenced images"""
-        referenced_images = set()
+        """Load and parse values.json to extract all tag values"""
+        tag_values = set()
         try:
             if os.path.exists(file_path):
                 with open(file_path, 'r') as f:
                     values = json.load(f)
                     
-                # Extract image references (adjust based on your values.json structure)
-                def extract_images(obj, path=""):
+                # Extract all tag values (keys ending with 'Tag')
+                def extract_tags(obj, path=""):
                     if isinstance(obj, dict):
                         for key, value in obj.items():
                             current_path = f"{path}.{key}" if path else key
-                            if key in ['image', 'repository', 'tag'] and isinstance(value, str):
-                                if ':' in value:
-                                    referenced_images.add(value)
-                                elif key == 'repository' and isinstance(obj.get('tag'), str):
-                                    referenced_images.add(f"{value}:{obj['tag']}")
-                            extract_images(value, current_path)
+                            # Check if key ends with 'Tag' and value is a string
+                            if key.endswith('Tag') and isinstance(value, str):
+                                tag_values.add(value)
+                            # Recursively process nested objects
+                            extract_tags(value, current_path)
                     elif isinstance(obj, list):
                         for i, item in enumerate(obj):
-                            extract_images(item, f"{path}[{i}]")
+                            extract_tags(item, f"{path}[{i}]")
                 
-                extract_images(values)
-                print(f"Found {len(referenced_images)} referenced images in values.json")
+                extract_tags(values)
+                print(f"Found {len(tag_values)} tag values in values.json")
                 
             else:
                 print(f"Warning: {file_path} not found")
@@ -163,7 +162,7 @@ class ArtifactoryAnalyzer:
         except Exception as e:
             print(f"Error loading values.json: {e}")
         
-        return referenced_images
+        return tag_values
     
     def create_cleanup_artifacts(self, cleanup_data):
         """Create cleanup artifacts organized by repository and image"""
@@ -190,7 +189,7 @@ class ArtifactoryAnalyzer:
                                 f.write(f"# Delete {candidate['full_name']} (created: {candidate['created_date'][:10]}, {candidate['age_days']} days old)\n")
                                 f.write(f"curl -X DELETE -u $ARTIFACTORY_USERNAME:$ARTIFACTORY_PASSWORD \\\n")
                                 f.write(f"  \"$ARTIFACTORY_URL/artifactory/{artifact_path}\"\n")
-                                f.write(f"echo 'Deleted: {candidate['full_name']}'\n\n")
+                                f.write(f"echo 'Deleted: {candidate['full_name']}'\n\n") 
         
         os.chmod(commands_file, 0o755)  # Make script executable
         print(f"Cleanup commands script saved to: {commands_file}")
@@ -215,7 +214,6 @@ class ArtifactoryAnalyzer:
             'summary_csv': csv_file
         }
     
-    # Add this method to your ArtifactoryAnalyzer class, right after the create_cleanup_artifacts method:
     def create_github_artifact(self, cleanup_data):
         """Create the cleanup_candidates.json file expected by GitHub Actions"""
         # Extract simple cleanup candidates list for GitHub Actions
@@ -249,13 +247,13 @@ class ArtifactoryAnalyzer:
             print("=" * 60)
             
             # Load referenced images from values.json
-            referenced_images = self.load_values_json(values_json_path)
+            referenced_image_tags = self.load_values_json(values_json_path)
             
             # Calculate cutoff date (make it timezone-aware to match parsed dates)
             from datetime import timezone
             cutoff_date = datetime.now(timezone.utc) - timedelta(days=months_threshold * 30)
             print(f"Analyzing containers older than: {cutoff_date.strftime('%Y-%m-%d')}")
-            print(f"Referenced images in values.json: {len(referenced_images)}")
+            print(f"Referenced images in values.json: {len(referenced_image_tags)}")
             print("=" * 60)
             
             cleanup_data = {}
@@ -359,8 +357,7 @@ class ArtifactoryAnalyzer:
                             
                             if created_date:
                                 is_old = created_date < cutoff_date
-                                is_referenced = any(ref_img in full_image_name or full_image_name in ref_img 
-                                                    for ref_img in referenced_images)
+                                is_referenced = any(ref_img in full_image_name for ref_img in referenced_image_tags)
                                 
                                 # Add date information to artifact data
                                 artifact_data.update({
