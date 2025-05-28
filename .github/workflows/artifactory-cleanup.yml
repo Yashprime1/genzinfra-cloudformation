@@ -45,26 +45,50 @@ jobs:
       run: |
         python scripts/artifactory/analyze_containers.py
 
-    - name: Upload cleanup candidates
+    - name: Upload all cleanup artifacts
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: cleanup-candidates
-        path: cleanup_candidates.json
+        name: cleanup-analysis-results
+        path: |
+          cleanup_report_*.json
+          cleanup_*_*.json
+          cleanup_commands_*.sh
+          cleanup_summary_*.csv
         retention-days: 30
 
     - name: Create summary comment
       run: |
+        # Count cleanup candidates from the most recent cleanup report
+        CLEANUP_COUNT=$(find . -name "cleanup_report_*.json" -type f -exec jq '.summary.total_cleanup_candidates' {} \; | head -1 2>/dev/null || echo "0")
+        TOTAL_ANALYZED=$(find . -name "cleanup_report_*.json" -type f -exec jq '.summary.total_images' {} \; | head -1 2>/dev/null || echo "0")
+        
         echo "## Artifactory Container Cleanup Analysis Results" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "- **Analysis Date:** $(date)" >> $GITHUB_STEP_SUMMARY
-        echo "- **Cleanup Candidates Found:** $(cat cleanup_candidates.json 2>/dev/null | jq length 2>/dev/null || echo 'N/A')" >> $GITHUB_STEP_SUMMARY
+        echo "- **Component Analyzed:** ${{ github.event.inputs.component_name || 'dashboard' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Total Images Analyzed:** $TOTAL_ANALYZED" >> $GITHUB_STEP_SUMMARY
+        echo "- **Cleanup Candidates Found:** $CLEANUP_COUNT" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # List generated files
+        echo "### Generated Files" >> $GITHUB_STEP_SUMMARY
+        echo "The following files were generated and uploaded as artifacts:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        for file in cleanup_report_*.json cleanup_*_*.json cleanup_commands_*.sh cleanup_summary_*.csv; do
+          if [ -f "$file" ]; then
+            echo "- **$file**" >> $GITHUB_STEP_SUMMARY
+          fi
+        done
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
         echo "### Action Items" >> $GITHUB_STEP_SUMMARY
-        echo "1. Review the uploaded cleanup_candidates.json artifact" >> $GITHUB_STEP_SUMMARY
-        echo "2. Verify that identified containers are safe to remove" >> $GITHUB_STEP_SUMMARY
-        echo "3. Consider implementing automated cleanup for confirmed candidates" >> $GITHUB_STEP_SUMMARY
+        echo "1. Review the uploaded cleanup analysis artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "2. Check the cleanup_summary_*.csv for an overview" >> $GITHUB_STEP_SUMMARY
+        echo "3. Review cleanup_commands_*.sh before executing any deletions" >> $GITHUB_STEP_SUMMARY
+        echo "4. Verify that identified containers are safe to remove" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
-        echo "- Download the cleanup_candidates.json artifact to review detailed results" >> $GITHUB_STEP_SUMMARY
+        echo "- Download the cleanup-analysis-results artifact to review detailed results" >> $GITHUB_STEP_SUMMARY
         echo "- Update values.json if any missing references are identified" >> $GITHUB_STEP_SUMMARY
+        echo "- Execute cleanup commands manually after verification" >> $GITHUB_STEP_SUMMARY

@@ -256,258 +256,288 @@ class ArtifactoryAnalyzer:
             'summary_csv': csv_file
         }
     
-    def analyze_containers(self, values_json_path,component_name, months_threshold=3):
-        """Analyze containers and identify candidates for cleanup"""
-        print("Starting Artifactory container analysis...")
-        print("=" * 60)
+    # Add this method to your ArtifactoryAnalyzer class, right after the create_cleanup_artifacts method:
+    def create_github_artifact(self, cleanup_data):
+        """Create the cleanup_candidates.json file expected by GitHub Actions"""
+        # Extract simple cleanup candidates list for GitHub Actions
+        cleanup_candidates = []
+        for repo_name, repo_data in cleanup_data.items():
+            for image_name, image_data in repo_data['images'].items():
+                for candidate in image_data['cleanup_candidates']:
+                    # Simplify the structure for easier consumption
+                    simple_candidate = {
+                        'repository': candidate['repository'],
+                        'image': candidate['image'],
+                        'tag': candidate['tag'],
+                        'full_name': candidate['full_name'],
+                        'created_date': candidate.get('created_date'),
+                        'age_days': candidate.get('age_days'),
+                        'is_old': candidate.get('is_old', False),
+                        'is_referenced': candidate.get('is_referenced', False)
+                    }
+                    cleanup_candidates.append(simple_candidate)
         
-        # Load referenced images from values.json
-        referenced_images = self.load_values_json(values_json_path)
+        # Create the expected cleanup_candidates.json file
+        with open('cleanup_candidates.json', 'w') as f:
+            json.dump(cleanup_candidates, f, indent=2)
         
-        # Calculate cutoff date (make it timezone-aware to match parsed dates)
-        from datetime import timezone
-        cutoff_date = datetime.now(timezone.utc) - timedelta(days=months_threshold * 30)
-        print(f"Analyzing containers older than: {cutoff_date.strftime('%Y-%m-%d')}")
-        print(f"Referenced images in values.json: {len(referenced_images)}")
-        print("=" * 60)
-        
-        cleanup_data = {}
-        total_analyzed = 0
-        
-        # Get all Docker repositories
-        repositories = self.get_repositories()
-        print(f"Found {len(repositories)} Docker repositories")
-        for repo in repositories:
-            repo_name = repo['key']
-            print(f"\nAnalyzing repository: {repo_name}")
-            print("-" * 40)
-            if repo_name != "clevertap":
-                continue
-            # Initialize repository data structure
-            cleanup_data[repo_name] = {
-                'repository_info': repo,
-                'images': {},
-                'summary': {
-                    'total_images': 0,
-                    'total_tags': 0,
-                    'cleanup_candidates_count': 0
-                }
-            }
+        print(f"GitHub Actions artifact saved to: cleanup_candidates.json ({len(cleanup_candidates)} candidates)")
+        return 'cleanup_candidates.json'
+
+        def analyze_containers(self, values_json_path,component_name, months_threshold=3):
+            """Analyze containers and identify candidates for cleanup"""
+            print("Starting Artifactory container analysis...")
+            print("=" * 60)
             
-            # Get all images in repository
-            images = self.get_docker_images(repo_name,component_name)
+            # Load referenced images from values.json
+            referenced_images = self.load_values_json(values_json_path)
             
-            if not images:
-                print(f"  No Docker images found in {repo_name}")
-                continue
+            # Calculate cutoff date (make it timezone-aware to match parsed dates)
+            from datetime import timezone
+            cutoff_date = datetime.now(timezone.utc) - timedelta(days=months_threshold * 30)
+            print(f"Analyzing containers older than: {cutoff_date.strftime('%Y-%m-%d')}")
+            print(f"Referenced images in values.json: {len(referenced_images)}")
+            print("=" * 60)
             
-            cleanup_data[repo_name]['summary']['total_images'] = len(images)
+            cleanup_data = {}
+            total_analyzed = 0
             
-            for image_name in images:
-                if image_name != component_name:
+            # Get all Docker repositories
+            repositories = self.get_repositories()
+            print(f"Found {len(repositories)} Docker repositories")
+            for repo in repositories:
+                repo_name = repo['key']
+                print(f"\nAnalyzing repository: {repo_name}")
+                print("-" * 40)
+                if repo_name != "clevertap":
                     continue
-                print(f"  Image: {image_name}")
-            
-                # Initialize image data structure
-                cleanup_data[repo_name]['images'][image_name] = {
-                    'all_artifacts': [],
-                    'cleanup_candidates': [],
-                    'referenced_artifacts': [],
-                    'recent_artifacts': [],
+                # Initialize repository data structure
+                cleanup_data[repo_name] = {
+                    'repository_info': repo,
+                    'images': {},
                     'summary': {
+                        'total_images': 0,
                         'total_tags': 0,
-                        'cleanup_candidates_count': 0,
-                        'referenced_count': 0,
-                        'recent_count': 0
+                        'cleanup_candidates_count': 0
                     }
                 }
                 
-                # Get all tags for this image
-                tags = self.get_image_tags(repo_name, image_name)
-                cleanup_data[repo_name]['images'][image_name]['summary']['total_tags'] = len(tags)
-                cleanup_data[repo_name]['summary']['total_tags'] += len(tags)
+                # Get all images in repository
+                images = self.get_docker_images(repo_name,component_name)
                 
-                for tag in tags:
-                    total_analyzed += 1
-                    full_image_name = f"{image_name}:{tag}"
-                    
-                    # Get artifact information
-                    artifact_info = self.get_artifact_info(repo_name, image_name, tag)
-                    
-                    artifact_data = {
-                        'repository': repo_name,
-                        'image': image_name,
-                        'tag': tag,
-                        'full_name': full_image_name,
-                        'artifact_info': artifact_info
+                if not images:
+                    print(f"  No Docker images found in {repo_name}")
+                    continue
+                
+                cleanup_data[repo_name]['summary']['total_images'] = len(images)
+                
+                for image_name in images:
+                    if image_name != component_name:
+                        continue
+                    print(f"  Image: {image_name}")
+                
+                    # Initialize image data structure
+                    cleanup_data[repo_name]['images'][image_name] = {
+                        'all_artifacts': [],
+                        'cleanup_candidates': [],
+                        'referenced_artifacts': [],
+                        'recent_artifacts': [],
+                        'summary': {
+                            'total_tags': 0,
+                            'cleanup_candidates_count': 0,
+                            'referenced_count': 0,
+                            'recent_count': 0
+                        }
                     }
                     
-                    if artifact_info:
-                        # Try multiple date fields and formats
-                        date_fields = ['created', 'lastModified', 'lastUpdated']
-                        created_date = None
-                        date_source = None
+                    # Get all tags for this image
+                    tags = self.get_image_tags(repo_name, image_name)
+                    cleanup_data[repo_name]['images'][image_name]['summary']['total_tags'] = len(tags)
+                    cleanup_data[repo_name]['summary']['total_tags'] += len(tags)
+                    
+                    for tag in tags:
+                        total_analyzed += 1
+                        full_image_name = f"{image_name}:{tag}"
                         
-                        for field in date_fields:
-                            date_str = artifact_info.get(field)
-                            if date_str:
-                                try:
-                                    # Try different date parsing approaches
-                                    if isinstance(date_str, str):
-                                        # Handle ISO format with timezone (most common)
-                                        created_date = parser.parse(date_str)
-                                        # Ensure timezone awareness for comparison
-                                        if created_date.tzinfo is None:
-                                            created_date = created_date.replace(tzinfo=timezone.utc)
-                                    elif isinstance(date_str, (int, float)):
-                                        # Handle timestamp as number  
-                                        created_date = datetime.fromtimestamp(date_str / 1000 if date_str > 1e10 else date_str, tz=timezone.utc)
-                                    
-                                    if created_date:
-                                        date_source = field
-                                        break
-                                        
-                                except Exception as date_error:
-                                    continue
+                        # Get artifact information
+                        artifact_info = self.get_artifact_info(repo_name, image_name, tag)
                         
-                        if created_date:
-                            is_old = created_date < cutoff_date
-                            is_referenced = any(ref_img in full_image_name or full_image_name in ref_img 
-                                                for ref_img in referenced_images)
+                        artifact_data = {
+                            'repository': repo_name,
+                            'image': image_name,
+                            'tag': tag,
+                            'full_name': full_image_name,
+                            'artifact_info': artifact_info
+                        }
+                        
+                        if artifact_info:
+                            # Try multiple date fields and formats
+                            date_fields = ['created', 'lastModified', 'lastUpdated']
+                            created_date = None
+                            date_source = None
                             
-                            # Add date information to artifact data
-                            artifact_data.update({
-                                'created_date': created_date.isoformat(),
-                                'age_days': (datetime.now(timezone.utc) - created_date).days,
-                                'date_source': date_source,
-                                'is_old': is_old,
-                                'is_referenced': is_referenced
-                            })
-                            
-                            status = []
-                            if is_old:
-                                status.append("OLD")
-                            if is_referenced:
-                                status.append("REFERENCED")
-                            if not status:
-                                status.append("RECENT")
-                            
-                            print(f"    Tag: {tag:20} | Date: {created_date.strftime('%Y-%m-%d')} ({date_source}) | Status: {', '.join(status)}")
-                            
-                            # Categorize artifacts
-                            if is_old and not is_referenced:
-                                cleanup_data[repo_name]['images'][image_name]['cleanup_candidates'].append(artifact_data)
-                                cleanup_data[repo_name]['images'][image_name]['summary']['cleanup_candidates_count'] += 1
-                                cleanup_data[repo_name]['summary']['cleanup_candidates_count'] += 1
-                            elif is_referenced:
-                                cleanup_data[repo_name]['images'][image_name]['referenced_artifacts'].append(artifact_data)
-                                cleanup_data[repo_name]['images'][image_name]['summary']['referenced_count'] += 1
-                            else:
-                                cleanup_data[repo_name]['images'][image_name]['recent_artifacts'].append(artifact_data)
-                                cleanup_data[repo_name]['images'][image_name]['summary']['recent_count'] += 1
-                            
-                            cleanup_data[repo_name]['images'][image_name]['all_artifacts'].append(artifact_data)
-                            
-                        else:
-                            print(f"    Tag: {tag:20} | Date: NO PARSEABLE DATE | Available fields: {list(artifact_info.keys())}")
-                            # Show date field values for debugging
                             for field in date_fields:
-                                value = artifact_info.get(field, 'NOT FOUND')
+                                date_str = artifact_info.get(field)
+                                if date_str:
+                                    try:
+                                        # Try different date parsing approaches
+                                        if isinstance(date_str, str):
+                                            # Handle ISO format with timezone (most common)
+                                            created_date = parser.parse(date_str)
+                                            # Ensure timezone awareness for comparison
+                                            if created_date.tzinfo is None:
+                                                created_date = created_date.replace(tzinfo=timezone.utc)
+                                        elif isinstance(date_str, (int, float)):
+                                            # Handle timestamp as number  
+                                            created_date = datetime.fromtimestamp(date_str / 1000 if date_str > 1e10 else date_str, tz=timezone.utc)
+                                        
+                                        if created_date:
+                                            date_source = field
+                                            break
+                                            
+                                    except Exception as date_error:
+                                        continue
                             
-                            # Add to all artifacts even without date
+                            if created_date:
+                                is_old = created_date < cutoff_date
+                                is_referenced = any(ref_img in full_image_name or full_image_name in ref_img 
+                                                    for ref_img in referenced_images)
+                                
+                                # Add date information to artifact data
+                                artifact_data.update({
+                                    'created_date': created_date.isoformat(),
+                                    'age_days': (datetime.now(timezone.utc) - created_date).days,
+                                    'date_source': date_source,
+                                    'is_old': is_old,
+                                    'is_referenced': is_referenced
+                                })
+                                
+                                status = []
+                                if is_old:
+                                    status.append("OLD")
+                                if is_referenced:
+                                    status.append("REFERENCED")
+                                if not status:
+                                    status.append("RECENT")
+                                
+                                print(f"    Tag: {tag:20} | Date: {created_date.strftime('%Y-%m-%d')} ({date_source}) | Status: {', '.join(status)}")
+                                
+                                # Categorize artifacts
+                                if is_old and not is_referenced:
+                                    cleanup_data[repo_name]['images'][image_name]['cleanup_candidates'].append(artifact_data)
+                                    cleanup_data[repo_name]['images'][image_name]['summary']['cleanup_candidates_count'] += 1
+                                    cleanup_data[repo_name]['summary']['cleanup_candidates_count'] += 1
+                                elif is_referenced:
+                                    cleanup_data[repo_name]['images'][image_name]['referenced_artifacts'].append(artifact_data)
+                                    cleanup_data[repo_name]['images'][image_name]['summary']['referenced_count'] += 1
+                                else:
+                                    cleanup_data[repo_name]['images'][image_name]['recent_artifacts'].append(artifact_data)
+                                    cleanup_data[repo_name]['images'][image_name]['summary']['recent_count'] += 1
+                                
+                                cleanup_data[repo_name]['images'][image_name]['all_artifacts'].append(artifact_data)
+                                
+                            else:
+                                print(f"    Tag: {tag:20} | Date: NO PARSEABLE DATE | Available fields: {list(artifact_info.keys())}")
+                                # Show date field values for debugging
+                                for field in date_fields:
+                                    value = artifact_info.get(field, 'NOT FOUND')
+                                
+                                # Add to all artifacts even without date
+                                artifact_data.update({
+                                    'created_date': None,
+                                    'age_days': None,
+                                    'date_source': None,
+                                    'is_old': False,
+                                    'is_referenced': False,
+                                    'status': 'NO_DATE_INFO'
+                                })
+                                cleanup_data[repo_name]['images'][image_name]['all_artifacts'].append(artifact_data)
+                        else:
+                            print(f"    Tag: {tag:20} | Date: INFO NOT AVAILABLE | Status: UNKNOWN")
+                            
+                            # Add to all artifacts even without info
                             artifact_data.update({
                                 'created_date': None,
                                 'age_days': None,
                                 'date_source': None,
                                 'is_old': False,
                                 'is_referenced': False,
-                                'status': 'NO_DATE_INFO'
+                                'status': 'NO_ARTIFACT_INFO'
                             })
                             cleanup_data[repo_name]['images'][image_name]['all_artifacts'].append(artifact_data)
-                    else:
-                        print(f"    Tag: {tag:20} | Date: INFO NOT AVAILABLE | Status: UNKNOWN")
-                        
-                        # Add to all artifacts even without info
-                        artifact_data.update({
-                            'created_date': None,
-                            'age_days': None,
-                            'date_source': None,
-                            'is_old': False,
-                            'is_referenced': False,
-                            'status': 'NO_ARTIFACT_INFO'
-                        })
-                        cleanup_data[repo_name]['images'][image_name]['all_artifacts'].append(artifact_data)
-        
-        # Create cleanup artifacts
-        print("\n" + "=" * 60)
-        print("CREATING CLEANUP ARTIFACTS")
-        print("=" * 60)
-        
-        artifacts_created = self.create_cleanup_artifacts(cleanup_data)
-        
-        # Print summary
-        print("\n" + "=" * 60)
-        print("ANALYSIS SUMMARY")
-        print("=" * 60)
-        print(f"Total containers analyzed: {total_analyzed}")
-        
-        total_cleanup_candidates = sum(
-            len(image_data['cleanup_candidates']) 
-            for repo_data in cleanup_data.values() 
-            for image_data in repo_data['images'].values()
-        )
-        print(f"Cleanup candidates (old + not referenced): {total_cleanup_candidates}")
-        
-        # Repository-wise summary
-        print(f"\nREPOSITORY BREAKDOWN:")
-        print("-" * 60)
-        for repo_name, repo_data in cleanup_data.items():
-            if repo_data['images']:
-                print(f"Repository: {repo_name}")
-                print(f"  Total Images: {repo_data['summary']['total_images']}")
-                print(f"  Total Tags: {repo_data['summary']['total_tags']}")
-                print(f"  Cleanup Candidates: {repo_data['summary']['cleanup_candidates_count']}")
-                
-                # Image-wise breakdown
-                for image_name, image_data in repo_data['images'].items():
-                    if image_data['cleanup_candidates']:
-                        print(f"    {image_name}: {len(image_data['cleanup_candidates'])} cleanup candidates")
-                print()
-        
-        if total_cleanup_candidates > 0:
-            print(f"\nTop 10 oldest cleanup candidates:")
+            
+            # Create cleanup artifacts
+            print("\n" + "=" * 60)
+            print("CREATING CLEANUP ARTIFACTS")
+            print("=" * 60)
+            
+            artifacts_created = self.create_cleanup_artifacts(cleanup_data)
+
+            github_artifact = self.create_github_artifact(cleanup_data)
+            
+            # Print summary
+            print("\n" + "=" * 60)
+            print("ANALYSIS SUMMARY")
+            print("=" * 60)
+            print(f"Total containers analyzed: {total_analyzed}")
+            
+            total_cleanup_candidates = sum(
+                len(image_data['cleanup_candidates']) 
+                for repo_data in cleanup_data.values() 
+                for image_data in repo_data['images'].values()
+            )
+            print(f"Cleanup candidates (old + not referenced): {total_cleanup_candidates}")
+            
+            # Repository-wise summary
+            print(f"\nREPOSITORY BREAKDOWN:")
             print("-" * 60)
-            all_candidates = []
+            for repo_name, repo_data in cleanup_data.items():
+                if repo_data['images']:
+                    print(f"Repository: {repo_name}")
+                    print(f"  Total Images: {repo_data['summary']['total_images']}")
+                    print(f"  Total Tags: {repo_data['summary']['total_tags']}")
+                    print(f"  Cleanup Candidates: {repo_data['summary']['cleanup_candidates_count']}")
+                    
+                    # Image-wise breakdown
+                    for image_name, image_data in repo_data['images'].items():
+                        if image_data['cleanup_candidates']:
+                            print(f"    {image_name}: {len(image_data['cleanup_candidates'])} cleanup candidates")
+                    print()
+            
+            if total_cleanup_candidates > 0:
+                print(f"\nTop 10 oldest cleanup candidates:")
+                print("-" * 60)
+                all_candidates = []
+                for repo_data in cleanup_data.values():
+                    for image_data in repo_data['images'].values():
+                        all_candidates.extend(image_data['cleanup_candidates'])
+                
+                # Sort by age and show top 10
+                sorted_candidates = sorted(all_candidates, key=lambda x: x.get('age_days', 0), reverse=True)[:10]
+                for i, candidate in enumerate(sorted_candidates, 1):
+                    print(f"{i:2d}. {candidate['full_name']:40} | {candidate.get('age_days', 'N/A'):4} days | {candidate['created_date'][:10] if candidate.get('created_date') else 'No date'}")
+            
+            print(f"\nARTIFACTS CREATED:")
+            print("-" * 60)
+            for artifact_type, filename in artifacts_created.items():
+                print(f"{artifact_type.replace('_', ' ').title()}: {filename}")
+            
+            # Extract simple cleanup candidates list for backward compatibility
+            cleanup_candidates = []
             for repo_data in cleanup_data.values():
                 for image_data in repo_data['images'].values():
-                    all_candidates.extend(image_data['cleanup_candidates'])
+                    cleanup_candidates.extend(image_data['cleanup_candidates'])
             
-            # Sort by age and show top 10
-            sorted_candidates = sorted(all_candidates, key=lambda x: x.get('age_days', 0), reverse=True)[:10]
-            for i, candidate in enumerate(sorted_candidates, 1):
-                print(f"{i:2d}. {candidate['full_name']:40} | {candidate.get('age_days', 'N/A'):4} days | {candidate['created_date'][:10] if candidate.get('created_date') else 'No date'}")
-        
-        print(f"\nARTIFACTS CREATED:")
-        print("-" * 60)
-        for artifact_type, filename in artifacts_created.items():
-            print(f"{artifact_type.replace('_', ' ').title()}: {filename}")
-        
-        # Extract simple cleanup candidates list for backward compatibility
-        cleanup_candidates = []
-        for repo_data in cleanup_data.values():
-            for image_data in repo_data['images'].values():
-                cleanup_candidates.extend(image_data['cleanup_candidates'])
-        
-        return {
-            'cleanup_candidates': cleanup_candidates,
-            'detailed_data': cleanup_data,
-            'artifacts_created': artifacts_created,
-            'summary': {
-                'total_analyzed': total_analyzed,
-                'total_cleanup_candidates': total_cleanup_candidates,
-                'repositories_analyzed': len(cleanup_data)
+            return {
+                'cleanup_candidates': cleanup_candidates,
+                'detailed_data': cleanup_data,
+                'artifacts_created': artifacts_created,
+                'summary': {
+                    'total_analyzed': total_analyzed,
+                    'total_cleanup_candidates': total_cleanup_candidates,
+                    'repositories_analyzed': len(cleanup_data)
+                }
             }
-        }
 
 def main():
     # Get environment variables
