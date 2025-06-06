@@ -63,7 +63,7 @@
     },
     "SensuElbTargetGroup": {
       "Properties": {
-        "Port": 80,
+        "Port": 3000,
         "Protocol": "HTTP",
         "TargetType": "ip",
         "UnhealthyThresholdCount": 2,
