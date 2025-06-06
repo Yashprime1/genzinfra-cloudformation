@@ -123,6 +123,15 @@
             ],
             "Essential": true,
             "Image": "sensu/sensu:6.10.0",
+            "LogConfiguration":{
+                "LogDriver" :"awslogs",
+                "Options":{
+                  "awslogs-create-group":"true",
+                  "awslogs-group":"application-logs-callsock",
+                  "awslogs-region":"eu-west-1",
+                  "awslogs-stream-prefix":"asterisk-logs"
+                }
+            },
             "MemoryReservation": 256,
             "Name": "sensu",
             "PortMappings": [
