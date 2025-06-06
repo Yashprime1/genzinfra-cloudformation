@@ -27,10 +27,14 @@
         ],
         "Subnets": [
           {
-            "Fn::ImportValue": "${NetworkStack}-PublicAzAEc2SubnetId"
+            "Fn::ImportValue": {
+                "Fn::Sub":"${NetworkStack}-PublicAzAEc2SubnetId"
+            }
           },
           {
-            "Fn::ImportValue": "${NetworkStack}-PublicAzBEc2SubnetId"
+            "Fn::ImportValue": {
+                "Fn::Sub":"${NetworkStack}-PublicAzBEc2SubnetId"
+            }
           }
         ],
         "Type": "application"
