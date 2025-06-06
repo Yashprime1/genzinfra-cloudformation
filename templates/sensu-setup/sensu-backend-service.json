@@ -43,6 +43,30 @@
         "SchedulingStrategy": "REPLICA",
         "TaskDefinition": {
           "Ref": "SensuEcsTaskDefinition"
+        },
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "ENABLED",
+            "SecurityGroups": [
+              {
+                "Fn::ImportValue":{
+                    "Fn::Sub": "${NetworkStack}-SecurityGroup-SensuSecurityGroupId"
+                } 
+              }
+            ],
+            "Subnets": [
+              {
+                "Fn::ImportValue": {
+                    "Fn::Sub":"${NetworkStack}-PublicAzAEc2SubnetId"
+                }
+              },
+              {
+                "Fn::ImportValue": {
+                    "Fn::Sub":"${NetworkStack}-PublicAzBEc2SubnetId"
+                }
+              }
+            ]
+          }
         }
       },
       "Type": "AWS::ECS::Service"
@@ -120,7 +144,7 @@
         "Family": {
           "Ref": "AWS::StackName"
         },
-        "NetworkMode": "host"
+        "NetworkMode": "awsvpc"
       },
       "Type": "AWS::ECS::TaskDefinition"
     },
