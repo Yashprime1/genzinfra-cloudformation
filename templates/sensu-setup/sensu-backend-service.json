@@ -132,6 +132,10 @@
                   "awslogs-stream-prefix":"asterisk-logs"
                 }
             },
+            "Command": [
+              "sensu-backend",
+              "start"
+            ],
             "MemoryReservation": 256,
             "Name": "sensu",
             "PortMappings": [
