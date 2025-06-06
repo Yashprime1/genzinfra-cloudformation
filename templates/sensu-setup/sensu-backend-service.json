@@ -127,9 +127,8 @@
                 "LogDriver" :"awslogs",
                 "Options":{
                   "awslogs-create-group":"true",
-                  "awslogs-group":"application-logs-callsock",
-                  "awslogs-region":"eu-west-1",
-                  "awslogs-stream-prefix":"asterisk-logs"
+                  "awslogs-group":"sensu-backend-logs",
+                  "awslogs-region":"ap-south-1"
                 }
             },
             "Command": [
