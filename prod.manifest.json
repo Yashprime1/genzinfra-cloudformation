@@ -2,91 +2,25 @@
     "ParallelDeployment": false,
     "Regions": [
         {
-            "Name": "eu-west-1",
+            "Name": "ap-south-1",
             "Stacks": [
                   {
-                    "StackName": "eu1",
+                    "StackName": "in1",
                     "Action": "CREATE",
-                    "TemplatePath": "templates/network/network.json",
+                    "TemplatePath": "templates/sensu-setup/network.json",
                     "Parameters": {
-                      "VPCNetworkPrefix": "10.11",
-                      "StackProvisioningMode": "dev",
-                      "NatInstanceAmiId": "ami-085252d6cf1b51097"
+                      "VPCNetworkPrefix": "10.11"
                     },
                     "StackPolicy": {}
                   },
                   {
-                    "StackName": "eu1-SecurityGroup",
+                    "StackName": "in1-SecurityGroup",
                     "Action": "CREATE",
-                    "TemplatePath": "templates/security-group/security-group.json",
+                    "TemplatePath": "templates/sensu-setup/security-group.json",
                     "Parameters": {
-                      "NetworkStack": "eu1"
+                      "NetworkStack": "in1"
                     },
                     "StackPolicy": {}
-                  },
-                  {
-                    "StackName": "eu1-SecurityGroup-IngressRule-CallSocksEcsTaskEc2SecurityGroup",
-                    "Action": "CREATE",
-                    "TemplatePath": "templates/security-group/ingressrule/CallSocksEcsTaskEc2SecurityGroup.json",
-                    "Parameters": {
-                      "NetworkStack": "eu1"
-                    },
-                    "StackPolicy": {}
-                  },
-                  {
-                    "StackName": "eu1-SecurityGroup-IngressRule-PromotionsRDSEc2SecurityGroup",
-                    "Action": "CREATE",
-                    "TemplatePath": "templates/security-group/ingressrule/PromotionsRDSEc2SecurityGroup.json",
-                    "Parameters": {
-                      "NetworkStack": "eu1"
-                    },
-                    "StackPolicy": {}
-                  },
-                  {
-                    "StackName": "eu1-SharedResources",
-                    "Action": "CREATE",
-                    "TemplatePath": "templates/sharedresources/sharedresources.json",
-                    "Parameters": {
-                      "NetworkStack": "eu1",
-                      "StackProvisioningMode": "dev"
-                    },
-                    "StackPolicy": {}
-                  },
-                  {
-                    "StackName": "eu1-Mongo-Directcall-1",
-                    "Action": "CREATE",
-                    "TemplatePath": "templates/mongo/eu1/eu1-Mongo-Directcall-1/eu1-Mongo-Directcall-1.json",
-                    "Parameters": {},
-                    "StackPolicy": {}
-                  },
-                  {
-                    "StackName": "eu1-Mongo-Directcall-1-Service",
-                    "Action": "CREATE",
-                    "TemplatePath": "templates/mongo/eu1/eu1-Mongo-Directcall-1/eu1-Mongo-Directcall-1-Service.json",
-                    "Parameters": {
-                      "ContainerTag": "{{ ContainerTag }}",
-                      "SensuClientImageName": "sensu",
-                      "SensuClientImageTag": "{{ SensuClientImageTag }}",
-                      "SplunkForwarderImageName": "splunk-forwarder",
-                      "SplunkForwarderImageTag": "{{ SplunkForwarderImageTag }}",
-                      "CadvisorImageName": "clevertap/cadvisor",
-                      "CadvisorImageTag": "{{ CadvisorImageTag }}",
-                      "SensuClientContainerTag": "{{ SensuClientContainerTag }}",
-                      "SensuV2BackendUrl": "wss://sensu-v2-backend.clevertap.net",
-                      "MongoContainerTag101113132": "{{ MongoContainerTag101113132 }}",
-                      "MongoContainerTag101113148": "{{ MongoContainerTag101113148 }}",
-                      "MongoContainerTag101113164": "{{ MongoContainerTag101113164 }}"
-                    },
-                    "StackPolicy": {
-                      "Statement": [
-                        {
-                          "Effect": "Allow",
-                          "Action": "Update:*",
-                          "Principal": "*",
-                          "Resource": "*"
-                        }
-                      ]
-                    }
                   },
                   {
                     "StackName": "eu1-Redis-Directcall-1",
@@ -105,68 +39,24 @@
                     "StackPolicy": {}
                   },
                   {
-                    "StackName": "eu1-Callsock-1",
+                    "StackName": "eu1-Sensu-Backend",
                     "Action": "CREATE",
-                    "TemplatePath": "templates/callsock/callsock.json",
+                    "TemplatePath": "templates/sensu-setup/sensu-backend-base.json",
                     "Parameters": {
-                      "NetworkStack": "eu1",
-                      "EnableEfsCertbotAutomatedSetup":"true",
-                      "EnableNotificationSetupForCallSockServiceScalingAlarms": "true"
+                      "NetworkStack": "in1"
                     },
                     "StackPolicy": {}
                   },
                   {
-                    "StackName": "eu1-Callsock-1-Service",
+                    "StackName": "eu1-Sensu-Backend-Service",
                     "Action": "CREATE",
-                    "TemplatePath": "templates/callsock/callsock-service.json",
+                    "TemplatePath": "templates/sensu-setup/sensu-backend-service.json",
                     "Parameters": {
-                      "NetworkStack": "eu1",
-                      "ContainerTag": "{{ ContainerTag }}",
-                      "AsteriskContainerTag": "{{ AsteriskImageTag }}",
-                      "DesiredCount": "1",
-                      "PostgresContainerTag" : "{{ PostgresContainerTag }}",
-                      "CPU": "8192",
-                      "Memory": "16384",
-                      "MinTasks": "2",
-                      "MaxTasks": "10",
-                      "MongoDirectCallHosts": "10.11.13.132:27017,10.11.13.148:27017,10.11.13.164",
-                      "EnableEfsCertbotAutomatedSetup":"true",
-                      "EnableSetupForAutoScalingCallSockService":"true"
+                      "NetworkStack": "in1"
                     },
-                    "StackPolicy": {
-                      "Statement": [
-                        {
-                          "Action": "Update:*",
-                          "Effect": "Allow",
-                          "Principal": "*",
-                          "Resource": "*"
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "StackName": "eu1-ScaleIn-Monitor-Service",
-                    "Action": "CREATE",
-                    "TemplatePath": "templates/callsock/scale-in-monitor-service.json",
-                    "Parameters": {
-                      "NetworkStack": "eu1",
-                      "DesiredCount": "1",
-                      "CPU": "8192",
-                      "Memory": "16384",
-                      "MinTasks": "2",
-                      "MaxTasks": "10"
-                    },
-                    "StackPolicy": {
-                      "Statement": [
-                        {
-                          "Action": "Update:*",
-                          "Effect": "Allow",
-                          "Principal": "*",
-                          "Resource": "*"
-                        }
-                      ]
-                    }
+                    "StackPolicy": {}
                   }
+
             ]
         }
     ]

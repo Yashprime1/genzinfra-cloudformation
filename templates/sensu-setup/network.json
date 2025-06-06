@@ -1,0 +1,195 @@
+{
+  "Description": "AWS CloudFormation template that defines all the necessary resources for setting up CleverTap's stack. Supported availability zones are specified in the Mappings section. Certificates and the base AMI ID are prerequisites.",
+  "Parameters": {
+    "VPCNetworkPrefix": {
+      "Default": "10.0",
+      "Description": "Defines the first two octets of the VPC's CIDR block, with '.0.0/16' automatically appended",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "Vpc": {
+      "Properties": {
+        "CidrBlock": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Ref": "VPCNetworkPrefix"
+              },
+              "0.0/16"
+            ]
+          ]
+        },
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default"
+      },
+      "Type": "AWS::EC2::VPC"
+    },
+    "PublicAzAEc2Subnet": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "a"
+            ]
+          ]
+        },
+        "CidrBlock": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Ref": "VPCNetworkPrefix"
+              },
+              "1.0/27"
+            ]
+          ]
+        },
+        "MapPublicIpOnLaunch": false,
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "PublicAzBEc2Subnet": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "b"
+            ]
+          ]
+        },
+        "CidrBlock": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Ref": "VPCNetworkPrefix"
+              },
+              "1.32/27"
+            ]
+          ]
+        },
+        "MapPublicIpOnLaunch": false,
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "InternetGateway": {
+      "Properties": {},
+      "Type": "AWS::EC2::InternetGateway"
+    },
+    "VpcGatewayAttachment": {
+      "Properties": {
+        "InternetGatewayId": {
+          "Ref": "InternetGateway"
+        },
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Type": "AWS::EC2::VPCGatewayAttachment"
+    },
+    "RouteTableForPublicSubnets": {
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Type": "AWS::EC2::RouteTable"
+    },
+    "RouteToIGW": {
+      "DependsOn": [
+        "VpcGatewayAttachment"
+      ],
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "InternetGateway"
+        },
+        "RouteTableId": {
+          "Ref": "RouteTableForPublicSubnets"
+        }
+      },
+      "Type": "AWS::EC2::Route"
+    },
+    "PublicAzAEc2SubnetRouteTableAssociation": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "RouteTableForPublicSubnets"
+        },
+        "SubnetId": {
+          "Ref": "PublicAzAEc2Subnet"
+        }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    "PublicAzBEc2SubnetRouteTableAssociation": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "RouteTableForPublicSubnets"
+        },
+        "SubnetId": {
+          "Ref": "PublicAzBEc2Subnet"
+        }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation"
+    }
+  },
+  "Outputs": {
+    "PublicAzAEc2SubnetId": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-PublicAzAEc2SubnetId"
+        }
+      },
+      "Value": {
+        "Ref": "PublicAzAEc2Subnet"
+      }
+    },
+    "PublicAzBEc2SubnetId": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-PublicAzBEc2SubnetId"
+        }
+      },
+      "Value": {
+        "Ref": "PublicAzBEc2Subnet"
+      }
+    },
+    "VpcId": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-VpcId"
+        }
+      },
+      "Value": {
+        "Ref": "Vpc"
+      }
+    },
+    "VpcNetworkPrefix": {
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-VpcNetworkPrefix"
+        }
+      },
+      "Value": {
+        "Ref": "VPCNetworkPrefix"
+      }
+    }
+  }
+}

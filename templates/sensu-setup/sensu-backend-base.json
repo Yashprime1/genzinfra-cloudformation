@@ -1,0 +1,95 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Sensu's Base Stack",
+  "Parameters": {
+    "NetworkStack": {
+      "Description": "Name of the stack that acts as the bases for all stacks in System",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "SensuEcsCluster": {
+      "Properties": {
+        "ClusterName": {
+          "Ref": "AWS::StackName"
+        }
+      },
+      "Type": "AWS::ECS::Cluster"
+    },
+    "SensuElb": {
+      "Properties": {
+        "IpAddressType": "ipv4",
+        "Scheme": "internet-facing",
+        "SecurityGroups": [
+          {
+            "Fn::ImportValue": "${NetworkStack}-SecurityGroup-SensuSecurityGroupId"
+          }
+        ],
+        "Subnets": [
+          {
+            "Fn::ImportValue": "${NetworkStack}-PublicAzAEc2SubnetId"
+          },
+          {
+            "Fn::ImportValue": "${NetworkStack}-PublicAzBEc2SubnetId"
+          }
+        ],
+        "Type": "application"
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    },
+    "SensuElbListener": {
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "SensuElbTargetGroup"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "SensuElb"
+        },
+        "Port": 80,
+        "Protocol": "HTTP"
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::Listener"
+    },
+    "SensuElbTargetGroup": {
+      "Properties": {
+        "Port": 80,
+        "Protocol": "HTTP",
+        "TargetType": "ip",
+        "UnhealthyThresholdCount": 2,
+        "VpcId": {
+          "Fn::ImportValue": "${NetworkStack}-VpcId"
+        }
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
+    }
+  },
+  "Outputs": {
+    "SensuElbTargetGroupArn": {
+      "Description": "Sensu ELB Target Group Arn",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-SensuElbTargetGroupArn"
+        }
+      },
+      "Value": {
+        "Ref": "SensuElbTargetGroup"
+      }
+    },
+    "SensuEcsClusterName": {
+      "Description": "Sensu ECS Cluster Name",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-SensuEcsClusterName"
+        }
+      },
+      "Value": {
+        "Ref": "SensuEcsCluster"
+      }
+    }
+  }
+}

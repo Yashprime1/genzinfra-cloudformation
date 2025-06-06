@@ -1,0 +1,232 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Sensu's Service Stack",
+  "Parameters": {
+    "NetworkStack": {
+      "Description": "Name of the stack that acts as the bases for all stacks in System",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "SensuEcsService": {
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-SensuEcsClusterName"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 200,
+          "MinimumHealthyPercent": 100
+        },
+        "HealthCheckGracePeriodSeconds": 60,
+        "LaunchType": "FARGATE",
+        "LoadBalancers": [
+          {
+            "ContainerName": "sensu",
+            "ContainerPort": 8080,
+            "TargetGroupArn": {
+              "Fn::ImportValue": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "AWS::StackName"
+                    },
+                    "SensuElbTargetGroupArn"
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+        "SchedulingStrategy": "REPLICA",
+        "TaskDefinition": {
+          "Ref": "SensuEcsTaskDefinition"
+        }
+      },
+      "Type": "AWS::ECS::Service"
+    },
+    "SensuEcsTaskDefinition": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Environment": [
+              {
+                "Name": "name",
+                "Value": "sensu"
+              },
+              {
+                "Name": "SENSU_BACKEND_NO_EMBED_ETCD",
+                "Value": false
+              },
+              {
+                "Name": "SENSU_BACKEND_STATE_DIR",
+                "Value": "/var/lib/sensu/sensu-backend"
+              },
+              {
+                "Name": "SENSU_BACKEND_LOG_LEVEL",
+                "Value": "error"
+              },
+              {
+                "Name": "SENSU_BACKEND_DISABLE_PLATFORM_METRICS",
+                "Value": "true"
+              },
+              {
+                "Name": "STACK_NAME",
+                "Value": {
+                  "Ref": "AWS::StackName"
+                }
+              },
+              {
+                "Name": "SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD",
+                "Value": "admin"
+              },
+              {
+                "Name" : "SENSU_BACKEND_CLUSTER_ADMIN_USERNAME",
+                "Value" : "admin"
+              }
+            ],
+            "Essential": true,
+            "Image": "sensu/sensu:6.10.0",
+            "MemoryReservation": 256,
+            "Name": "sensu",
+            "PortMappings": [
+              {
+                "ContainerPort": 8080,
+                "HostPort": 8080,
+                "Protocol": "tcp"
+              },
+              {
+                "ContainerPort": 3000,
+                "HostPort": 3000,
+                "Protocol": "tcp"
+              }
+            ],
+            "Privileged": false,
+            "ReadonlyRootFilesystem": false,
+            "Ulimits": [
+              {
+                "HardLimit": 65536,
+                "Name": "nofile",
+                "SoftLimit": 65536
+              }
+            ]
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Ref": "SensuEcsTaskExecutionRole"
+        },
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "NetworkMode": "host"
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    },
+    "SensuEcsTaskExecutionRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "SensuEcsTaskExecutionRolePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "*",
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "SensuEcsTaskExecutionRolePolicy"
+            ]
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "SensuEcsTaskExecutionRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "SensuEcsTaskRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "SensuEcsTaskRolePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "*",
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::StackName"
+              },
+              "SensuEcsTaskRolePolicy"
+            ]
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "SensuEcsTaskRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    }
+  }
+}
