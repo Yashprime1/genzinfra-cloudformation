@@ -128,7 +128,8 @@
                 "Options":{
                   "awslogs-create-group":"true",
                   "awslogs-group":"sensu-backend-logs",
-                  "awslogs-region":"ap-south-1"
+                  "awslogs-region":"ap-south-1",
+                  "awslogs-stream-prefix":"sensu-backend-logs"
                 }
             },
             "Command": [
