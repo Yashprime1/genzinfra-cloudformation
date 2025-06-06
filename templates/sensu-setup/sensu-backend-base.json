@@ -22,7 +22,9 @@
         "Scheme": "internet-facing",
         "SecurityGroups": [
           {
-            "Fn::ImportValue": "${NetworkStack}-SecurityGroup-SensuSecurityGroupId"
+            "Fn::ImportValue":{
+                "Fn::Sub": "${NetworkStack}-SecurityGroup-SensuSecurityGroupId"
+            } 
           }
         ],
         "Subnets": [
@@ -66,7 +68,9 @@
         "TargetType": "ip",
         "UnhealthyThresholdCount": 2,
         "VpcId": {
-          "Fn::ImportValue": "${NetworkStack}-VpcId"
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
         }
       },
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
