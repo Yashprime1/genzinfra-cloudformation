@@ -5,6 +5,16 @@
     "NetworkStack": {
       "Description": "Name of the stack that acts as the bases for all stacks in System",
       "Type": "String"
+    },
+    "CPU": {
+      "Default": "256",
+      "Description": "The amount of CPU to reserve for the task",
+      "Type": "String"
+    },
+    "Memory": {
+      "Default": "512",
+      "Description": "The amount of memory to reserve for the task",
+      "Type": "String"
     }
   },
   "Resources": {
@@ -141,10 +151,25 @@
         "ExecutionRoleArn": {
           "Ref": "SensuEcsTaskExecutionRole"
         },
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "SensuEcsTaskRole",
+            "Arn"
+          ]
+        },
+        "Cpu": {
+          "Ref": "CPU"
+        },
+        "Memory": {
+          "Ref": "Memory"
+        },
         "Family": {
           "Ref": "AWS::StackName"
         },
-        "NetworkMode": "awsvpc"
+        "NetworkMode": "awsvpc",
+        "RequiresCompatibilities": [
+          "FARGATE"
+        ]
       },
       "Type": "AWS::ECS::TaskDefinition"
     },
