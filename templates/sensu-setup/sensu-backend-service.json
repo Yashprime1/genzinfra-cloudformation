@@ -234,7 +234,6 @@
         "ContainerDefinitions": [
           {
             "Name": "sensu-etcd",
-            "Hostname": "etcd",
             "Image": "bitnami/etcd:latest",
             "Essential": true,
             "Environment": [
@@ -244,7 +243,7 @@
               },
               {
                 "Name": "ETCD_ADVERTISE_CLIENT_URLS",
-                "Value": "http://etcd:2379"
+                "Value": "http://0.0.0.0:2379"
               },
               {
                 "Name": "ETCD_LISTEN_CLIENT_URLS",
@@ -358,7 +357,7 @@
         "LaunchType": "FARGATE",
         "LoadBalancers": [
           {
-            "ContainerName": "sensu",
+            "ContainerName": "sensu-etcd",
             "ContainerPort": 2379,
             "TargetGroupArn": {
               "Fn::ImportValue": {
