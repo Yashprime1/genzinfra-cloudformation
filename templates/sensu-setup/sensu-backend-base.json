@@ -91,7 +91,7 @@
         "HealthCheckProtocol": "HTTP",
         "HealthCheckTimeoutSeconds": 10,
         "HealthyThresholdCount": 5,
-        "HealthCheckPort": "8080",
+        "HealthCheckPort": "3000",
         "Matcher": {
           "HttpCode": "200"
         },
@@ -114,7 +114,7 @@
         "HealthCheckProtocol": "HTTP",
         "HealthCheckTimeoutSeconds": 10,
         "HealthyThresholdCount": 5,
-        "HealthCheckPort": "8081",
+        "HealthCheckPort": "3000",
         "Matcher": {
           "HttpCode": "200"
         },
