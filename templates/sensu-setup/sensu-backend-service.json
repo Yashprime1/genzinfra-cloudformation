@@ -374,7 +374,7 @@
             }
           },
           {
-            "ContainerName": "sensu",
+            "ContainerName": "sensu-etcd",
             "ContainerPort": 2380,
             "TargetGroupArn": {
               "Fn::ImportValue": {
