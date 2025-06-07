@@ -22,20 +22,20 @@
         "Scheme": "internet-facing",
         "SecurityGroups": [
           {
-            "Fn::ImportValue":{
-                "Fn::Sub": "${NetworkStack}-SecurityGroup-SensuSecurityGroupId"
-            } 
+            "Fn::ImportValue": {
+              "Fn::Sub": "${NetworkStack}-SecurityGroup-SensuSecurityGroupId"
+            }
           }
         ],
         "Subnets": [
           {
             "Fn::ImportValue": {
-                "Fn::Sub":"${NetworkStack}-PublicAzAEc2SubnetId"
+              "Fn::Sub": "${NetworkStack}-PublicAzAEc2SubnetId"
             }
           },
           {
             "Fn::ImportValue": {
-                "Fn::Sub":"${NetworkStack}-PublicAzBEc2SubnetId"
+              "Fn::Sub": "${NetworkStack}-PublicAzBEc2SubnetId"
             }
           }
         ],
@@ -68,7 +68,7 @@
         "HealthCheckProtocol": "HTTP",
         "HealthCheckTimeoutSeconds": 10,
         "HealthyThresholdCount": 5,
-        "HealthCheckPort":"3000",
+        "HealthCheckPort": "3000",
         "Matcher": {
           "HttpCode": "200"
         },
@@ -172,6 +172,52 @@
       },
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
     },
+    "SensuElbTargetGroup2379": {
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/",
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckTimeoutSeconds": 10,
+        "HealthyThresholdCount": 5,
+        "HealthCheckPort": "2379",
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "Port": 2379,
+        "Protocol": "HTTP",
+        "TargetType": "ip",
+        "UnhealthyThresholdCount": 2,
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
+        }
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
+    },
+    "SensuElbTargetGroup2380": {
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/",
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckTimeoutSeconds": 10,
+        "HealthyThresholdCount": 5,
+        "HealthCheckPort": "2380",
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "Port": 2380,
+        "Protocol": "HTTP",
+        "TargetType": "ip",
+        "UnhealthyThresholdCount": 2,
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
+        }
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
+    },
     "SensuElbListener8080": {
       "Properties": {
         "DefaultActions": [
@@ -204,6 +250,42 @@
           "Ref": "SensuElb"
         },
         "Port": 8081,
+        "Protocol": "HTTP"
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::Listener"
+    },
+    "SensuElbListener2379": {
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "SensuElbTargetGroup2379"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "SensuElb"
+        },
+        "Port": 2379,
+        "Protocol": "HTTP"
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::Listener"
+    },
+    "SensuElbListener2380": {
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "SensuElbTargetGroup2380"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "SensuElb"
+        },
+        "Port": 2380,
         "Protocol": "HTTP"
       },
       "Type": "AWS::ElasticLoadBalancingV2::Listener"
@@ -252,6 +334,28 @@
       },
       "Value": {
         "Ref": "SensuElbTargetGroup8081"
+      }
+    },
+    "SensuElbTargetGroup2379Arn": {
+      "Description": "Sensu ELB Target Group 2379 Arn",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-SensuElbTargetGroup2379Arn"
+        }
+      },
+      "Value": {
+        "Ref": "SensuElbTargetGroup2379"
+      }
+    },
+    "SensuElbTargetGroup2380Arn": {
+      "Description": "Sensu ELB Target Group 2380 Arn",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-SensuElbTargetGroup2380Arn"
+        }
+      },
+      "Value": {
+        "Ref": "SensuElbTargetGroup2380"
       }
     }
   }

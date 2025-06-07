@@ -32,7 +32,7 @@
         "HealthCheckGracePeriodSeconds": 60,
         "LaunchType": "FARGATE",
         "LoadBalancers": [
-       {
+          {
             "ContainerName": "sensu",
             "ContainerPort": 3000,
             "TargetGroupArn": {
@@ -93,20 +93,20 @@
             "AssignPublicIp": "ENABLED",
             "SecurityGroups": [
               {
-                "Fn::ImportValue":{
-                    "Fn::Sub": "${NetworkStack}-SecurityGroup-SensuSecurityGroupId"
-                } 
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${NetworkStack}-SecurityGroup-SensuSecurityGroupId"
+                }
               }
             ],
             "Subnets": [
               {
                 "Fn::ImportValue": {
-                    "Fn::Sub":"${NetworkStack}-PublicAzAEc2SubnetId"
+                  "Fn::Sub": "${NetworkStack}-PublicAzAEc2SubnetId"
                 }
               },
               {
                 "Fn::ImportValue": {
-                    "Fn::Sub":"${NetworkStack}-PublicAzBEc2SubnetId"
+                  "Fn::Sub": "${NetworkStack}-PublicAzBEc2SubnetId"
                 }
               }
             ]
@@ -151,20 +151,20 @@
                 "Value": "admin"
               },
               {
-                "Name" : "SENSU_BACKEND_CLUSTER_ADMIN_USERNAME",
-                "Value" : "admin"
+                "Name": "SENSU_BACKEND_CLUSTER_ADMIN_USERNAME",
+                "Value": "admin"
               }
             ],
             "Essential": true,
             "Image": "sensu/sensu:6.10.0",
-            "LogConfiguration":{
-                "LogDriver" :"awslogs",
-                "Options":{
-                  "awslogs-create-group":"true",
-                  "awslogs-group":"sensu-backend-logs",
-                  "awslogs-region":"ap-south-1",
-                  "awslogs-stream-prefix":"sensu-backend-logs"
-                }
+            "LogConfiguration": {
+              "LogDriver": "awslogs",
+              "Options": {
+                "awslogs-create-group": "true",
+                "awslogs-group": "sensu-backend-logs",
+                "awslogs-region": "ap-south-1",
+                "awslogs-stream-prefix": "sensu-backend-logs"
+              }
             },
             "Command": [
               "sensu-backend",
@@ -224,6 +224,200 @@
         ]
       },
       "Type": "AWS::ECS::TaskDefinition"
+    },
+    "SensuEtcdEcsTaskDefinition": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Name": "sensu-etcd",
+            "Hostname": "etcd",
+            "Image": "bitnami/etcd:latest",
+            "Essential": true,
+            "Environment": [
+              {
+                "Name": "ALLOW_NONE_AUTHENTICATION",
+                "Value": "yes"
+              },
+              {
+                "Name": "ETCD_ADVERTISE_CLIENT_URLS",
+                "Value": "http://etcd:2379"
+              },
+              {
+                "Name": "ETCD_LISTEN_CLIENT_URLS",
+                "Value": "http://0.0.0.0:2379"
+              },
+              {
+                "Name": "ETCD_LISTEN_PEER_URLS",
+                "Value": "http://0.0.0.0:2380"
+              },
+              {
+                "Name": "ETCD_INITIAL_ADVERTISE_PEER_URLS",
+                "Value": "http://etcd:2380"
+              },
+              {
+                "Name": "ETCD_INITIAL_CLUSTER",
+                "Value": "etcd=http://etcd:2380"
+              },
+              {
+                "Name": "ETCD_NAME",
+                "Value": "etcd"
+              },
+              {
+                "Name": "ETCD_INITIAL_CLUSTER_STATE",
+                "Value": "new"
+              },
+              {
+                "Name": "ETCD_INITIAL_CLUSTER_TOKEN",
+                "Value": "etcd-cluster"
+              }
+            ],
+            "PortMappings": [
+              {
+                "ContainerPort": 2379,
+                "HostPort": 2379,
+                "Protocol": "tcp"
+              },
+              {
+                "ContainerPort": 2380,
+                "HostPort": 2380,
+                "Protocol": "tcp"
+              }
+            ],
+            "MountPoints": [
+              {
+                "SourceVolume": "etcd_data",
+                "ContainerPath": "/bitnami/etcd"
+              }
+            ],
+            "LogConfiguration": {
+              "LogDriver": "awslogs",
+              "Options": {
+                "awslogs-create-group": "true",
+                "awslogs-group": "sensu-backend-logs",
+                "awslogs-region": "ap-south-1",
+                "awslogs-stream-prefix": "sensu-backend-logs"
+              }
+            },
+            "Privileged": false,
+            "ReadonlyRootFilesystem": false,
+            "Ulimits": [
+              {
+                "HardLimit": 65536,
+                "Name": "nofile",
+                "SoftLimit": 65536
+              }
+            ]
+          }
+        ],
+        "Volumes": [
+          {
+            "Name": "etcd_data"
+          }
+        ],
+        "ExecutionRoleArn": {
+          "Ref": "SensuEcsTaskExecutionRole"
+        },
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "SensuEcsTaskRole",
+            "Arn"
+          ]
+        },
+        "Cpu": {
+          "Ref": "CPU"
+        },
+        "Memory": {
+          "Ref": "Memory"
+        },
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "NetworkMode": "awsvpc",
+        "RequiresCompatibilities": [
+          "FARGATE"
+        ]
+      },
+      "Type": "AWS::ECS::TaskDefinition"
+    },
+    "SensuEtcdEcsService": {
+      "Properties": {
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${AWS::StackName}-SensuEcsClusterName"
+          }
+        },
+        "DeploymentConfiguration": {
+          "MaximumPercent": 200,
+          "MinimumHealthyPercent": 100
+        },
+        "HealthCheckGracePeriodSeconds": 60,
+        "LaunchType": "FARGATE",
+        "LoadBalancers": [
+          {
+            "ContainerName": "sensu",
+            "ContainerPort": 2379,
+            "TargetGroupArn": {
+              "Fn::ImportValue": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "AWS::StackName"
+                    },
+                    "SensuElbTargetGroup2379Arn"
+                  ]
+                ]
+              }
+            }
+          },
+          {
+            "ContainerName": "sensu",
+            "ContainerPort": 2380,
+            "TargetGroupArn": {
+              "Fn::ImportValue": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "AWS::StackName"
+                    },
+                    "SensuElbTargetGroup2380Arn"
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+        "SchedulingStrategy": "REPLICA",
+        "TaskDefinition": {
+          "Ref": "SensuEcsTaskDefinition"
+        },
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "ENABLED",
+            "SecurityGroups": [
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${NetworkStack}-SecurityGroup-SensuSecurityGroupId"
+                }
+              }
+            ],
+            "Subnets": [
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${NetworkStack}-PublicAzAEc2SubnetId"
+                }
+              },
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${NetworkStack}-PublicAzBEc2SubnetId"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "Type": "AWS::ECS::Service"
     },
     "SensuEcsTaskExecutionRole": {
       "Properties": {
