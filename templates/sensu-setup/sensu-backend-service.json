@@ -153,6 +153,10 @@
               {
                 "Name": "SENSU_BACKEND_CLUSTER_ADMIN_USERNAME",
                 "Value": "admin"
+              },
+               {
+                "Name": "SENSU_BACKEND_ETCD_URLS",
+                "Value": "in1-Se-Sensu-lvlLrUIhwJmo-792887.ap-south-1.elb.amazonaws.com:2379"
               }
             ],
             "Essential": true,
