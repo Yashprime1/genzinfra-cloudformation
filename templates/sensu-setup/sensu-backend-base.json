@@ -63,6 +63,15 @@
     },
     "SensuElbTargetGroup": {
       "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/",
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckTimeoutSeconds": 10,
+        "HealthyThresholdCount": 5,
+        "HealthCheckPort":"3000",
+        "Matcher": {
+          "HttpCode": "200"
+        },
         "Port": 3000,
         "Protocol": "HTTP",
         "TargetType": "ip",
