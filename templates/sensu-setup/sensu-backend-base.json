@@ -113,6 +113,20 @@
         "Protocol": "HTTP",
         "TargetType": "ip",
         "UnhealthyThresholdCount": 2,
+            "TargetGroupAttributes": [
+          {
+            "Key": "stickiness.enabled",
+            "Value": "true"
+          },
+          {
+            "Key": "stickiness.type",
+            "Value": "lb_cookie"
+          },
+          {
+            "Key": "stickiness.lb_cookie.duration_seconds",
+            "Value": "86400"
+          }
+        ],
         "VpcId": {
           "Fn::ImportValue": {
             "Fn::Sub": "${NetworkStack}-VpcId"
@@ -136,6 +150,20 @@
         "Protocol": "HTTP",
         "TargetType": "ip",
         "UnhealthyThresholdCount": 2,
+            "TargetGroupAttributes": [
+          {
+            "Key": "stickiness.enabled",
+            "Value": "true"
+          },
+          {
+            "Key": "stickiness.type",
+            "Value": "lb_cookie"
+          },
+          {
+            "Key": "stickiness.lb_cookie.duration_seconds",
+            "Value": "86400"
+          }
+        ],
         "VpcId": {
           "Fn::ImportValue": {
             "Fn::Sub": "${NetworkStack}-VpcId"
