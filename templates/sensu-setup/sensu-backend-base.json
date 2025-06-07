@@ -83,6 +83,88 @@
         }
       },
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
+    },
+    "SensuElbTargetGroup8080": {
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/",
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckTimeoutSeconds": 10,
+        "HealthyThresholdCount": 5,
+        "HealthCheckPort": "8080",
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "Port": 8080,
+        "Protocol": "HTTP",
+        "TargetType": "ip",
+        "UnhealthyThresholdCount": 2,
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
+        }
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
+    },
+    "SensuElbTargetGroup8081": {
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/",
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckTimeoutSeconds": 10,
+        "HealthyThresholdCount": 5,
+        "HealthCheckPort": "8081",
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "Port": 8081,
+        "Protocol": "HTTP",
+        "TargetType": "ip",
+        "UnhealthyThresholdCount": 2,
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
+        }
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup"
+    },
+    "SensuElbListener8080": {
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "SensuElbTargetGroup8080"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "SensuElb"
+        },
+        "Port": 8080,
+        "Protocol": "HTTP"
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::Listener"
+    },
+    "SensuElbListener8081": {
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "SensuElbTargetGroup8081"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "SensuElb"
+        },
+        "Port": 8081,
+        "Protocol": "HTTP"
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::Listener"
     }
   },
   "Outputs": {
@@ -106,6 +188,28 @@
       },
       "Value": {
         "Ref": "SensuEcsCluster"
+      }
+    },
+    "SensuElbTargetGroup8080Arn": {
+      "Description": "Sensu ELB Target Group 8080 Arn",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-SensuElbTargetGroup8080Arn"
+        }
+      },
+      "Value": {
+        "Ref": "SensuElbTargetGroup8080"
+      }
+    },
+    "SensuElbTargetGroup8081Arn": {
+      "Description": "Sensu ELB Target Group 8081 Arn",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Service-SensuElbTargetGroup8081Arn"
+        }
+      },
+      "Value": {
+        "Ref": "SensuElbTargetGroup8081"
       }
     }
   }

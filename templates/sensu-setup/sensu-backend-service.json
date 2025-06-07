@@ -32,7 +32,7 @@
         "HealthCheckGracePeriodSeconds": 60,
         "LaunchType": "FARGATE",
         "LoadBalancers": [
-          {
+       {
             "ContainerName": "sensu",
             "ContainerPort": 3000,
             "TargetGroupArn": {
@@ -44,6 +44,40 @@
                       "Ref": "AWS::StackName"
                     },
                     "SensuElbTargetGroupArn"
+                  ]
+                ]
+              }
+            }
+          },
+          {
+            "ContainerName": "sensu",
+            "ContainerPort": 8080,
+            "TargetGroupArn": {
+              "Fn::ImportValue": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "AWS::StackName"
+                    },
+                    "SensuElbTargetGroup8080Arn"
+                  ]
+                ]
+              }
+            }
+          },
+          {
+            "ContainerName": "sensu",
+            "ContainerPort": 8081,
+            "TargetGroupArn": {
+              "Fn::ImportValue": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "AWS::StackName"
+                    },
+                    "SensuElbTargetGroup8081Arn"
                   ]
                 ]
               }
@@ -142,6 +176,11 @@
               {
                 "ContainerPort": 8080,
                 "HostPort": 8080,
+                "Protocol": "tcp"
+              },
+              {
+                "ContainerPort": 8081,
+                "HostPort": 8081,
                 "Protocol": "tcp"
               },
               {
