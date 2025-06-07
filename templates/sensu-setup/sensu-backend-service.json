@@ -34,7 +34,7 @@
         "LoadBalancers": [
           {
             "ContainerName": "sensu",
-            "ContainerPort": 8080,
+            "ContainerPort": 3000,
             "TargetGroupArn": {
               "Fn::ImportValue": {
                 "Fn::Join": [
