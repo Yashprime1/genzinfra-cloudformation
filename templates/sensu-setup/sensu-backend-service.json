@@ -393,7 +393,7 @@
         ],
         "SchedulingStrategy": "REPLICA",
         "TaskDefinition": {
-          "Ref": "SensuEcsTaskDefinition"
+          "Ref": "SensuEtcdEcsTaskDefinition"
         },
         "NetworkConfiguration": {
           "AwsvpcConfiguration": {
