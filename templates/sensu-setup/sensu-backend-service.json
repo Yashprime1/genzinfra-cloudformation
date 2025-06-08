@@ -258,9 +258,9 @@
               "LogDriver": "awslogs",
               "Options": {
                 "awslogs-create-group": "true",
-                "awslogs-group": "sensu-backend-logs",
+                "awslogs-group": "sensu-etcd-logs",
                 "awslogs-region": "ap-south-1",
-                "awslogs-stream-prefix": "sensu-backend-logs"
+                "awslogs-stream-prefix": "sensu-etcd-logs"
               }
             },
             "Privileged": false,
