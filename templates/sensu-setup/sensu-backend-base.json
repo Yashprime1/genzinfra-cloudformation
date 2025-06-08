@@ -269,7 +269,7 @@
         },
         "Port": 2379,
         "Protocol": "HTTP",
-        "ProtocolVersion":"HTTP2"
+        "ProtocolVersion":"GRPC"
       },
       "Type": "AWS::ElasticLoadBalancingV2::Listener"
     },
@@ -288,7 +288,7 @@
         },
         "Port": 2380,
         "Protocol": "HTTP",
-        "ProtocolVersion":"HTTP2"
+        "ProtocolVersion":"GRPC"
       },
       "Type": "AWS::ElasticLoadBalancingV2::Listener"
     }

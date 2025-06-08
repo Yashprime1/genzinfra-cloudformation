@@ -161,7 +161,7 @@
               },
               {
                 "Name": "SENSU_BACKEND_ETCD_MAX_REQUEST_BYTES",
-                "Value": "1572864"
+                "Value": "8192"
               },
               {
                 "Name": "SENSU_BACKEND_ETCD_GRPC_KEEPALIVE_MIN_TIME",
