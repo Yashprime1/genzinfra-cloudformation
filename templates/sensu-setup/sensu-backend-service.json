@@ -161,7 +161,7 @@
               },
               {
                 "Name":"SENSU_BACKEND_ETCD_CLIENT_CERT_AUTH",
-                "Value": "false"
+                "Value": false
               }
             ],
             "Essential": true,
