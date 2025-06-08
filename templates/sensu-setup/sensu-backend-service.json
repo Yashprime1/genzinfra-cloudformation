@@ -31,6 +31,7 @@
         },
         "HealthCheckGracePeriodSeconds": 60,
         "LaunchType": "FARGATE",
+        "EnableExecuteCommand" : true,
         "LoadBalancers": [
           {
             "ContainerName": "sensu",
