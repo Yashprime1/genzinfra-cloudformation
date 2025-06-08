@@ -175,7 +175,7 @@
     "SensuElbTargetGroup2379": {
       "Properties": {
         "HealthCheckIntervalSeconds": 30,
-        "HealthCheckPath": "/",
+        "HealthCheckPath": "/health",
         "HealthCheckProtocol": "HTTP",
         "HealthCheckTimeoutSeconds": 10,
         "HealthyThresholdCount": 5,
@@ -198,11 +198,11 @@
     "SensuElbTargetGroup2380": {
       "Properties": {
         "HealthCheckIntervalSeconds": 30,
-        "HealthCheckPath": "/",
+        "HealthCheckPath": "/health",
         "HealthCheckProtocol": "HTTP",
         "HealthCheckTimeoutSeconds": 10,
         "HealthyThresholdCount": 5,
-        "HealthCheckPort": "2380",
+        "HealthCheckPort": "2379",
         "Matcher": {
           "HttpCode": "200"
         },
