@@ -254,12 +254,6 @@
                 "Protocol": "tcp"
               }
             ],
-            "MountPoints": [
-              {
-                "SourceVolume": "etcd_data",
-                "ContainerPath": "/bitnami/etcd"
-              }
-            ],
             "LogConfiguration": {
               "LogDriver": "awslogs",
               "Options": {
@@ -278,11 +272,6 @@
                 "SoftLimit": 65536
               }
             ]
-          }
-        ],
-        "Volumes": [
-          {
-            "Name": "etcd_data"
           }
         ],
         "ExecutionRoleArn": {
