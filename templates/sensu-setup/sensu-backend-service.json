@@ -127,7 +127,7 @@
               },
               {
                 "Name": "SENSU_BACKEND_NO_EMBED_ETCD",
-                "Value": false
+                "Value": true
               },
               {
                 "Name": "SENSU_BACKEND_STATE_DIR",
