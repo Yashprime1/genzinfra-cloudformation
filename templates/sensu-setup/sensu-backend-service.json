@@ -160,14 +160,6 @@
                 "Value": "http://in1-Se-Sensu-amExzOIyheum-c14dffe3d89b1e49.elb.ap-south-1.amazonaws.com:2379"
               },
               {
-                "Name": "SENSU_BACKEND_ETCD_MAX_REQUEST_BYTES",
-                "Value": "8192"
-              },
-              {
-                "Name": "SENSU_BACKEND_ETCD_GRPC_KEEPALIVE_MIN_TIME",
-                "Value": "5s"
-              },
-              {
                 "Name":"SENSU_BACKEND_ETCD_CLIENT_CERT_AUTH",
                 "Value": false
               }
