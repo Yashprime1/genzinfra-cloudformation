@@ -185,6 +185,7 @@
         },
         "Port": 2379,
         "Protocol": "HTTP",
+        "ProtocolVersion":"GRPC",
         "TargetType": "ip",
         "UnhealthyThresholdCount": 2,
         "VpcId": {
@@ -208,6 +209,7 @@
         },
         "Port": 2380,
         "Protocol": "HTTP",
+        "ProtocolVersion":"GRPC",
         "TargetType": "ip",
         "UnhealthyThresholdCount": 2,
         "VpcId": {
@@ -268,8 +270,7 @@
           "Ref": "SensuElb"
         },
         "Port": 2379,
-        "Protocol": "HTTP",
-        "ProtocolVersion":"GRPC"
+        "Protocol": "HTTP"
       },
       "Type": "AWS::ElasticLoadBalancingV2::Listener"
     },
@@ -287,8 +288,7 @@
           "Ref": "SensuElb"
         },
         "Port": 2380,
-        "Protocol": "HTTP",
-        "ProtocolVersion":"GRPC"
+        "Protocol": "HTTP"
       },
       "Type": "AWS::ElasticLoadBalancingV2::Listener"
     }
