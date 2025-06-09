@@ -270,7 +270,7 @@
           "Ref": "SensuElb"
         },
         "Port": 2379,
-        "Protocol": "HTTP"
+        "Protocol": "TCP"
       },
       "Type": "AWS::ElasticLoadBalancingV2::Listener"
     },
@@ -288,7 +288,7 @@
           "Ref": "SensuElb"
         },
         "Port": 2380,
-        "Protocol": "HTTP"
+        "Protocol": "TCP"
       },
       "Type": "AWS::ElasticLoadBalancingV2::Listener"
     }
