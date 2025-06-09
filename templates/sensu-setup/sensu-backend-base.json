@@ -212,7 +212,6 @@
         },
         "Port": 2379,
         "Protocol": "TCP",
-        "ProtocolVersion":"GRPC",
         "TargetType": "ip",
         "UnhealthyThresholdCount": 2,
         "VpcId": {
@@ -236,7 +235,6 @@
         },
         "Port": 2380,
         "Protocol": "TCP",
-        "ProtocolVersion":"GRPC",
         "TargetType": "ip",
         "UnhealthyThresholdCount": 2,
         "VpcId": {
