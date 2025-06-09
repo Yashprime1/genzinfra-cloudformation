@@ -157,7 +157,7 @@
               },
                {
                 "Name": "SENSU_BACKEND_ETCD_CLIENT_URLS",
-                "Value": "http://in1-Se-Sensu-lvlLrUIhwJmo-792887.ap-south-1.elb.amazonaws.com:2379"
+                "Value": "http://in1-Se-Sensu-amExzOIyheum-c14dffe3d89b1e49.elb.ap-south-1.amazonaws.com:2379"
               },
               {
                 "Name": "SENSU_BACKEND_ETCD_MAX_REQUEST_BYTES",
