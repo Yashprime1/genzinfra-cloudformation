@@ -155,9 +155,9 @@
                 "Name": "SENSU_BACKEND_CLUSTER_ADMIN_USERNAME",
                 "Value": "admin"
               },
-               {
+              {
                 "Name": "SENSU_BACKEND_ETCD_CLIENT_URLS",
-                "Value": "http://in1-Se-Sensu-amExzOIyheum-c14dffe3d89b1e49.elb.ap-south-1.amazonaws.com:2379"
+                "Value": "http://etcd.sensu.local:2379"
               },
               {
                 "Name":"SENSU_BACKEND_ETCD_CLIENT_CERT_AUTH",
