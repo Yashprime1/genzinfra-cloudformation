@@ -358,6 +358,11 @@
             }
           }
         ],
+        "ServiceRegistries": [
+          {
+            "RegistryArn": {"Fn::GetAtt": ["SensuEtcdServiceDiscovery", "Arn"]}
+          }
+        ],
         "SchedulingStrategy": "REPLICA",
         "TaskDefinition": {
           "Ref": "SensuEtcdEcsTaskDefinition"
@@ -492,6 +497,36 @@
         ]
       },
       "Type": "AWS::IAM::Policy"
+    },
+    "PrivateNamespace": {
+      "Type": "AWS::ServiceDiscovery::PrivateDnsNamespace",
+      "Properties": {
+        "Name": "sensu.local",
+        "Vpc": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${NetworkStack}-VpcId"
+          }
+        },
+        "Description": "Private namespace for Sensu services"
+      }
+    },
+    "SensuEtcdServiceDiscovery": {
+      "Type": "AWS::ServiceDiscovery::Service", 
+      "Properties": {
+        "Name": "etcd",
+        "NamespaceId": {"Ref": "PrivateNamespace"},
+        "DnsConfig": {
+          "DnsRecords": [
+            {
+              "Type": "A",
+              "TTL": 60
+            }
+          ]
+        },
+        "HealthCheckCustomConfig": {
+          "FailureThreshold": 1
+        }
+      }
     }
   }
 }
