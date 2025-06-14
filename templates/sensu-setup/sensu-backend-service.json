@@ -257,10 +257,6 @@
                 }
               },
               {
-                "Name": "ETCD_NAME",
-                "Value": "sensu-etcd-${ECS_CONTAINER_METADATA_URI_V4}"
-              },
-              {
                 "Name": "ETCD_INITIAL_ADVERTISE_PEER_URLS",
                 "Value": "http://in1-Se-Sensu-amExzOIyheum-c14dffe3d89b1e49.elb.ap-south-1.amazonaws.com:2380"
               },
