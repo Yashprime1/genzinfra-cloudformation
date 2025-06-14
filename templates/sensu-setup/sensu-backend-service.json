@@ -135,7 +135,7 @@
               },
               {
                 "Name": "SENSU_BACKEND_LOG_LEVEL",
-                "Value": "error"
+                "Value": "debug"
               },
               {
                 "Name": "SENSU_BACKEND_DISABLE_PLATFORM_METRICS",
