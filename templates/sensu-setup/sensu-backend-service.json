@@ -177,7 +177,9 @@
             },
             "Command": [
               "sensu-backend",
-              "start"
+              "start",
+              "--no-embed-etcd",
+              "--etcd-client-urls=http://etcd.sensu.local:2379"
             ],
             "MemoryReservation": 256,
             "Name": "sensu",
