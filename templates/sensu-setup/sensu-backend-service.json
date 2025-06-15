@@ -241,7 +241,7 @@
         "ContainerDefinitions": [
           {
             "Name": "sensu-etcd",
-            "Image": "bitnami/etcd:3.6.1",
+            "Image": "bitnami/etcd:3.3.2",
             "Essential": true,
             "Environment": [
               {
