@@ -27,6 +27,8 @@ on:
         options:
           - eu1-Poller-Staging-Service-PollerEcsCluster99E29D7C-5IzLxVko7Rjp
           - in1-Poller-Staging-Service-PollerEcsCluster99E29D7C-s2sVxWJM2f3a
+          - Semaphore-Ecs-s1-Agent-SemaphoreAgentEcsCluster-9tUYfq9pQPj5
+
       ECS_SERVICE_NAME:
         type: choice
         description: ECS Service Name
@@ -35,6 +37,7 @@ on:
         options:
           - eu1-Poller-Staging-Service-PollerEcsService2FA3C4F1-UA6uSIvc4zOG
           - in1-Poller-Staging-Service-PollerEcsService2FA3C4F1-8rjUiMXqybC7
+          - Semaphore-Ecs-s1-Agent-Service
 env:
   AWS_REGION: ${{ inputs.AWS_REGION }}
   ECS_CLUSTER_NAME: ${{ inputs.ECS_CLUSTER_NAME }}
