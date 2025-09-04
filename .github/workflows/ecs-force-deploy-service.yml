@@ -170,12 +170,13 @@ jobs:
             --query 'services[0].failedTasks' \
             --output text)
           
-          if [[ "$FAILED_TASKS" != "0" ]]; then
-            echo "WARNING: $FAILED_TASKS failed tasks detected"
-            echo "DEPLOYMENT_STATUS=warning" >> $GITHUB_ENV
-          else
+          # Handle null values and check for actual failures
+          if [[ "$FAILED_TASKS" == "null" ]] || [[ "$FAILED_TASKS" == "0" ]] || [[ -z "$FAILED_TASKS" ]]; then
             echo "All tasks are running successfully"
             echo "DEPLOYMENT_STATUS=success" >> $GITHUB_ENV
+          else
+            echo "WARNING: $FAILED_TASKS failed tasks detected"
+            echo "DEPLOYMENT_STATUS=warning" >> $GITHUB_ENV
           fi
 
       - name: Create Summary Report
@@ -210,10 +211,11 @@ jobs:
           echo "- **Failed Tasks:** $FAILED_TASKS" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [[ "$FAILED_TASKS" != "0" ]]; then
-            echo "### ⚠️ Warning" >> $GITHUB_STEP_SUMMARY
-            echo "Some tasks failed during deployment. Please check the ECS console for details." >> $GITHUB_STEP_SUMMARY
-          else
+          # Handle null values and check for actual failures
+          if [[ "$FAILED_TASKS" == "null" ]] || [[ "$FAILED_TASKS" == "0" ]] || [[ -z "$FAILED_TASKS" ]]; then
             echo "### ✅ Success" >> $GITHUB_STEP_SUMMARY
             echo "All tasks are running successfully." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ⚠️ Warning" >> $GITHUB_STEP_SUMMARY
+            echo "Some tasks failed during deployment. Please check the ECS console for details." >> $GITHUB_STEP_SUMMARY
           fi
