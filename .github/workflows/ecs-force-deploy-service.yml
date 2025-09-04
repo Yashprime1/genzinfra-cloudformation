@@ -73,16 +73,26 @@ jobs:
       - name: Check ECS Service Exists
         run: |
           echo "Checking if ECS service exists..."
-          if ! aws ecs describe-services \
+          SERVICE_COUNT=$(aws ecs describe-services \
+            --cluster "$ECS_CLUSTER_NAME" \
+            --services "$ECS_SERVICE_NAME" \
+            --region "$AWS_REGION" \
+            --query 'length(services)' \
+            --output text)
+          
+          if [ "$SERVICE_COUNT" -eq 0 ]; then
+            echo "ERROR: ECS service '$ECS_SERVICE_NAME' not found in cluster '$ECS_CLUSTER_NAME'"
+            exit 1
+          fi
+          
+          SERVICE_STATUS=$(aws ecs describe-services \
             --cluster "$ECS_CLUSTER_NAME" \
             --services "$ECS_SERVICE_NAME" \
             --region "$AWS_REGION" \
             --query 'services[0].status' \
-            --output text > /dev/null 2>&1; then
-            echo "ERROR: ECS service '$ECS_SERVICE_NAME' not found in cluster '$ECS_CLUSTER_NAME'"
-            exit 1
-          fi
-          echo "ECS service exists and is accessible"
+            --output text)
+          
+          echo "ECS service exists and is accessible (Status: $SERVICE_STATUS)"
 
       - name: Get Current Service Configuration
         id: get-current-config
