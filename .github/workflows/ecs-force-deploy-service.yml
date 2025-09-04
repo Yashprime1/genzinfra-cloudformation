@@ -44,17 +44,11 @@ jobs:
       - name: Checkout Infra-Actions Repository
         uses: actions/checkout@v3
 
-      - name: Setup Python Environment
-        run: |
-          # Check if pip is available
-          if ! python3 -m pip --version &> /dev/null; then
-              echo "pip not available, installing..."
-              # Download and install pip
-              curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-              python3 get-pip.py --user
-              rm get-pip.py
-          fi
-
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
       - name: Install Python dependencies
         run: |
           echo "Installing Python dependencies..."
