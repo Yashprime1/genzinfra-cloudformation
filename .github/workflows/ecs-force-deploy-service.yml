@@ -9,7 +9,7 @@ on:
         type: choice
         description: AWS Region
         required: true
-        default: 'us-east-1'
+        default: 'eu-west-1'
         options:
           - us-east-1
           - us-west-2
@@ -20,16 +20,21 @@ on:
           - ap-southeast-3
           - ap-northeast-2
       ECS_CLUSTER_NAME:
-        type: string
+        type: choice
         description: ECS Cluster Name
         required: true
-        default: 'staging-cluster'
+        default: 'eu1-Poller-Staging-Service-PollerEcsCluster99E29D7C-5IzLxVko7Rjp'
+        options:
+          - eu1-Poller-Staging-Service-PollerEcsCluster99E29D7C-5IzLxVko7Rjp
+          - in1-Poller-Staging-Service-PollerEcsCluster99E29D7C-s2sVxWJM2f3a
       ECS_SERVICE_NAME:
-        type: string
+        type: choice
         description: ECS Service Name
         required: true
-        default: 'staging-poller'
-
+        default: 'eu1-Poller-Staging-Service-PollerEcsService2FA3C4F1-UA6uSIvc4zOG'
+        options:
+          - eu1-Poller-Staging-Service-PollerEcsService2FA3C4F1-UA6uSIvc4zOG
+          - in1-Poller-Staging-Service-PollerEcsService2FA3C4F1-8rjUiMXqybC7
 env:
   AWS_REGION: ${{ inputs.AWS_REGION }}
   ECS_CLUSTER_NAME: ${{ inputs.ECS_CLUSTER_NAME }}
@@ -55,10 +60,8 @@ jobs:
           python3 -m pip install --upgrade pip --user
           python3 -m pip install boto3 botocore --user
           
-      - name: Verify AWS Identity
+      - name: Details of the deployment
         run: |
-          echo "Verifying AWS identity..."
-          aws sts get-caller-identity
           
           echo "Deploying ECS service with following configuration:"
           echo "Region: $AWS_REGION"
