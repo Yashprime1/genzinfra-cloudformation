@@ -1,0 +1,214 @@
+name: ECS Force Deploy Service
+
+run-name: ECS Force Deploy - ${{ inputs.ECS_CLUSTER_NAME }}/${{ inputs.ECS_SERVICE_NAME }}-${{ github.run_number }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      AWS_REGION:
+        type: choice
+        description: AWS Region
+        required: true
+        default: 'us-east-1'
+        options:
+          - us-east-1
+          - us-west-2
+          - eu-west-1
+          - ap-southeast-1
+          - ap-south-1
+          - me-central-1
+          - ap-southeast-3
+          - ap-northeast-2
+      ECS_CLUSTER_NAME:
+        type: string
+        description: ECS Cluster Name
+        required: true
+        default: 'staging-cluster'
+      ECS_SERVICE_NAME:
+        type: string
+        description: ECS Service Name
+        required: true
+        default: 'staging-poller'
+      PRODUCTION_ACCOUNT_IAM_ROLE_ARN:
+        type: string
+        description: Production Account IAM Role ARN for cross-account access
+        required: true
+
+env:
+  AWS_REGION: ${{ inputs.AWS_REGION }}
+  ECS_CLUSTER_NAME: ${{ inputs.ECS_CLUSTER_NAME }}
+  ECS_SERVICE_NAME: ${{ inputs.ECS_SERVICE_NAME }}
+  PRODUCTION_ACCOUNT_IAM_ROLE_ARN: ${{ inputs.PRODUCTION_ACCOUNT_IAM_ROLE_ARN }}
+
+jobs:
+  force-deploy-ecs-service:
+    runs-on: eu1
+    timeout-minutes: 60
+    
+    steps:
+      - name: Checkout Infra-Actions Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python Environment
+        run: |
+          # Check if pip is available
+          if ! python3 -m pip --version &> /dev/null; then
+              echo "pip not available, installing..."
+              # Download and install pip
+              curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+              python3 get-pip.py --user
+              rm get-pip.py
+          fi
+
+      - name: Install Python dependencies
+        run: |
+          echo "Installing Python dependencies..."
+          python3 -m pip install --upgrade pip --user
+          python3 -m pip install boto3 botocore --user
+          
+      - name: Verify AWS Identity
+        run: |
+          echo "Verifying AWS identity..."
+          aws sts get-caller-identity
+          
+          echo "Deploying ECS service with following configuration:"
+          echo "Region: $AWS_REGION"
+          echo "Cluster: $ECS_CLUSTER_NAME"
+          echo "Service: $ECS_SERVICE_NAME"
+
+      - name: Verify AWS CLI
+        run: |
+          # Verify AWS CLI is available
+          aws --version
+
+      - name: Check ECS Service Exists
+        run: |
+          echo "Checking if ECS service exists..."
+          if ! aws ecs describe-services \
+            --cluster "$ECS_CLUSTER_NAME" \
+            --services "$ECS_SERVICE_NAME" \
+            --region "$AWS_REGION" \
+            --query 'services[0].status' \
+            --output text > /dev/null 2>&1; then
+            echo "ERROR: ECS service '$ECS_SERVICE_NAME' not found in cluster '$ECS_CLUSTER_NAME'"
+            exit 1
+          fi
+          echo "ECS service exists and is accessible"
+
+      - name: Get Current Service Configuration
+        id: get-current-config
+        run: |
+          echo "Getting current service configuration..."
+          CURRENT_TASK_DEFINITION=$(aws ecs describe-services \
+            --cluster "$ECS_CLUSTER_NAME" \
+            --services "$ECS_SERVICE_NAME" \
+            --region "$AWS_REGION" \
+            --query 'services[0].taskDefinition' \
+            --output text)
+          
+          echo "Current task definition: $CURRENT_TASK_DEFINITION"
+          echo "CURRENT_TASK_DEFINITION=$CURRENT_TASK_DEFINITION" >> $GITHUB_OUTPUT
+
+      - name: Force New Deployment
+        run: |
+          echo "Forcing new deployment..."
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER_NAME" \
+            --service "$ECS_SERVICE_NAME" \
+            --task-definition "${{ steps.get-current-config.outputs.CURRENT_TASK_DEFINITION }}" \
+            --force-new-deployment \
+            --region "$AWS_REGION"
+          
+          echo "Deployment initiated successfully!"
+
+      - name: Wait for Deployment to Complete
+        run: |
+          echo "Waiting for deployment to complete..."
+          aws ecs wait services-stable \
+            --cluster "$ECS_CLUSTER_NAME" \
+            --services "$ECS_SERVICE_NAME" \
+            --region "$AWS_REGION"
+          
+          echo "Deployment completed successfully!"
+
+      - name: Get Final Deployment Status
+        run: |
+          echo "Final deployment status:"
+          aws ecs describe-services \
+            --cluster "$ECS_CLUSTER_NAME" \
+            --services "$ECS_SERVICE_NAME" \
+            --region "$AWS_REGION" \
+            --query 'services[0].deployments[0].[status,desiredCount,runningCount,pendingCount,failedTasks]' \
+            --output table
+
+      - name: Deployment Summary
+        if: always()
+        run: |
+          echo "=== Deployment Summary ==="
+          echo "Region: $AWS_REGION"
+          echo "Cluster: $ECS_CLUSTER_NAME"
+          echo "Service: $ECS_SERVICE_NAME"
+          
+          # Get final service status
+          aws ecs describe-services \
+            --cluster "$ECS_CLUSTER_NAME" \
+            --services "$ECS_SERVICE_NAME" \
+            --region "$AWS_REGION" \
+            --query 'services[0].[status,desiredCount,runningCount,pendingCount,failedTasks]' \
+            --output table
+          
+          # Check for any failed tasks
+          FAILED_TASKS=$(aws ecs describe-services \
+            --cluster "$ECS_CLUSTER_NAME" \
+            --services "$ECS_SERVICE_NAME" \
+            --region "$AWS_REGION" \
+            --query 'services[0].failedTasks' \
+            --output text)
+          
+          if [[ "$FAILED_TASKS" != "0" ]]; then
+            echo "WARNING: $FAILED_TASKS failed tasks detected"
+            echo "DEPLOYMENT_STATUS=warning" >> $GITHUB_ENV
+          else
+            echo "All tasks are running successfully"
+            echo "DEPLOYMENT_STATUS=success" >> $GITHUB_ENV
+          fi
+
+      - name: Create Summary Report
+        if: always()
+        run: |
+          echo "## ECS Force Deploy Service Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployment Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Region:** $AWS_REGION" >> $GITHUB_STEP_SUMMARY
+          echo "- **Cluster:** $ECS_CLUSTER_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "- **Service:** $ECS_SERVICE_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "- **Task Definition:** ${{ steps.get-current-config.outputs.CURRENT_TASK_DEFINITION }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Get final service status for summary
+          SERVICE_STATUS=$(aws ecs describe-services \
+            --cluster "$ECS_CLUSTER_NAME" \
+            --services "$ECS_SERVICE_NAME" \
+            --region "$AWS_REGION" \
+            --query 'services[0].[status,desiredCount,runningCount,pendingCount,failedTasks]' \
+            --output json)
+          
+          DESIRED_COUNT=$(echo "$SERVICE_STATUS" | jq -r '.[1]')
+          RUNNING_COUNT=$(echo "$SERVICE_STATUS" | jq -r '.[2]')
+          PENDING_COUNT=$(echo "$SERVICE_STATUS" | jq -r '.[3]')
+          FAILED_TASKS=$(echo "$SERVICE_STATUS" | jq -r '.[4]')
+          
+          echo "### Service Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **Desired Count:** $DESIRED_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Running Count:** $RUNNING_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Pending Count:** $PENDING_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Failed Tasks:** $FAILED_TASKS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "$FAILED_TASKS" != "0" ]]; then
+            echo "### ⚠️ Warning" >> $GITHUB_STEP_SUMMARY
+            echo "Some tasks failed during deployment. Please check the ECS console for details." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✅ Success" >> $GITHUB_STEP_SUMMARY
+            echo "All tasks are running successfully." >> $GITHUB_STEP_SUMMARY
+          fi
