@@ -29,16 +29,11 @@ on:
         description: ECS Service Name
         required: true
         default: 'staging-poller'
-      PRODUCTION_ACCOUNT_IAM_ROLE_ARN:
-        type: string
-        description: Production Account IAM Role ARN for cross-account access
-        required: true
 
 env:
   AWS_REGION: ${{ inputs.AWS_REGION }}
   ECS_CLUSTER_NAME: ${{ inputs.ECS_CLUSTER_NAME }}
   ECS_SERVICE_NAME: ${{ inputs.ECS_SERVICE_NAME }}
-  PRODUCTION_ACCOUNT_IAM_ROLE_ARN: ${{ inputs.PRODUCTION_ACCOUNT_IAM_ROLE_ARN }}
 
 jobs:
   force-deploy-ecs-service:
