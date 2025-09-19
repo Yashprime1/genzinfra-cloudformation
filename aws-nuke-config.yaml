@@ -1,0 +1,459 @@
+regions:
+  - global
+  - us-east-1
+  - us-east-2
+  - us-west-2
+  - eu-west-1
+  - ap-southeast-1
+  - ap-south-1
+  - me-central-1
+  - ap-southeast-3
+  - ap-northeast-2
+
+blocklist:
+  - "337909764629" # Management Account
+  - "246705294232" # Custom-Customer-Resources
+  - "062484260092" # CleverTap SaaS Platform
+
+
+settings:
+  EC2Image:
+    IncludeDisabled: true
+    IncludeDeprecated: true
+    DisableDeregistrationProtection: true
+  EC2Instance:
+    DisableStopProtection: true
+    DisableDeletionProtection: true
+  RDSInstance:
+    DisableDeletionProtection: true
+  CloudFormationStack:
+    DisableDeletionProtection: true
+  DynamoDBTable:
+    DisableDeletionProtection: true
+
+resource-types:
+  excludes:
+    - S3Object # Excluded because S3 bucket removal handles removing all S3Objects
+    - ServiceCatalogTagOption # Excluded due to https://github.com/rebuy-de/aws-nuke/issues/515
+    - ServiceCatalogTagOptionPortfolioAttachment # Excluded due to https://github.com/rebuy-de/aws-nuke/issues/515
+    - FMSNotificationChannel # Excluded because it's not available
+    - FMSPolicy # Excluded because it's not available
+    - MachineLearningMLModel # Excluded due to ML being unavailable
+    - MachineLearningDataSource # Excluded due to ML being unavailable
+    - MachineLearningBranchPrediction # Excluded due to ML being unavailable
+    - MachineLearningEvaluation # Excluded due to ML being unavailable
+    - RoboMakerDeploymentJob # Deprecated Service
+    - RoboMakerFleet # Deprecated Service
+    - RoboMakerRobot # Deprecated Service
+    - RoboMakerSimulationJob
+    - RoboMakerRobotApplication
+    - RoboMakerSimulationApplication
+    - OpsWorksApp # Deprecated service
+    - OpsWorksInstance # Deprecated service
+    - OpsWorksLayer # Deprecated service
+    - OpsWorksUserProfile # Deprecated service
+    - OpsWorksCMBackup # Deprecated service
+    - OpsWorksCMServer # Deprecated service
+    - OpsWorksCMServerState # Deprecated service
+    - CodeStarProject # Deprecated service
+    - CodeStarConnection # Deprecated service
+    - CodeStarNotification # Deprecated service
+    - Cloud9Environment # Deprecated service
+    - CloudSearchDomain # Deprecated service
+    - RedshiftServerlessSnapshot # Deprecated service
+    - RedshiftServerlessNamespace # Deprecated service
+    - RedshiftServerlessWorkgroup # Deprecated service
+    - AWS::Timestream::ScheduledQuery # Deprecated service
+    - ElasticTranscoderPipeline # Deprecated service
+
+  includes:
+    # EC2 Resources
+    - EC2Instance
+    - EC2KeyPair
+    - EC2Image
+    - EC2Snapshot
+    - EC2Volume
+    - EC2NetworkInterface
+    - EC2PlacementGroup
+    - EC2SecurityGroup
+    - EC2InternetGateway
+    - EC2NATGateway
+    - EC2RouteTable
+    - EC2Subnet
+    - EC2VPC
+    - EC2VPCPeeringConnection
+    - EC2VPCEndpoint
+    - EC2VPCEndpointService
+    - EC2NetworkACL
+    - EC2CustomerGateway
+    - EC2VPNGateway
+    - EC2VPNConnection
+    - EC2TransitGateway
+    - EC2TransitGatewayRoute
+    - EC2TransitGatewayRouteTable
+    - EC2TransitGatewayVpcAttachment
+    - EC2CarrierGateway
+    - EC2LocalGatewayRouteTableVpcAssociation
+    - EC2LocalGatewayRoute
+    - EC2LocalGatewayRouteTable
+    - EC2LocalGateway
+    - EC2PrefixList
+    
+    # RDS Resources
+    - RDSDBInstance
+    - RDSDBCluster
+    - RDSDBSubnetGroup
+    - RDSDBSecurityGroup
+    - RDSDBParameterGroup
+    - RDSDBClusterParameterGroup
+    - RDSDBSnapshot
+    - RDSDBClusterSnapshot
+    - RDSDBInstanceAutomatedBackup
+    - RDSDBProxy
+    - RDSDBProxyTargetGroup
+    
+    # S3 Resources
+    - S3Bucket
+    
+    # Lambda Resources
+    - LambdaFunction
+    - LambdaEventSourceMapping
+    - LambdaLayerVersion
+    - LambdaPermission
+    
+    # ECS Resources
+    - ECSService
+    - ECSTaskDefinition
+    - ECSCluster
+    - ECSServiceLoadBalancer
+    
+    # EKS Resources
+    - EKSCluster
+    - EKSNodegroup
+    - EKSAddon
+    - EKSFargateProfile
+    
+    # IAM Resources
+    - IAMRole
+    - IAMInstanceProfile
+    - IAMManagedPolicy
+    - IAMUser
+    - IAMUserAccessKey
+    - IAMUserLoginProfile
+    - IAMUserPolicy
+    - IAMUserPolicyAttachment
+    - IAMRolePolicyAttachment
+    - IAMRolePolicy
+    - IAMGroup
+    - IAMGroupPolicy
+    - IAMGroupPolicyAttachment
+    - IAMGroupMembership
+    
+    # CloudFormation Resources
+    - CloudFormationStack
+    - CloudFormationStackSet
+    - CloudFormationStackInstance
+    
+    # CloudWatch Resources
+    - CloudWatchLogGroup
+    - CloudWatchLogStream
+    - CloudWatchAlarm
+    - CloudWatchDashboard
+    
+    # SNS Resources
+    - SNSTopic
+    - SNSTopicPolicy
+    - SNSTopicSubscription
+    
+    # SQS Resources
+    - SQSQueue
+    - SQSQueuePolicy
+    
+    # ELB Resources
+    - ELBLoadBalancer
+    - ELBLoadBalancerPolicy
+    - ELBLoadBalancerListener
+    - ELBLoadBalancerListenerPolicy
+    - ELBLoadBalancerTargetGroup
+    - ELBLoadBalancerTargetGroupAttachment
+    - ELBLoadBalancerTargetGroupPolicy
+    
+    # ALB/NLB Resources
+    - ALBLoadBalancer
+    - ALBLoadBalancerListener
+    - ALBLoadBalancerListenerRule
+    - ALBLoadBalancerTargetGroup
+    - ALBLoadBalancerTargetGroupAttachment
+    - ALBTargetGroup
+    - ALBTargetGroupPolicy
+    
+    # Route53 Resources
+    - Route53HostedZone
+    - Route53RecordSet
+    - Route53HostedZoneVPCAssociation
+    
+    # Auto Scaling Resources
+    - AutoScalingGroup
+    - AutoScalingLaunchConfiguration
+    - AutoScalingLaunchTemplate
+    - AutoScalingPolicy
+    - AutoScalingScheduledAction
+    - AutoScalingTargetGroup
+    - AutoScalingTargetGroupAttachment
+    
+    # CloudTrail Resources
+    - CloudTrailTrail
+    
+    # Config Resources
+    - ConfigConfigurationRecorder
+    - ConfigDeliveryChannel
+    - ConfigConfigRule
+    
+    # KMS Resources
+    - KMSKey
+    - KMSAlias
+    
+    # Secrets Manager Resources
+    - SecretsManagerSecret
+    
+    # Systems Manager Resources
+    - SSMParameter
+    - SSMDocument
+    - SSMMaintenanceWindow
+    - SSMMaintenanceWindowTarget
+    - SSMMaintenanceWindowTask
+    - SSMPatchBaseline
+    - SSMPatchGroup
+    - SSMPatchConfiguration
+    - SSMPatchState
+    - SSMAssociation
+    - SSMInstanceInformation
+    
+    # DynamoDB Resources
+    - DynamoDBTable
+    - DynamoDBTableItem
+    - DynamoDBTableStream
+    
+    # ElastiCache Resources
+    - ElastiCacheCluster
+    - ElastiCacheReplicationGroup
+    - ElastiCacheCacheSubnetGroup
+    - ElastiCacheCacheParameterGroup
+    - ElastiCacheSecurityGroup
+    
+    # Redshift Resources
+    - RedshiftCluster
+    - RedshiftClusterSubnetGroup
+    - RedshiftClusterParameterGroup
+    - RedshiftClusterSecurityGroup
+    - RedshiftClusterSnapshot
+    
+    # EMR Resources
+    - EMRCluster
+    - EMRStep
+    - EMRInstanceGroup
+    - EMRInstanceFleet
+    
+    # EFS Resources
+    - EFSFileSystem
+    - EFSMountTarget
+    - EFSAccessPoint
+    
+    # FSx Resources
+    - FSxFileSystem
+    - FSxBackup
+    
+    # API Gateway
+    - APIGatewayRestAPI
+    - APIGatewayResource
+    - APIGatewayMethod
+    - APIGatewayMethodResponse
+    - APIGatewayIntegration
+    - APIGatewayIntegrationResponse
+    - APIGatewayDeployment
+    - APIGatewayStage
+    - APIGatewayApiKey
+    - APIGatewayUsagePlan
+    - APIGatewayUsagePlanKey
+    - APIGatewayUsagePlanApiKey
+    - APIGatewayDomainName
+    - APIGatewayBasePathMapping
+    - APIGatewayModel
+    - APIGatewayRequestValidator
+    
+    # CloudFront
+    - CloudFrontDistribution
+    - CloudFrontOriginAccessIdentity
+    - CloudFrontStreamingDistribution
+    
+    # WAF Resources
+    - WAFWebACL
+    - WAFRule
+    - WAFRuleGroup
+    - WAFRegexPatternSet
+    - WAFIPSet
+    - WAFGeoMatchSet
+    - WAFSizeConstraintSet
+    - WAFSqlInjectionMatchSet
+    - WAFXssMatchSet
+    - WAFByteMatchSet
+    
+    # Certificate Manager
+    - ACMCertificate
+    
+    # Kinesis Resources
+    - KinesisStream
+    - KinesisStreamConsumer
+    - KinesisStreamShard
+    - KinesisDataStream
+    - KinesisDataFirehose
+    - KinesisDataAnalyticsApplication
+    - KinesisAnalyticsApplication
+    
+    # SES Resources
+    - SESConfigurationSet
+    - SESEventDestination
+    - SESIdentity
+    - SESReceiptRule
+    - SESReceiptRuleSet
+    - SESReceiptFilter
+    - SESReceiptAction
+    
+    # Glacier Resources
+    - GlacierVault
+    - GlacierVaultAccessPolicy
+    - GlacierVaultNotification
+    - GlacierVaultTagging
+    
+    # CloudWatch Events
+    - CloudWatchEventsRule
+    - CloudWatchEventsTarget
+    - CloudWatchEventsPermission
+    
+    # CloudWatch Logs
+    - CloudWatchLogsLogGroup
+    - CloudWatchLogsLogStream
+    - CloudWatchLogsDestination
+    - CloudWatchLogsExportTask
+    - CloudWatchLogsMetricFilter
+    - CloudWatchLogsResourcePolicy
+    - CloudWatchLogsSubscriptionFilter
+    
+    # CloudWatch Alarms
+    - CloudWatchAlarm
+    - CloudWatchDashboard
+    - CloudWatchMetricStream
+    
+    # Organizations
+    - OrganizationsOrganization
+    - OrganizationsAccount
+    - OrganizationsOrganizationalUnit
+    - OrganizationsPolicy
+    - OrganizationsPolicyAttachment
+    - OrganizationsResourcePolicy
+    - OrganizationsResourcePolicyAttachment
+    
+    # Cost Explorer
+    - CostExplorerCostCategory
+    - CostExplorerAnomalyDetector
+    - CostExplorerAnomalySubscription
+    
+    # Budgets
+    - BudgetsBudget
+    - BudgetsBudgetAction
+    - BudgetsBudgetNotification
+    
+    # Trusted Advisor
+    - TrustedAdvisorCheck
+    - TrustedAdvisorCheckResult
+    
+    # Support
+    - SupportCase
+    - SupportCaseAttachment
+    
+    # Personal Health Dashboard
+    - PersonalHealthDashboardEvent
+    - PersonalHealthDashboardEventDetail
+    
+    # Service Catalog
+    - ServiceCatalogPortfolio
+    - ServiceCatalogProduct
+    - ServiceCatalogProvisionedProduct
+    - ServiceCatalogTagOption
+    - ServiceCatalogTagOptionAssociation
+    - ServiceCatalogLaunchRoleConstraint
+    - ServiceCatalogLaunchTemplateConstraint
+    - ServiceCatalogPrincipalPortfolioAssociation
+    - ServiceCatalogProductPortfolioAssociation
+    - ServiceCatalogProvisionedProductPlan
+    - ServiceCatalogRecordHistory
+    - ServiceCatalogServiceAction
+    - ServiceCatalogServiceActionAssociation
+    - ServiceCatalogTerminateProvisionedProduct
+    - ServiceCatalogUpdateProvisionedProduct
+
+
+presets:
+  organization:
+    filters:
+      IAMSAMLProvider:
+        - property: ARN
+          type: contains
+          value: "AWSSSO"
+      IAMRole:
+        - property: Name
+          type: contains
+          value: "OrganizationAccountAccessRole"
+      IAMRolePolicyAttachment:
+        - property: RoleName
+          value: "OrganizationAccountAccessRole"
+  
+  controltower:
+    filters:
+      __global__:
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+        - property: TopicARN
+          type: contains
+          value: ":aws-controltower-"
+        - property: RoleName
+          type: contains
+          value: "aws-controltower-"
+        - property: Name
+          value: "AWSControlTowerExecution"
+        - property: RoleName
+          value: "AWSControlTowerExecution"
+        - property: role:RoleName
+          type: contains
+          value: "aws-controltower-"  
+
+
+
+  defaults:
+    filters:
+      EC2Subnet:
+        - property: DefaultVPC
+          value: "true"
+      EC2DefaultSecurityGroupRule:
+        - property: DefaultVPC
+          value: "true"
+      EC2DHCPOption:
+        - property: DefaultVPC
+          value: "true"
+      EC2VPC:
+        - property: IsDefault
+          value: "true"
+      EC2InternetGateway:
+        - property: DefaultVPC
+          value: "true"
+      EC2InternetGatewayAttachment:
+        - property: DefaultVPC
+          value: "true"
+
+accounts:
+  AWS_ACCOUNT_ID_PLACEHOLDER:
+    presets:
+      - organization
+      - defaults
+      - controltower

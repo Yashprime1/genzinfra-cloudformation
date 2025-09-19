@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  etcd:
+    image: bitnami/etcd:latest
+    container_name: sensu-etcd
+    hostname: etcd
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd:2380
+      - ETCD_INITIAL_CLUSTER=etcd=http://etcd:2380
+      - ETCD_NAME=etcd
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    volumes:
+      - etcd_data:/bitnami/etcd
+    networks:
+      sensu-network:
+        aliases:
+          - etcd
+    healthcheck:
+      test: ["CMD-SHELL", "etcdctl endpoint health --endpoints=http://localhost:2379 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  sensu-backend:
+    image: sensu/sensu:6.10.0
+    container_name: sensu-backend
+    hostname: sensu-backend
+    command: ["sensu-backend", "start"]
+    environment:
+      - SENSU_BACKEND_NO_EMBED_ETCD=true
+      - SENSU_BACKEND_ETCD_URLS=http://etcd:2379
+      - SENSU_BACKEND_STATE_DIR=/var/lib/sensu/sensu-backend
+      - SENSU_BACKEND_LOG_LEVEL=debug
+      - SENSU_BACKEND_DISABLE_PLATFORM_METRICS=true
+      - SENSU_BACKEND_CLUSTER_ADMIN_USERNAME=admin
+      - SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD=admin
+      - SENSU_BACKEND_ETCD_CLIENT_URLS=http://etcd:2379
+      - SENSU_BACKEND_KEEPALIVE_INTERVAL=20
+      - SENSU_BACKEND_KEEPALIVE_WARNING_TIMEOUT=120
+      - SENSU_BACKEND_KEEPALIVE_CRITICAL_TIMEOUT=180
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "3000:3000"
+    volumes:
+      - sensu_backend_data:/var/lib/sensu
+    depends_on:
+      etcd:
+        condition: service_healthy
+    networks:
+      sensu-network:
+        aliases:
+          - sensu-backend
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    restart: unless-stopped
+
+  sensu-agent:
+    image: sensu/sensu:latest
+    container_name: sensu-agent
+    hostname: sensu-agent
+    command: ["sensu-agent", "start", "--log-level", "debug"]
+    environment:
+      - SENSU_BACKEND_URL=ws://sensu-backend:8081
+      - SENSU_USER=admin
+      - SENSU_PASSWORD=admin
+      - SENSU_SUBSCRIPTIONS=testing,linux
+      - SENSU_NAMESPACE=default
+      - SENSU_AGENT_MANAGED_ENTITY=true
+      - SENSU_KEEPALIVE_INTERVAL=20
+      - SENSU_KEEPALIVE_WARNING_TIMEOUT=120
+      - SENSU_KEEPALIVE_CRITICAL_TIMEOUT=180
+      - SENSU_AGENT_NAME=sensu-agent-01
+      - SENSU_DETECT_CLOUD_PROVIDER=false
+    depends_on:
+      - sensu-backend
+    networks:
+      sensu-network:
+        aliases:
+          - sensu-agent
+    restart: unless-stopped
+
+  sensu-agent-2:
+    image: sensu/sensu:latest
+    container_name: sensu-agent-2
+    hostname: sensu-agent-2
+    command: ["sensu-agent", "start", "--log-level", "debug"]
+    environment:
+      - SENSU_BACKEND_URL=ws://sensu-backend:8081
+      - SENSU_USER=admin
+      - SENSU_PASSWORD=admin
+      - SENSU_SUBSCRIPTIONS=testing,linux,webserver
+      - SENSU_NAMESPACE=default
+      - SENSU_AGENT_MANAGED_ENTITY=true
+      - SENSU_KEEPALIVE_INTERVAL=20
+      - SENSU_KEEPALIVE_WARNING_TIMEOUT=120
+      - SENSU_KEEPALIVE_CRITICAL_TIMEOUT=180
+      - SENSU_AGENT_NAME=sensu-agent-02
+      - SENSU_DETECT_CLOUD_PROVIDER=false
+    depends_on:
+      - sensu-backend
+    networks:
+      sensu-network:
+        aliases:
+          - sensu-agent-2
+    restart: unless-stopped
+
+volumes:
+  etcd_data:
+  sensu_backend_data:
+
+networks:
+  sensu-network:
+    driver: bridge
