@@ -6,21 +6,6 @@ account-blocklist:
   - "246705294232" # Custom-Customer-Resources
   - "062484260092" # CleverTap SaaS Platform
 
-settings:
-  EC2Image:
-    IncludeDisabled: true
-    IncludeDeprecated: true
-    DisableDeregistrationProtection: true
-  EC2Instance:
-    DisableStopProtection: true
-    DisableDeletionProtection: true
-  RDSInstance:
-    DisableDeletionProtection: true
-  CloudFormationStack:
-    DisableDeletionProtection: true
-  DynamoDBTable:
-    DisableDeletionProtection: true
-
 resource-types:
   targets:
     # EC2 Resources
