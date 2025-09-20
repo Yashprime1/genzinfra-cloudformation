@@ -95,9 +95,6 @@ jobs:
         run: |
           echo "Verifying AWS credentials..."
           
-          LATEST_RELEASE=$(curl -s https://api.github.com/repos/rebuy-de/aws-nuke/releases/latest | jq -r .tag_name)
-          echo "Latest AWS Nuke version: $LATEST_RELEASE"
-          
           # Test AWS credentials
           aws sts get-caller-identity --region ${{ inputs.AWS_REGION }}
           
@@ -114,18 +111,7 @@ jobs:
         run: |
           echo "Downloading AWS Nuke..."
           LATEST_RELEASE=$(curl -s https://api.github.com/repos/rebuy-de/aws-nuke/releases/latest | jq -r .tag_name)
-          echo "Latest AWS Nuke version: $LATEST_RELEASE"
-          FILENAME="aws-nuke-$LATEST_RELEASE-linux-amd64.tar.gz"
-          EXTRACT_DIR="aws-nuke-$LATEST_RELEASE-linux-amd64"
-          
-          # Download and extract
-          wget -q "https://github.com/rebuy-de/aws-nuke/releases/download/$LATEST_RELEASE/$FILENAME"
-          tar -xzf "$FILENAME"
-          
-          # Navigate into the extracted directory
-          cd "$EXTRACT_DIR"
-          
-          chmod +x aws-nuke
+          wget -c https://github.com/rebuy-de/aws-nuke/releases/download/v2.25.0/aws-nuke-v2.25.0-linux-amd64.tar.gz -O - | tar -xz -C $HOME/bin
           
           # Verify installation
           ./aws-nuke version
