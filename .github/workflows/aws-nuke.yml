@@ -122,6 +122,7 @@ jobs:
           echo "AWS Nuke execution completed"
 
       - name: Verify Account is Clean
+        if: always()
         run: |
           echo "Verifying account is clean..."
           
