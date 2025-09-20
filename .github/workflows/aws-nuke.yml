@@ -9,20 +9,6 @@ on:
         type: string
         description: AWS Account ID to nuke
         required: true
-      AWS_REGION:
-        type: choice
-        description: AWS Region
-        required: true
-        default: 'us-east-1'
-        options:
-          - us-east-1
-          - us-west-2
-          - eu-west-1
-          - ap-southeast-1
-          - ap-south-1
-          - me-central-1
-          - ap-southeast-3
-          - ap-northeast-2
       AWS_ACCESS_KEY_ID:
         type: string
         description: AWS Access Key ID (will be masked)
@@ -31,10 +17,6 @@ on:
         type: string
         description: AWS Secret Access Key (will be masked)
         required: true
-      AWS_SESSION_TOKEN:
-        type: string
-        description: AWS Session Token (will be masked)
-        required: false
       CONFIRM_NUKE:
         type: boolean
         description: I understand this will DELETE ALL RESOURCES in the specified AWS account
@@ -43,7 +25,6 @@ on:
 
 env:
   AWS_ACCOUNT_ID: ${{ inputs.AWS_ACCOUNT_ID }}
-  AWS_REGION: ${{ inputs.AWS_REGION }}
 
 jobs:
   aws-nuke:
@@ -52,7 +33,6 @@ jobs:
     env:
       AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
-      AWS_SESSION_TOKEN: ${{ inputs.AWS_SESSION_TOKEN }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -86,20 +66,18 @@ jobs:
         run: |
           echo "AWS Nuke Configuration"
           echo "Account ID: ${{ inputs.AWS_ACCOUNT_ID }}"
-          echo "Region: ${{ inputs.AWS_REGION }}"
           echo "Access Key ID: ${AWS_ACCESS_KEY_ID:0:4}****${AWS_ACCESS_KEY_ID: -4}"
           echo "Secret Access Key: ****"
-          echo "Session Token: $([ -n "${{ inputs.AWS_SESSION_TOKEN }}" ] && echo "Provided" || echo "Not provided")"
           
       - name: Verify AWS Credentials
         run: |
           echo "Verifying AWS credentials..."
           
           # Test AWS credentials
-          aws sts get-caller-identity --region ${{ inputs.AWS_REGION }}
+          aws sts get-caller-identity
           
           # Verify we're in the correct account
-          CALLER_ACCOUNT=$(aws sts get-caller-identity --query Account --output text --region ${{ inputs.AWS_REGION }})
+          CALLER_ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
           if [ "$CALLER_ACCOUNT" != "${{ inputs.AWS_ACCOUNT_ID }}" ]; then
             echo "ERROR: Credentials are for account $CALLER_ACCOUNT, but you specified ${{ inputs.AWS_ACCOUNT_ID }}"
             exit 1
@@ -138,7 +116,6 @@ jobs:
         run: |
           echo "EXECUTING AWS NUKE - THIS WILL DELETE ALL RESOURCES"
           echo "Account: ${{ inputs.AWS_ACCOUNT_ID }}"
-          echo "Region: ${{ inputs.AWS_REGION }}"
           echo "Timestamp: $(date)"
           
           # Execute aws-nuke with the specified flags
@@ -172,9 +149,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Execution Date:** $(date)" >> $GITHUB_STEP_SUMMARY
           echo "- **Account ID:** ${{ inputs.AWS_ACCOUNT_ID }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Region:** ${{ inputs.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Access Key ID:** ${AWS_ACCESS_KEY_ID:0:4}****${AWS_ACCESS_KEY_ID: -4}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Session Token:** $([ -n "${{ inputs.AWS_SESSION_TOKEN }}" ] && echo "Provided" || echo "Not provided")" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           if [ "${{ job.status }}" == "success" ]; then
