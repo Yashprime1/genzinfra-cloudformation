@@ -37,6 +37,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Mask Credentials
+        run: |
+          AWS_ACCESS_KEY_ID=$(jq -r '.inputs.AWS_ACCESS_KEY_ID' $GITHUB_EVENT_PATH)
+          AWS_SECRET_ACCESS_KEY=$(jq -r '.inputs.AWS_SECRET_ACCESS_KEY' $GITHUB_EVENT_PATH)
+          echo ::add-mask::$AWS_ACCESS_KEY_ID
+          echo ::add-mask::$AWS_SECRET_ACCESS_KEY
+          echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID >> $GITHUB_ENV
+          echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY >> $GITHUB_ENV
+
       - name: Validate Inputs
         run: |
           echo "Validating inputs..."
@@ -68,9 +77,7 @@ jobs:
    
       - name: Verify AWS Credentials
         run: |
-          echo "Verifying AWS credentials..."
           aws sts get-caller-identity
-          # Verifying that we're in the correct account
           CALLER_ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
           if [ "$CALLER_ACCOUNT" != "${{ inputs.AWS_ACCOUNT_ID }}" ]; then
             echo "ERROR: Credentials are for account $CALLER_ACCOUNT, but you specified ${{ inputs.AWS_ACCOUNT_ID }}"
@@ -78,9 +85,8 @@ jobs:
           fi
           echo "AWS credentials verified for account $CALLER_ACCOUNT"
 
-      - name: Download AWS Nuke
+      - name: Download AWS Nuke Tool
         run: |
-          echo "Downloading AWS nuke"
           wget -c https://github.com/rebuy-de/aws-nuke/releases/download/v2.25.0/aws-nuke-v2.25.0-linux-amd64.tar.gz -O - | sudo tar -xz -C /usr/local/bin
           sudo mv /usr/local/bin/aws-nuke-v2.25.0-linux-amd64 /usr/local/bin/aws-nuke
           sudo chmod +x /usr/local/bin/aws-nuke
