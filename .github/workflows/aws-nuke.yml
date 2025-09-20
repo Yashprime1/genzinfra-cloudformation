@@ -129,12 +129,12 @@ jobs:
           echo "Config file updated for account ${{ inputs.AWS_ACCOUNT_ID }}"
           
           # Validate config file syntax
-          aws-nuke --config aws-nuke-config.yaml --profile default --list-resource-types > /dev/null
+          aws-nuke --config aws-nuke-config.yaml --profile default --resource-types > /dev/null
           echo "Config file syntax is valid"
 
       - name: List Resources to be Deleted
         run: |
-          aws-nuke --config aws-nuke-config.yaml --profile default --list-resource-types
+          aws-nuke --config aws-nuke-config.yaml --profile default --resource-types
           
       - name: Execute AWS Nuke
         run: |
@@ -157,12 +157,12 @@ jobs:
           echo "Verifying account is clean..."
           
           # List remaining resources
-          REMAINING_RESOURCES=$(aws-nuke --config aws-nuke-config.yaml --profile default --list-resource-types 2>/dev/null | wc -l)
+          REMAINING_RESOURCES=$(aws-nuke --config aws-nuke-config.yaml --profile default --resource-types 2>/dev/null | wc -l)
           
           if [ "$REMAINING_RESOURCES" -gt 0 ]; then
             echo "WARNING: $REMAINING_RESOURCES resource types still exist"
             echo "Remaining resources:"
-            aws-nuke --config aws-nuke-config.yaml --profile default --list-resource-types
+            aws-nuke --config aws-nuke-config.yaml --profile default --resource-types
           else
             echo "Account appears to be clean"
           fi
