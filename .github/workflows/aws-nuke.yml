@@ -114,7 +114,7 @@ jobs:
           
       - name: Execute AWS Nuke
         run: |
-          echo "EXECUTING AWS NUKE - THIS WILL DELETE ALL RESOURCES"
+          echo "EXECUTING AWS NUKE"
           echo "Account: ${{ inputs.AWS_ACCOUNT_ID }}"
           echo "Timestamp: $(date)"
           
