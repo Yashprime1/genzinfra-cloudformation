@@ -110,14 +110,17 @@ jobs:
       - name: Download AWS Nuke
         run: |
           echo "Downloading AWS Nuke..."
-          
-          # Get the latest release
-          LATEST_RELEASE=$(curl -s https://api.github.com/repos/rebuy-de/aws-nuke/releases/latest | jq -r .tag_name)
-          echo "Latest AWS Nuke version: $LATEST_RELEASE"
+
+          FILENAME="aws-nuke-$LATEST_RELEASE-linux-amd64.tar.gz"
+          EXTRACT_DIR="aws-nuke-$LATEST_RELEASE-linux-amd64"
           
           # Download and extract
-          wget -q "https://github.com/rebuy-de/aws-nuke/releases/download/$LATEST_RELEASE/aws-nuke-$LATEST_RELEASE-linux-amd64.tar.gz"
-          tar -xzf "aws-nuke-$LATEST_RELEASE-linux-amd64.tar.gz"
+          wget -q "https://github.com/rebuy-de/aws-nuke/releases/download/$LATEST_RELEASE/$FILENAME"
+          tar -xzf "$FILENAME"
+          
+          # Navigate into the extracted directory
+          cd "$EXTRACT_DIR"
+          
           chmod +x aws-nuke
           
           # Verify installation
