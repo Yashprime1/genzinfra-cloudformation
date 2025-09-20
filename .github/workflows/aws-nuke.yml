@@ -95,7 +95,7 @@ jobs:
       - name: List Resources to be Deleted
         run: |
           echo "Listing resources that will be deleted (dry-run)..."
-          aws-nuke --config aws-nuke-config.yaml --access-key-id ${AWS_ACCESS_KEY_ID} --secret-access-key ${AWS_SECRET_ACCESS_KEY} > resources-before.txt 2>&1 || true
+          aws-nuke --config aws-nuke-config.yaml --access-key-id ${AWS_ACCESS_KEY_ID} --secret-access-key ${AWS_SECRET_ACCESS_KEY} --force > resources-before.txt 2>&1 || true
           echo "Resources before nuke:"
           cat resources-before.txt
           
@@ -128,7 +128,7 @@ jobs:
           
           # List resources after nuke (dry-run)
           echo "Listing resources after nuke (dry-run)..."
-          aws-nuke --config aws-nuke-config.yaml --access-key-id ${AWS_ACCESS_KEY_ID} --secret-access-key ${AWS_SECRET_ACCESS_KEY} > resources-after.txt 2>&1 || true
+          aws-nuke --config aws-nuke-config.yaml --access-key-id ${AWS_ACCESS_KEY_ID} --secret-access-key ${AWS_SECRET_ACCESS_KEY} --force > resources-after.txt 2>&1 || true
           echo "Resources after nuke:"
           cat resources-after.txt
           
