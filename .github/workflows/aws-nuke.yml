@@ -110,9 +110,8 @@ jobs:
       - name: Download AWS Nuke
         run: |
           echo "Downloading AWS nuke"
-          VERSION="v3.59.0"
-          wget -c "https://github.com/ekristen/aws-nuke/releases/download/$VERSION/aws-nuke-$VERSION-linux-amd64.tar.gz" -O - | sudo tar -xz -C /usr/local/bin/
-
+          wget -c https://github.com/rebuy-de/aws-nuke/releases/download/v2.25.0/aws-nuke-v2.25.0-linux-amd64.tar.gz -O - | sudo tar -xz -C /usr/local/bin
+          sudo mv /usr/local/bin/aws-nuke-v2.25.0-linux-amd64 /usr/local/bin/aws-nuke
           sudo chmod +x /usr/local/bin/aws-nuke
 
           # Verify installation
