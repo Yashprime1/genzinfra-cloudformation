@@ -41,6 +41,10 @@ jobs:
         run: |
           echo "Validating inputs..."
           
+          # Mask sensitive inputs
+          echo "::add-mask::${{ inputs.AWS_ACCESS_KEY_ID }}"
+          echo "::add-mask::${{ inputs.AWS_SECRET_ACCESS_KEY }}"
+          
           # Check if confirmation is provided
           if [ "${{ inputs.CONFIRM_NUKE }}" != "true" ]; then
             echo "ERROR: You must confirm that you understand this will DELETE ALL RESOURCES"
