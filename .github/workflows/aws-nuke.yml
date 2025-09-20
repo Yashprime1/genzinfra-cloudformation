@@ -148,7 +148,7 @@ jobs:
             --config aws-nuke-config.yaml \
             --profile default \
             --no-dry-run \
-            --no-prompt
+            --force
           
           echo "AWS Nuke execution completed"
 
