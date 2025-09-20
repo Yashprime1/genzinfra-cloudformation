@@ -113,7 +113,8 @@ jobs:
       - name: Download AWS Nuke
         run: |
           echo "Downloading AWS Nuke..."
-
+          LATEST_RELEASE=$(curl -s https://api.github.com/repos/rebuy-de/aws-nuke/releases/latest | jq -r .tag_name)
+          echo "Latest AWS Nuke version: $LATEST_RELEASE"
           FILENAME="aws-nuke-$LATEST_RELEASE-linux-amd64.tar.gz"
           EXTRACT_DIR="aws-nuke-$LATEST_RELEASE-linux-amd64"
           
