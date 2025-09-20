@@ -1,20 +1,10 @@
 regions:
-  - global
-  - us-east-1
-  - us-east-2
-  - us-west-2
-  - eu-west-1
-  - ap-southeast-1
-  - ap-south-1
-  - me-central-1
-  - ap-southeast-3
   - ap-northeast-2
 
-blocklist:
+account-blocklist:
   - "337909764629" # Management Account
   - "246705294232" # Custom-Customer-Resources
   - "062484260092" # CleverTap SaaS Platform
-
 
 settings:
   EC2Image:
@@ -32,41 +22,7 @@ settings:
     DisableDeletionProtection: true
 
 resource-types:
-  excludes:
-    - S3Object # Excluded because S3 bucket removal handles removing all S3Objects
-    - ServiceCatalogTagOption # Excluded due to https://github.com/rebuy-de/aws-nuke/issues/515
-    - ServiceCatalogTagOptionPortfolioAttachment # Excluded due to https://github.com/rebuy-de/aws-nuke/issues/515
-    - FMSNotificationChannel # Excluded because it's not available
-    - FMSPolicy # Excluded because it's not available
-    - MachineLearningMLModel # Excluded due to ML being unavailable
-    - MachineLearningDataSource # Excluded due to ML being unavailable
-    - MachineLearningBranchPrediction # Excluded due to ML being unavailable
-    - MachineLearningEvaluation # Excluded due to ML being unavailable
-    - RoboMakerDeploymentJob # Deprecated Service
-    - RoboMakerFleet # Deprecated Service
-    - RoboMakerRobot # Deprecated Service
-    - RoboMakerSimulationJob
-    - RoboMakerRobotApplication
-    - RoboMakerSimulationApplication
-    - OpsWorksApp # Deprecated service
-    - OpsWorksInstance # Deprecated service
-    - OpsWorksLayer # Deprecated service
-    - OpsWorksUserProfile # Deprecated service
-    - OpsWorksCMBackup # Deprecated service
-    - OpsWorksCMServer # Deprecated service
-    - OpsWorksCMServerState # Deprecated service
-    - CodeStarProject # Deprecated service
-    - CodeStarConnection # Deprecated service
-    - CodeStarNotification # Deprecated service
-    - Cloud9Environment # Deprecated service
-    - CloudSearchDomain # Deprecated service
-    - RedshiftServerlessSnapshot # Deprecated service
-    - RedshiftServerlessNamespace # Deprecated service
-    - RedshiftServerlessWorkgroup # Deprecated service
-    - AWS::Timestream::ScheduledQuery # Deprecated service
-    - ElasticTranscoderPipeline # Deprecated service
-
-  includes:
+  targets:
     # EC2 Resources
     - EC2Instance
     - EC2KeyPair
@@ -132,22 +88,6 @@ resource-types:
     - EKSNodegroup
     - EKSAddon
     - EKSFargateProfile
-    
-    # IAM Resources
-    - IAMRole
-    - IAMInstanceProfile
-    - IAMManagedPolicy
-    - IAMUser
-    - IAMUserAccessKey
-    - IAMUserLoginProfile
-    - IAMUserPolicy
-    - IAMUserPolicyAttachment
-    - IAMRolePolicyAttachment
-    - IAMRolePolicy
-    - IAMGroup
-    - IAMGroupPolicy
-    - IAMGroupPolicyAttachment
-    - IAMGroupMembership
     
     # CloudFormation Resources
     - CloudFormationStack
