@@ -95,6 +95,9 @@ jobs:
         run: |
           echo "Verifying AWS credentials..."
           
+          LATEST_RELEASE=$(curl -s https://api.github.com/repos/rebuy-de/aws-nuke/releases/latest | jq -r .tag_name)
+          echo "Latest AWS Nuke version: $LATEST_RELEASE"
+          
           # Test AWS credentials
           aws sts get-caller-identity --region ${{ inputs.AWS_REGION }}
           
