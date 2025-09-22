@@ -13,6 +13,7 @@ resource-types:
     - ServiceCatalogTagOptionPortfolioAttachment # Excluded due to https://github.com/rebuy-de/aws-nuke/issues/515
     - FMSNotificationChannel # Excluded because it's not available
     - FMSPolicy # Excluded because it's not available
+    - OSPackage
     - MachineLearningMLModel # Excluded due to ML being unavailable
     - MachineLearningDataSource # Excluded due to ML being unavailable
     - MachineLearningBranchPrediction # Excluded due to ML being unavailable
