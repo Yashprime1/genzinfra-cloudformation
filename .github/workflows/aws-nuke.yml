@@ -22,12 +22,15 @@ env:
   AWS_ACCOUNT_ID: ${{ inputs.AWS_ACCOUNT_ID }}
 
 jobs:
-  aws-nuke:
+  validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 10
     env:
       AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+    outputs:
+      caller-account: ${{ steps.verify.outputs.caller-account }}
+      caller-user: ${{ steps.verify.outputs.caller-user }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -42,12 +45,13 @@ jobs:
           echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY >> $GITHUB_ENV
 
       - name: Verify AWS Creds for the account to be nuked
+        id: verify
         run: |
           aws sts get-caller-identity
           CALLER_ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
           CALLER_USER=$(aws sts get-caller-identity --query Arn --output text)
-          echo "CALLER_ACCOUNT=$CALLER_ACCOUNT" >> $GITHUB_ENV
-          echo "CALLER_USER=$CALLER_USER" >> $GITHUB_ENV
+          echo "caller-account=$CALLER_ACCOUNT" >> $GITHUB_OUTPUT
+          echo "caller-user=$CALLER_USER" >> $GITHUB_OUTPUT
           if [ "$CALLER_ACCOUNT" != "${{ inputs.AWS_ACCOUNT_ID }}" ]; then
             echo "ERROR: Credentials are for account $CALLER_ACCOUNT, but you specified ${{ inputs.AWS_ACCOUNT_ID }}"
             exit 1
@@ -55,14 +59,30 @@ jobs:
           echo "AWS credentials verified for account $CALLER_ACCOUNT"
           echo "AWS User: $CALLER_USER"
 
+  approval:
+    runs-on: ubuntu-latest
+    needs: validate
+    environment: wait-for-approval
+    steps:
       - name: Manual Approval Required
-        environment: wait-for-approval
         run: |
-          echo "**Account ID:** ${{ inputs.AWS_ACCOUNT_ID }}"
-          echo "**AWS User:** ${{ env.CALLER_USER }}"
+          =echo "**Account ID:** ${{ inputs.AWS_ACCOUNT_ID }}"
+          echo "**AWS User:** ${{ needs.validate.outputs.caller-user }}"
           echo ""
+          echo ""
+          echo "### Confirmation Required"
           echo "Please review the account ID and AWS user above and confirm you want to proceed with nuking this account."
-          echo "Proceeding with AWS Nuke execution..."
+         
+  execute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: [validate, approval]
+    env:
+      AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Download AWS Nuke Tool
         run: |
@@ -86,6 +106,7 @@ jobs:
         run: |
           echo "EXECUTING AWS NUKE"
           echo "Account: ${{ inputs.AWS_ACCOUNT_ID }}"
+          echo "AWS User: ${{ needs.validate.outputs.caller-user }}"
           echo "Timestamp: $(date)"
           
           aws-nuke \
