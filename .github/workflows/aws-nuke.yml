@@ -24,7 +24,6 @@ env:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     env:
       AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
@@ -66,16 +65,13 @@ jobs:
     steps:
       - name: Manual Approval Required
         run: |
-          echo "**Account ID:** ${{ inputs.AWS_ACCOUNT_ID }}"
-          echo "**AWS User:** ${{ needs.validate.outputs.caller-user }}"
-          echo ""
-          echo ""
-          echo "### Confirmation Required"
+          echo "Account ID: ${{ inputs.AWS_ACCOUNT_ID }}"
+          echo "AWS User: ${{ needs.validate.outputs.caller-user }}"
           echo "Please review the account ID and AWS user above and confirm you want to proceed with nuking this account."
          
   execute:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     needs: [validate, approval]
     env:
       AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
@@ -99,7 +95,8 @@ jobs:
 
       - name: Update Config File with Account ID
         run: |
-          yq eval '.accounts."AWS_ACCOUNT_ID_PLACEHOLDER" = .accounts."AWS_ACCOUNT_ID_PLACEHOLDER" | with_entries(if .key == "AWS_ACCOUNT_ID_PLACEHOLDER" then .key = "${{ inputs.AWS_ACCOUNT_ID }}" else . end)' aws-nuke-config.yaml -i
+          ACCOUNT_ID="${{ inputs.AWS_ACCOUNT_ID }}"
+          yq eval "with(.accounts; .[\"$ACCOUNT_ID\"] = .[\"AWS_ACCOUNT_ID_PLACEHOLDER\"] | del(.[\"AWS_ACCOUNT_ID_PLACEHOLDER\"]))" aws-nuke-config.yaml -i
           echo "Config file updated for account ${{ inputs.AWS_ACCOUNT_ID }}"
         
       - name: Execute AWS Nuke
