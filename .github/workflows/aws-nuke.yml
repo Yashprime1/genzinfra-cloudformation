@@ -24,9 +24,6 @@ env:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
     outputs:
       caller-account: ${{ steps.verify.outputs.caller-account }}
       caller-user: ${{ steps.verify.outputs.caller-user }}
@@ -73,9 +70,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     needs: [validate, approval]
-    env:
-      AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -87,6 +81,15 @@ jobs:
           sudo chmod +x /usr/local/bin/aws-nuke
           aws-nuke version
 
+      - name: Mask Credentials
+        run: |
+          AWS_ACCESS_KEY_ID=$(jq -r '.inputs.AWS_ACCESS_KEY_ID' $GITHUB_EVENT_PATH)
+          AWS_SECRET_ACCESS_KEY=$(jq -r '.inputs.AWS_SECRET_ACCESS_KEY' $GITHUB_EVENT_PATH)
+          echo ::add-mask::$AWS_ACCESS_KEY_ID
+          echo ::add-mask::$AWS_SECRET_ACCESS_KEY
+          echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID >> $GITHUB_ENV
+          echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY >> $GITHUB_ENV
+  
       - name: Install yq
         run: |
           wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
