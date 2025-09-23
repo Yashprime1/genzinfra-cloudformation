@@ -17,11 +17,6 @@ on:
         type: string
         description: AWS Secret Access Key (will be masked)
         required: true
-      CONFIRM_NUKE:
-        type: boolean
-        description: I understand this will DELETE ALL RESOURCES in the specified AWS account
-        required: true
-        default: false
 
 env:
   AWS_ACCOUNT_ID: ${{ inputs.AWS_ACCOUNT_ID }}
@@ -46,38 +41,28 @@ jobs:
           echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID >> $GITHUB_ENV
           echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY >> $GITHUB_ENV
 
-      - name: Validate Inputs
-        run: |  
-          # Check if confirmation is provided
-          if [ "${{ inputs.CONFIRM_NUKE }}" != "true" ]; then
-            echo "ERROR: You must confirm that you understand this will DELETE ALL RESOURCES"
-            echo "Please set 'CONFIRM_NUKE' to true to proceed"
-            exit 1
-          fi
-          
-          # Validate AWS Account ID format
-          if [[ ! "${{ inputs.AWS_ACCOUNT_ID }}" =~ ^[0-9]{12}$ ]]; then
-            echo "ERROR: Invalid AWS Account ID format. Must be 12 digits."
-            exit 1
-          fi
-          
-          # Check if credentials are provided
-          if [ -z "${{ inputs.AWS_ACCESS_KEY_ID }}" ] || [ -z "${{ inputs.AWS_SECRET_ACCESS_KEY }}" ]; then
-            echo "ERROR: AWS Access Key ID and Secret Access Key are required"
-            exit 1
-          fi
-          
-          echo "Input validation passed"
-   
       - name: Verify AWS Creds for the account to be nuked
         run: |
           aws sts get-caller-identity
           CALLER_ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+          CALLER_USER=$(aws sts get-caller-identity --query Arn --output text)
+          echo "CALLER_ACCOUNT=$CALLER_ACCOUNT" >> $GITHUB_ENV
+          echo "CALLER_USER=$CALLER_USER" >> $GITHUB_ENV
           if [ "$CALLER_ACCOUNT" != "${{ inputs.AWS_ACCOUNT_ID }}" ]; then
             echo "ERROR: Credentials are for account $CALLER_ACCOUNT, but you specified ${{ inputs.AWS_ACCOUNT_ID }}"
             exit 1
           fi
           echo "AWS credentials verified for account $CALLER_ACCOUNT"
+          echo "AWS User: $CALLER_USER"
+
+      - name: Manual Approval Required
+        environment: wait-for-approval
+        run: |
+          echo "**Account ID:** ${{ inputs.AWS_ACCOUNT_ID }}"
+          echo "**AWS User:** ${{ env.CALLER_USER }}"
+          echo ""
+          echo "Please review the account ID and AWS user above and confirm you want to proceed with nuking this account."
+          echo "Proceeding with AWS Nuke execution..."
 
       - name: Download AWS Nuke Tool
         run: |
@@ -86,10 +71,15 @@ jobs:
           sudo chmod +x /usr/local/bin/aws-nuke
           aws-nuke version
 
+      - name: Install yq
+        run: |
+          wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          chmod +x /usr/local/bin/yq
+          yq --version
+
       - name: Update Config File with Account ID
         run: |
-          echo "Updating config file for account ${{ inputs.AWS_ACCOUNT_ID }}..."        
-          sed -i "s/AWS_ACCOUNT_ID_PLACEHOLDER/${{ inputs.AWS_ACCOUNT_ID }}/g" aws-nuke-config.yaml
+          yq eval '.accounts."AWS_ACCOUNT_ID_PLACEHOLDER" = .accounts."AWS_ACCOUNT_ID_PLACEHOLDER" | with_entries(if .key == "AWS_ACCOUNT_ID_PLACEHOLDER" then .key = "${{ inputs.AWS_ACCOUNT_ID }}" else . end)' aws-nuke-config.yaml -i
           echo "Config file updated for account ${{ inputs.AWS_ACCOUNT_ID }}"
         
       - name: Execute AWS Nuke
