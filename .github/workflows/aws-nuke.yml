@@ -103,17 +103,17 @@ jobs:
           yq eval "with(.accounts; .[\"$ACCOUNT_ID\"] = .[\"AWS_ACCOUNT_ID_PLACEHOLDER\"] | del(.[\"AWS_ACCOUNT_ID_PLACEHOLDER\"]))" aws-nuke-config.yaml -i
           echo "Config file updated for account ${{ inputs.AWS_ACCOUNT_ID }}"
         
-      - name: Execute AWS Nuke
-        run: |
-          echo "EXECUTING AWS NUKE"
-          echo "Account: ${{ inputs.AWS_ACCOUNT_ID }}"
-          echo "AWS User: ${{ needs.validate.outputs.caller-user }}"
-          echo "Timestamp: $(date)"
+      # - name: Execute AWS Nuke
+      #   run: |
+      #     echo "EXECUTING AWS NUKE"
+      #     echo "Account: ${{ inputs.AWS_ACCOUNT_ID }}"
+      #     echo "AWS User: ${{ needs.validate.outputs.caller-user }}"
+      #     echo "Timestamp: $(date)"
           
-          aws-nuke \
-            --config aws-nuke-config.yaml \
-            --access-key-id ${AWS_ACCESS_KEY_ID} --secret-access-key ${AWS_SECRET_ACCESS_KEY} \
-            --no-dry-run \
-            --force
+      #     aws-nuke \
+      #       --config aws-nuke-config.yaml \
+      #       --access-key-id ${AWS_ACCESS_KEY_ID} --secret-access-key ${AWS_SECRET_ACCESS_KEY} \
+      #       --no-dry-run \
+      #       --force
           
-          echo "AWS Nuke execution completed"
+      #     echo "AWS Nuke execution completed"
