@@ -1,0 +1,77 @@
+name: Invoke Lambda Function
+
+run-name: Lambda Invoke - ${{ inputs.FUNCTION_NAME }}-${{ github.run_number }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      FUNCTION_NAME:
+        type: choice
+        options:
+            - mParticle-Extension-LambdaFunction-1VMQBU1VZEM8G
+            - mParticle-Extension-LambdaFunction-3USP2FRWA56M
+        default: mParticle-Extension-LambdaFunction-1VMQBU1VZEM8G
+        description: Name of the Lambda function to invoke
+        required: true
+      AWS_REGION:
+        type: choice
+        options:
+          - us-east-1
+          - ap-northeast-2
+        default: ap-northeast-2
+        description: AWS region where the Lambda function is located
+        required: true
+      PAYLOAD:
+        type: string
+        description: JSON payload to send to the Lambda function
+        required: true
+        default: '{}'
+      INVOCATION_TYPE:
+        type: choice
+        description: Type of Lambda invocation
+        required: true
+        default: RequestResponse
+        options:
+          - RequestResponse
+          - Event
+          - DryRun
+
+env:
+  AWS_REGION: ${{ inputs.AWS_REGION }}
+  FUNCTION_NAME: ${{ inputs.FUNCTION_NAME }}
+
+jobs:
+  invoke-lambda:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up aws credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.AWS_REGION }}
+
+      - name: Validate json payload
+        run: |
+          echo '${{ inputs.PAYLOAD }}' | jq .
+          echo "JSON payload is valid"
+
+      - name: Invoke lambda function
+        id: invoke
+        run: |
+          echo '${{ inputs.PAYLOAD }}' > /tmp/payload.json 
+          RESPONSE=$(aws lambda invoke \
+            --function-name "${{ inputs.FUNCTION_NAME }}" \
+            --region "${{ inputs.AWS_REGION }}" \
+            --invocation-type "${{ inputs.INVOCATION_TYPE }}" \
+            --payload file:///tmp/payload.json \
+            --cli-binary-format raw-in-base64-out \
+            /tmp/response.json)
+    
+          echo "Lambda invocation response:"
+          cat /tmp/response.json | jq .
+          STATUS_CODE=$(echo $RESPONSE | jq -r '.StatusCode')
+          echo "Status Code: $STATUS_CODE"    
