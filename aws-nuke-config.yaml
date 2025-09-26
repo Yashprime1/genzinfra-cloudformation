@@ -48,6 +48,8 @@ resource-types:
     - RedshiftServerlessWorkgroup # Deprecated service
     - AWS::Timestream::ScheduledQuery # Deprecated service
     - ElasticTranscoderPipeline # Deprecated service
+    - ConfigServiceConfigurationRecorder # Control Tower managed
+    - ConfigServiceDeliveryChannel # Control Tower managed
 
 
 presets:
@@ -67,24 +69,6 @@ presets:
   
   controltower:
     filters:
-      ConfigServiceConfigurationRecorder:
-        - property: Name
-          value: "aws-controltower-BaselineConfigRecorder"
-        - property: Name
-          type: contains
-          value: "aws-controltower-"
-        - property: Name
-          type: contains
-          value: "ControlTower"
-      ConfigServiceDeliveryChannel:
-        - property: Name
-          value: "aws-controltower-BaselineConfigDeliveryChannel"
-        - property: Name
-          type: contains
-          value: "aws-controltower-"
-        - property: Name
-          type: contains
-          value: "ControlTower"
       CloudTrailTrail:
         - property: Name
           type: contains
