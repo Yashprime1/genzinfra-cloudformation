@@ -109,6 +109,17 @@ presets:
           type: contains
           value: "/aws/ControlTower/"
       CloudWatchEventsRule:
+        - property: Rule
+          value: "aws-controltower-ConfigComplianceChangeEventRule"
+        - property: Rule
+          type: contains
+          value: "aws-controltower-"
+        - property: Rule
+          type: contains
+          value: "ControlTower"
+        - property: Rule
+          type: contains
+          value: "AWSControlTower"
         - property: Name
           value: "aws-controltower-ConfigComplianceChangeEventRule"
         - property: Name
@@ -123,7 +134,7 @@ presets:
       CloudWatchEventsTarget:
         - property: Rule
           value: "aws-controltower-ConfigComplianceChangeEventRule"
-        - property: TargetID
+        - property: "Target ID"
           value: "Compliance-Change-Topic"
         - property: Rule
           type: contains
@@ -131,7 +142,13 @@ presets:
         - property: Rule
           type: contains
           value: "ControlTower"
-        - property: TargetID
+        - property: "Target ID"
+          type: contains
+          value: "ControlTower"
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+        - property: Name
           type: contains
           value: "ControlTower"
       SNSTopic:
@@ -166,6 +183,18 @@ presets:
         - property: TopicARN
           type: contains
           value: ":ControlTower-"
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+        - property: Name
+          type: contains
+          value: "ControlTower"
+        - property: Owner
+          type: contains
+          value: "aws-controltower-"
+        - property: Owner
+          type: contains
+          value: "ControlTower"
       LambdaFunction:
         - property: Name
           type: contains
@@ -198,6 +227,17 @@ presets:
         - property: Name
           type: contains
           value: "ControlTower"
+        - property: Name
+          type: contains
+          value: "events!connection"
+        - property: Description
+          type: contains
+          value: "events!connection"
+        - property: "tag:aws:secretsmanager:owningService"
+          value: "events"
+        - property: "tag:aws:secretsmanager:owningService"
+          type: contains
+          value: "events"
       IAMRole:
         - property: RoleName
           type: contains
