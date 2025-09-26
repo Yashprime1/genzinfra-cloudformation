@@ -70,37 +70,118 @@ presets:
       ConfigServiceConfigurationRecorder:
         - property: Name
           value: "aws-controltower-BaselineConfigRecorder"
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+        - property: Name
+          type: contains
+          value: "ControlTower"
       ConfigServiceDeliveryChannel:
         - property: Name
           value: "aws-controltower-BaselineConfigDeliveryChannel"
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+        - property: Name
+          type: contains
+          value: "ControlTower"
       CloudTrailTrail:
         - property: Name
           type: contains
           value: "aws-controltower-"
+        - property: Name
+          type: contains
+          value: "ControlTower"
+        - property: Name
+          type: contains
+          value: "AWSControlTower"
       CloudWatchLogsLogGroup:
         - property: logGroupName
           type: contains
           value: "/aws/lambda/aws-controltower-"
+        - property: logGroupName
+          type: contains
+          value: "/aws/lambda/ControlTower-"
+        - property: logGroupName
+          type: contains
+          value: "/aws/controltower/"
+        - property: logGroupName
+          type: contains
+          value: "/aws/ControlTower/"
       CloudWatchEventsRule:
         - property: Name
           value: "aws-controltower-ConfigComplianceChangeEventRule"
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+        - property: Name
+          type: contains
+          value: "ControlTower"
+        - property: Name
+          type: contains
+          value: "AWSControlTower"
       CloudWatchEventsTarget:
         - property: Rule
           value: "aws-controltower-ConfigComplianceChangeEventRule"
         - property: TargetID
           value: "Compliance-Change-Topic"
+        - property: Rule
+          type: contains
+          value: "aws-controltower-"
+        - property: Rule
+          type: contains
+          value: "ControlTower"
+        - property: TargetID
+          type: contains
+          value: "ControlTower"
       SNSTopic:
         - property: TopicARN
           type: contains
           value: ":aws-controltower-SecurityNotifications"
+        - property: TopicARN
+          type: contains
+          value: ":aws-controltower-"
+        - property: TopicARN
+          type: contains
+          value: ":ControlTower-"
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+        - property: Name
+          type: contains
+          value: "ControlTower"
       SNSSubscription:
         - property: ARN
           type: contains
           value: ":aws-controltower-SecurityNotifications"
+        - property: ARN
+          type: contains
+          value: ":aws-controltower-"
+        - property: ARN
+          type: contains
+          value: ":ControlTower-"
+        - property: TopicARN
+          type: contains
+          value: ":aws-controltower-"
+        - property: TopicARN
+          type: contains
+          value: ":ControlTower-"
       LambdaFunction:
         - property: Name
           type: contains
           value: "aws-controltower-"
+        - property: Name
+          type: contains
+          value: "ControlTower"
+        - property: Name
+          type: contains
+          value: "AWSControlTower"
+        - property: FunctionName
+          type: contains
+          value: "aws-controltower-"
+        - property: FunctionName
+          type: contains
+          value: "ControlTower"
       SecretsManagerSecret:
         - property: ARN
           type: contains
@@ -108,6 +189,99 @@ presets:
         - property: ARN
           type: contains
           value: "events!connection"
+        - property: ARN
+          type: contains
+          value: "ControlTower"
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+        - property: Name
+          type: contains
+          value: "ControlTower"
+      IAMRole:
+        - property: RoleName
+          type: contains
+          value: "aws-controltower-"
+        - property: RoleName
+          type: contains
+          value: "ControlTower"
+        - property: RoleName
+          type: contains
+          value: "AWSControlTower"
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+        - property: Name
+          type: contains
+          value: "ControlTower"
+      IAMPolicy:
+        - property: PolicyName
+          type: contains
+          value: "aws-controltower-"
+        - property: PolicyName
+          type: contains
+          value: "ControlTower"
+        - property: PolicyName
+          type: contains
+          value: "AWSControlTower"
+        - property: Arn
+          type: contains
+          value: "aws-controltower-"
+        - property: Arn
+          type: contains
+          value: "ControlTower"
+      IAMRolePolicyAttachment:
+        - property: RoleName
+          type: contains
+          value: "aws-controltower-"
+        - property: RoleName
+          type: contains
+          value: "ControlTower"
+        - property: PolicyArn
+          type: contains
+          value: "aws-controltower-"
+        - property: PolicyArn
+          type: contains
+          value: "ControlTower"
+      IAMInstanceProfile:
+        - property: InstanceProfileName
+          type: contains
+          value: "aws-controltower-"
+        - property: InstanceProfileName
+          type: contains
+          value: "ControlTower"
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+        - property: Name
+          type: contains
+          value: "ControlTower"
+      CloudFormationStack:
+        - property: StackName
+          type: contains
+          value: "aws-controltower-"
+        - property: StackName
+          type: contains
+          value: "ControlTower"
+        - property: StackName
+          type: contains
+          value: "AWSControlTower"
+        - property: StackId
+          type: contains
+          value: "aws-controltower-"
+        - property: StackId
+          type: contains
+          value: "ControlTower"
+      CloudFormationStackSet:
+        - property: StackSetName
+          type: contains
+          value: "aws-controltower-"
+        - property: StackSetName
+          type: contains
+          value: "ControlTower"
+        - property: StackSetName
+          type: contains
+          value: "AWSControlTower"
 
   defaults:
     filters:
