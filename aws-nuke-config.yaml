@@ -1,5 +1,12 @@
 regions:
   - ap-northeast-2
+  - us-east-1
+  - eu-west-1
+  - ap-south-1
+  - ap-southeast-1
+  - ap-southeast-3
+  - me-central-1
+  - us-west-2
 
 account-blocklist:
   - "337909764629" # Management Account
@@ -13,7 +20,6 @@ resource-types:
     - ServiceCatalogTagOptionPortfolioAttachment # Excluded due to https://github.com/rebuy-de/aws-nuke/issues/515
     - FMSNotificationChannel # Excluded because it's not available
     - FMSPolicy # Excluded because it's not available
-    - OSPackage
     - MachineLearningMLModel # Excluded due to ML being unavailable
     - MachineLearningDataSource # Excluded due to ML being unavailable
     - MachineLearningBranchPrediction # Excluded due to ML being unavailable
@@ -22,6 +28,7 @@ resource-types:
     - RoboMakerFleet # Deprecated Service
     - RoboMakerRobot # Deprecated Service
     - RoboMakerSimulationJob
+    - OSPackage
     - RoboMakerRobotApplication
     - RoboMakerSimulationApplication
     - OpsWorksApp # Deprecated service
@@ -76,9 +83,62 @@ presets:
           value: "AWSControlTowerExecution"
         - property: role:RoleName
           type: contains
-          value: "aws-controltower-"  
-
-
+          value: "aws-controltower-"
+        - property: logGroupName
+          type: contains
+          value: "/aws/lambda/aws-controltower-"
+        - property: ARN
+          type: contains
+          value: "aws-controltower-"
+        - property: stack-name
+          type: contains
+          value: "AWSControlTowerBP"
+        - property: stack-id
+          type: contains
+          value: "AWSControlTowerBP"
+        - property: logical-id
+          type: contains
+          value: "aws-controltower-"
+      ConfigServiceConfigurationRecorder:
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+      ConfigServiceDeliveryChannel:
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+      CloudTrailTrail:
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+      CloudWatchLogsLogGroup:
+        - property: logGroupName
+          type: contains
+          value: "/aws/lambda/aws-controltower-"
+      CloudWatchEventsRule:
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+      CloudWatchEventsTarget:
+        - property: Rule
+          type: contains
+          value: "aws-controltower-"
+      SNSTopic:
+        - property: TopicARN
+          type: contains
+          value: ":aws-controltower-"
+      SNSSubscription:
+        - property: ARN
+          type: contains
+          value: ":aws-controltower-"
+      LambdaFunction:
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+      SecretsManagerSecret:
+        - property: ARN
+          type: contains
+          value: "aws-controltower-"
 
   defaults:
     filters:
