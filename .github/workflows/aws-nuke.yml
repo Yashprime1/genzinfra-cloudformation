@@ -1,6 +1,6 @@
-name: AWS Nuke Account
+name: aws/Nuke-Account
 
-run-name: AWS Nuke - ${{ inputs.AWS_ACCOUNT_ID }}-${{ github.run_number }}
+run-name: aws/Nuke-Account-${{ inputs.AWS_ACCOUNT_ID }}-${{ github.run_number }}
 
 on:
   workflow_dispatch:
@@ -17,6 +17,10 @@ on:
         type: string
         description: AWS Secret Access Key (will be masked)
         required: true
+      AWS_SESSION_TOKEN:
+        type: string
+        description: AWS Session Token (will be masked) - Required for temporary credentials
+        required: false
 
 env:
   AWS_ACCOUNT_ID: ${{ inputs.AWS_ACCOUNT_ID }}
@@ -28,19 +32,22 @@ jobs:
       caller-account: ${{ steps.verify.outputs.caller-account }}
       caller-user: ${{ steps.verify.outputs.caller-user }}
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Mask Credentials
+      - name: Mask credentials
         run: |
           AWS_ACCESS_KEY_ID=$(jq -r '.inputs.AWS_ACCESS_KEY_ID' $GITHUB_EVENT_PATH)
           AWS_SECRET_ACCESS_KEY=$(jq -r '.inputs.AWS_SECRET_ACCESS_KEY' $GITHUB_EVENT_PATH)
+          AWS_SESSION_TOKEN=$(jq -r '.inputs.AWS_SESSION_TOKEN' $GITHUB_EVENT_PATH)
           echo ::add-mask::$AWS_ACCESS_KEY_ID
           echo ::add-mask::$AWS_SECRET_ACCESS_KEY
+          echo ::add-mask::$AWS_SESSION_TOKEN
+          echo AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN >> $GITHUB_ENV
           echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID >> $GITHUB_ENV
           echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY >> $GITHUB_ENV
 
-      - name: Verify AWS Creds for the account to be nuked
+      - name: Validate that supplied credentials belong to the account that is to be nuked
         id: verify
         run: |
           aws sts get-caller-identity
@@ -49,7 +56,7 @@ jobs:
           echo "caller-account=$CALLER_ACCOUNT" >> $GITHUB_OUTPUT
           echo "caller-user=$CALLER_USER" >> $GITHUB_OUTPUT
           if [ "$CALLER_ACCOUNT" != "${{ inputs.AWS_ACCOUNT_ID }}" ]; then
-            echo "ERROR: Credentials are for account $CALLER_ACCOUNT, but you specified ${{ inputs.AWS_ACCOUNT_ID }}"
+            echo "ERROR: Credentials mismatch. Supplied credentails are for $CALLER_ACCOUNT, but account selected to nuke is ${{ inputs.AWS_ACCOUNT_ID }}"
             exit 1
           fi
           echo "AWS credentials verified for account $CALLER_ACCOUNT"
@@ -60,11 +67,11 @@ jobs:
     needs: validate
     environment: wait-for-approval
     steps:
-      - name: Manual Approval Required
+      - name: Approval required
         run: |
-          echo "Account ID: ${{ inputs.AWS_ACCOUNT_ID }}"
+          echo "AWS Account ID: ${{ inputs.AWS_ACCOUNT_ID }}"
           echo "AWS User: ${{ needs.validate.outputs.caller-user }}"
-          echo "Please review the account ID and AWS user above and confirm you want to proceed with nuking this account."
+          echo "Are you sure you want to delete all resources in account ${{ inputs.AWS_ACCOUNT_ID }}?"
          
   execute:
     runs-on: ubuntu-latest
@@ -74,19 +81,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Download AWS Nuke Tool
+      - name: Download aws-nuke
         run: |
           wget -c https://github.com/rebuy-de/aws-nuke/releases/download/v2.25.0/aws-nuke-v2.25.0-linux-amd64.tar.gz -O - | tar -xz -C /usr/local/bin
           mv /usr/local/bin/aws-nuke-v2.25.0-linux-amd64 /usr/local/bin/aws-nuke
           chmod +x /usr/local/bin/aws-nuke
           aws-nuke version
 
-      - name: Mask Credentials
+      - name: Mask credentials
         run: |
           AWS_ACCESS_KEY_ID=$(jq -r '.inputs.AWS_ACCESS_KEY_ID' $GITHUB_EVENT_PATH)
           AWS_SECRET_ACCESS_KEY=$(jq -r '.inputs.AWS_SECRET_ACCESS_KEY' $GITHUB_EVENT_PATH)
+          AWS_SESSION_TOKEN=$(jq -r '.inputs.AWS_SESSION_TOKEN' $GITHUB_EVENT_PATH)
           echo ::add-mask::$AWS_ACCESS_KEY_ID
           echo ::add-mask::$AWS_SECRET_ACCESS_KEY
+          if [ "$AWS_SESSION_TOKEN" != "null" ] && [ -n "$AWS_SESSION_TOKEN" ]; then
+            echo ::add-mask::$AWS_SESSION_TOKEN
+            echo AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN >> $GITHUB_ENV
+          fi
           echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID >> $GITHUB_ENV
           echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY >> $GITHUB_ENV
   
@@ -97,7 +109,7 @@ jobs:
           chmod +x /usr/local/bin/yq
           yq --version
 
-      - name: Update Config File with Account ID
+      - name: Update config file with account ID
         run: |
           ACCOUNT_ID="${{ inputs.AWS_ACCOUNT_ID }}"
           yq eval "with(.accounts; .[\"$ACCOUNT_ID\"] = .[\"AWS_ACCOUNT_ID_PLACEHOLDER\"] | del(.[\"AWS_ACCOUNT_ID_PLACEHOLDER\"]))" aws-nuke-config.yaml -i
@@ -105,15 +117,30 @@ jobs:
         
       - name: Execute AWS Nuke
         run: |
-          echo "EXECUTING AWS NUKE"
-          echo "Account: ${{ inputs.AWS_ACCOUNT_ID }}"
+          echo "Fire in the hole!"
+          echo "AWS Account: ${{ inputs.AWS_ACCOUNT_ID }}"
           echo "AWS User: ${{ needs.validate.outputs.caller-user }}"
           echo "Timestamp: $(date)"
           
-          aws-nuke \
-            --config aws-nuke-config.yaml \
-            --access-key-id ${AWS_ACCESS_KEY_ID} --secret-access-key ${AWS_SECRET_ACCESS_KEY} \
-            --no-dry-run \
-            --force
+          MAX_RETRIES=5
+          RETRY_COUNT=0
           
-          echo "AWS Nuke execution completed"
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES"       
+            if aws-nuke \
+              --config aws-nuke-config.yaml \
+              --access-key-id ${AWS_ACCESS_KEY_ID} --secret-access-key ${AWS_SECRET_ACCESS_KEY} \
+              --session-token ${AWS_SESSION_TOKEN} \
+              --no-dry-run \
+              --force; then
+              echo "AWS Nuke execution completed successfully on attempt $((RETRY_COUNT + 1))"
+              exit 0
+            else
+              EXIT_CODE=$?
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "AWS Nuke failed with exit code $EXIT_CODE on attempt $RETRY_COUNT"            
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "Retrying"
+              fi
+            fi
+          done
