@@ -69,6 +69,37 @@ presets:
   
   controltower:
     filters:
+      __global__:
+        - property: Name
+          type: contains
+          value: "aws-controltower-"
+        - property: Name
+          type: contains
+          value: "ControlTower"
+        - property: Name
+          type: contains
+          value: "AWSControlTower"
+        - property: ARN
+          type: contains
+          value: "aws-controltower-"
+        - property: ARN
+          type: contains
+          value: "ControlTower"
+        - property: Rule
+          type: contains
+          value: "aws-controltower-"
+        - property: Rule
+          type: contains
+          value: "ControlTower"
+        - property: "Target ID"
+          type: contains
+          value: "ControlTower"
+        - property: Owner
+          type: contains
+          value: "aws-controltower-"
+        - property: Owner
+          type: contains
+          value: "ControlTower"
       CloudTrailTrail:
         - property: Name
           type: contains
