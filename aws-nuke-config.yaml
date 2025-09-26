@@ -67,46 +67,12 @@ presets:
   
   controltower:
     filters:
-      __global__:
-        - property: Name
-          type: contains
-          value: "aws-controltower-"
-        - property: TopicARN
-          type: contains
-          value: ":aws-controltower-"
-        - property: RoleName
-          type: contains
-          value: "aws-controltower-"
-        - property: Name
-          value: "AWSControlTowerExecution"
-        - property: RoleName
-          value: "AWSControlTowerExecution"
-        - property: role:RoleName
-          type: contains
-          value: "aws-controltower-"
-        - property: logGroupName
-          type: contains
-          value: "/aws/lambda/aws-controltower-"
-        - property: ARN
-          type: contains
-          value: "aws-controltower-"
-        - property: stack-name
-          type: contains
-          value: "AWSControlTowerBP"
-        - property: stack-id
-          type: contains
-          value: "AWSControlTowerBP"
-        - property: logical-id
-          type: contains
-          value: "aws-controltower-"
       ConfigServiceConfigurationRecorder:
         - property: Name
-          type: contains
-          value: "aws-controltower-"
+          value: "aws-controltower-BaselineConfigRecorder"
       ConfigServiceDeliveryChannel:
         - property: Name
-          type: contains
-          value: "aws-controltower-"
+          value: "aws-controltower-BaselineConfigDeliveryChannel"
       CloudTrailTrail:
         - property: Name
           type: contains
@@ -117,20 +83,20 @@ presets:
           value: "/aws/lambda/aws-controltower-"
       CloudWatchEventsRule:
         - property: Name
-          type: contains
-          value: "aws-controltower-"
+          value: "aws-controltower-ConfigComplianceChangeEventRule"
       CloudWatchEventsTarget:
         - property: Rule
-          type: contains
-          value: "aws-controltower-"
+          value: "aws-controltower-ConfigComplianceChangeEventRule"
+        - property: TargetID
+          value: "Compliance-Change-Topic"
       SNSTopic:
         - property: TopicARN
           type: contains
-          value: ":aws-controltower-"
+          value: ":aws-controltower-SecurityNotifications"
       SNSSubscription:
         - property: ARN
           type: contains
-          value: ":aws-controltower-"
+          value: ":aws-controltower-SecurityNotifications"
       LambdaFunction:
         - property: Name
           type: contains
@@ -139,6 +105,9 @@ presets:
         - property: ARN
           type: contains
           value: "aws-controltower-"
+        - property: ARN
+          type: contains
+          value: "events!connection"
 
   defaults:
     filters:
