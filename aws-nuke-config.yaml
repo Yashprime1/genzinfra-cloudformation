@@ -29,8 +29,8 @@ resource-types:
     - RoboMakerRobot # Deprecated Service
     - RoboMakerSimulationJob
     - OSPackage
-    - RoboMakerRobotApplication
-    - RoboMakerSimulationApplication
+    - RoboMakerRobotApplication # Deprecated Service
+    - RoboMakerSimulationApplication # Deprecated Service
     - OpsWorksApp # Deprecated service
     - OpsWorksInstance # Deprecated service
     - OpsWorksLayer # Deprecated service
@@ -96,11 +96,11 @@ presets:
         - property: Rule
           type: contains
           value: "aws-controltower-"
-        excludes: # <-- EXCLUDING FAILING RULE
+        excludes:
           - property: Rule
             value: "aws-controltower-ConfigComplianceChangeEventRule"
       CloudWatchEventsTarget:
-        excludes: # <-- EXCLUDING FAILING TARGET
+        excludes:
           - property: Rule
             value: "aws-controltower-ConfigComplianceChangeEventRule"
       SNSTopic:
@@ -114,7 +114,7 @@ presets:
         - property: ARN
           type: contains
           value: ":aws-controltower-SecurityNotifications"
-        excludes: # <-- EXCLUDING FAILING SUBSCRIPTION
+        excludes:
           - property: ARN
             type: contains
             value: ":aws-controltower-SecurityNotifications:" 
@@ -138,7 +138,7 @@ presets:
           value: "aws-controltower-"
         - property: RoleName
           value: "AWSControlTowerExecution"
-        excludes: # <-- EXCLUDING SERVICE-LINKED ROLES
+        excludes:
           - property: RoleName
             type: regex
             value: "^AWSServiceRoleForControlTower|AWSControlTowerStackSetRole$"
@@ -146,7 +146,7 @@ presets:
         - property: PolicyName
           type: contains
           value: "aws-controltower-"
-        excludes: # <-- EXCLUDING SERVICE-LINKED POLICIES
+        excludes:
           - property: PolicyName
             type: regex
             value: "^AWSControlTowerAuditServicePolicy|AWSControlTowerAdminPolicy|AWSControlTowerAdminServicePolicy$"
