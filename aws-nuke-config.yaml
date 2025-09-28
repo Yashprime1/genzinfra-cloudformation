@@ -82,9 +82,9 @@ presets:
         - property: ARN
           type: contains
           value: "aws-controltower-"
-        - property: ARN
+        - property: Arn
           type: contains
-          value: "ControlTower"
+          value: "aws-controltower"
         - property: Rule
           type: contains
           value: "aws-controltower-"
