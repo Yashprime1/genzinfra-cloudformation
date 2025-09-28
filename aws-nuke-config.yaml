@@ -146,6 +146,9 @@ presets:
         - property: Name
           type: contains
           value: "AWSControlTower"
+        excludes: # <-- ADDED EXCLUSION
+          - property: Rule
+            value: "aws-controltower-ConfigComplianceChangeEventRule"
       CloudWatchEventsTarget:
         - property: Rule
           value: "aws-controltower-ConfigComplianceChangeEventRule"
@@ -166,6 +169,9 @@ presets:
         - property: Name
           type: contains
           value: "ControlTower"
+        excludes: # <-- ADDED EXCLUSION
+          - property: Rule
+            value: "aws-controltower-ConfigComplianceChangeEventRule"
       SNSTopic:
         - property: TopicARN
           type: contains
@@ -210,6 +216,10 @@ presets:
         - property: Owner
           type: contains
           value: "ControlTower"
+        excludes: # <-- ADDED EXCLUSION
+          - property: ARN
+            type: contains
+            value: ":aws-controltower-SecurityNotifications:" 
       LambdaFunction:
         - property: Name
           type: contains
