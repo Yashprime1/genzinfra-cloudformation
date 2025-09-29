@@ -125,6 +125,10 @@ presets:
         - property: PolicyName
           type: contains
           value: "aws-controltower-"
+      LambdaFunction:
+        - property: FunctionName
+          type: contains
+          value: "aws-controltower-"
 
   defaults:
     filters:
