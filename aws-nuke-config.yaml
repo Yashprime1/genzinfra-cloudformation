@@ -128,13 +128,11 @@ presets:
           type: contains
           value: "aws-controltower-"
       LambdaFunction:
-        - property: FunctionName
-          type: contains
-          value: "aws-controltower-"
+        - type: contains
+          value: "aws-controltower"
       CloudWatchLogsLogGroup:
-        - property: LogGroupName
-          type: contains
-          value: "aws-controltower-"
+        - type: contains
+          value: "aws-controltower"
 
   defaults:
     filters:
