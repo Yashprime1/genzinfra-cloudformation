@@ -133,6 +133,9 @@ presets:
       CloudWatchLogsLogGroup:
         - type: contains
           value: "aws-controltower"
+      SecretsManagerSecret:
+        - property: tag:aws:secretsmanager:owningService
+          value: "events"
 
   defaults:
     filters:
