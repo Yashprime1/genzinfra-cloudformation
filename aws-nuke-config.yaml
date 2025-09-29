@@ -53,6 +53,8 @@ resource-types:
     - CloudWatchEventsTarget
     - SNSSubscription
     - CloudWatchEventsRule
+    - CloudTrailTrail
+
 
 presets:
   organization:
@@ -127,6 +129,10 @@ presets:
           value: "aws-controltower-"
       LambdaFunction:
         - property: FunctionName
+          type: contains
+          value: "aws-controltower-"
+      CloudWatchLogsLogGroup:
+        - property: LogGroupName
           type: contains
           value: "aws-controltower-"
 
