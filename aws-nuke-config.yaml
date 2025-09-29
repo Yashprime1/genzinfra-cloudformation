@@ -50,7 +50,8 @@ resource-types:
     - ElasticTranscoderPipeline # Deprecated service
     - ConfigServiceConfigurationRecorder # Control Tower managed/Protected by SCPs
     - ConfigServiceDeliveryChannel # Control Tower managed/Protected by SCPs
-
+    - CloudWatchEventsTarget
+    - SNSSubscription
 
 presets:
   organization:
@@ -95,11 +96,7 @@ presets:
       CloudWatchEventsRule:
         - property: Rule
           type: contains
-          value: "aws-controltower-"
-      CloudWatchEventsTarget:
-        - property: Rule
-          type: contains
-          value: "aws-controltower-ConfigComplianceChangeEventRule"
+          value: "aws-controltower-"      
       SNSTopic:
         - property: TopicARN
           type: contains
@@ -107,10 +104,6 @@ presets:
         - property: Name
           type: contains
           value: "aws-controltower-"
-      SNSSubscription:
-        - property: ARN
-          type: contains
-          value: "aws-controltower-SecurityNotifications"
       CloudFormationStack:
         - property: StackName
           type: contains
