@@ -52,6 +52,7 @@ resource-types:
     - ConfigServiceDeliveryChannel # Control Tower managed/Protected by SCPs
     - CloudWatchEventsTarget
     - SNSSubscription
+    - CloudWatchEventsRule
 
 presets:
   organization:
@@ -92,11 +93,7 @@ presets:
           value: "AWSControlTowerExecution"
         - property: role:RoleName
           type: contains
-          value: "aws-controltower-"
-      CloudWatchEventsRule:
-        - property: Rule
-          type: contains
-          value: "aws-controltower-"      
+          value: "aws-controltower-"   
       SNSTopic:
         - property: TopicARN
           type: contains
