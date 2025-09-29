@@ -97,9 +97,9 @@ presets:
           type: contains
           value: "aws-controltower-"
       CloudWatchEventsTarget:
-          - property: Rule
-            type: contains
-            value: "aws-controltower-ConfigComplianceChangeEventRule"
+        - property: Rule
+          type: contains
+          value: "aws-controltower-ConfigComplianceChangeEventRule"
       SNSTopic:
         - property: TopicARN
           type: contains
