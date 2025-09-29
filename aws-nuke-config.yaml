@@ -96,12 +96,9 @@ presets:
         - property: Rule
           type: contains
           value: "aws-controltower-"
-        excludes:
-          - property: Rule
-            value: "aws-controltower-ConfigComplianceChangeEventRule"
       CloudWatchEventsTarget:
-        excludes:
           - property: Rule
+            type: contains
             value: "aws-controltower-ConfigComplianceChangeEventRule"
       SNSTopic:
         - property: TopicARN
@@ -113,11 +110,7 @@ presets:
       SNSSubscription:
         - property: ARN
           type: contains
-          value: ":aws-controltower-SecurityNotifications"
-        excludes:
-          - property: ARN
-            type: contains
-            value: ":aws-controltower-SecurityNotifications:" 
+          value: "aws-controltower-SecurityNotifications"
       CloudFormationStack:
         - property: StackName
           type: contains
@@ -138,18 +131,10 @@ presets:
           value: "aws-controltower-"
         - property: RoleName
           value: "AWSControlTowerExecution"
-        excludes:
-          - property: RoleName
-            type: regex
-            value: "^AWSServiceRoleForControlTower|AWSControlTowerStackSetRole$"
       IAMPolicy:
         - property: PolicyName
           type: contains
           value: "aws-controltower-"
-        excludes:
-          - property: PolicyName
-            type: regex
-            value: "^AWSControlTowerAuditServicePolicy|AWSControlTowerAdminPolicy|AWSControlTowerAdminServicePolicy$"
 
   defaults:
     filters:
