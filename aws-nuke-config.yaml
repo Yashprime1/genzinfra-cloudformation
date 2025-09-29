@@ -83,13 +83,6 @@ presets:
           value: ":aws-controltower-"
         - property: RoleName
           type: contains
-          value: "aws-controltower-"
-        - property: Name
-          value: "AWSControlTowerExecution"
-        - property: RoleName
-          value: "AWSControlTowerExecution"
-        - property: role:RoleName
-          type: contains
           value: "aws-controltower-"   
       SNSTopic:
         - property: TopicARN
