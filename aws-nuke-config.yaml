@@ -78,12 +78,6 @@ presets:
         - property: Name
           type: contains
           value: "aws-controltower-"
-        - property: Name
-          type: contains
-          value: "ControlTower"
-        - property: ARN
-          type: contains
-          value: "aws-controltower-"
         - property: TopicARN
           type: contains
           value: ":aws-controltower-"
@@ -108,22 +102,14 @@ presets:
         - property: StackName
           type: contains
           value: "aws-controltower-"
-        - property: StackName
-          type: contains
-          value: "ControlTower"
       CloudFormationStackSet:
         - property: StackSetName
           type: contains
           value: "aws-controltower-"
-        - property: StackSetName
-          type: contains
-          value: "ControlTower"
       IAMRole:
         - property: RoleName
           type: contains
           value: "aws-controltower-"
-        - property: RoleName
-          value: "AWSControlTowerExecution"
       IAMPolicy:
         - property: PolicyName
           type: contains
