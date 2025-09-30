@@ -55,7 +55,6 @@ resource-types:
     - CloudTrailTrail
     - BatchComputeEnvironment
 
-
 presets:
   organization:
     filters:
@@ -83,15 +82,13 @@ presets:
         - property: RoleName
           type: contains
           value: "aws-controltower-"   
+        - type: glob
+          value: "*aws-controltower*"
       SNSTopic:
         - property: TopicARN
           type: contains
           value: ":aws-controltower-SecurityNotifications"
         - property: Name
-          type: contains
-          value: "aws-controltower-"
-      SNSSubscription:
-        - property: TopicARN
           type: contains
           value: "aws-controltower-"
       CloudFormationStack:
