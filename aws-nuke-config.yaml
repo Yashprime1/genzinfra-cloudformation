@@ -51,7 +51,6 @@ resource-types:
     - ConfigServiceConfigurationRecorder # Control Tower managed/Protected by SCPs
     - ConfigServiceDeliveryChannel # Control Tower managed/Protected by SCPs
     - CloudWatchEventsTarget
-    - SNSSubscription
     - CloudWatchEventsRule
     - CloudTrailTrail
     - BatchComputeEnvironment
@@ -89,6 +88,10 @@ presets:
           type: contains
           value: ":aws-controltower-SecurityNotifications"
         - property: Name
+          type: contains
+          value: "aws-controltower-"
+      SNSSubscription:
+        - property: ARN
           type: contains
           value: "aws-controltower-"
       CloudFormationStack:
