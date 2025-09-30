@@ -91,7 +91,7 @@ presets:
           type: contains
           value: "aws-controltower-"
       SNSSubscription:
-        - property: ARN
+        - property: TopicARN
           type: contains
           value: "aws-controltower-"
       CloudFormationStack:
