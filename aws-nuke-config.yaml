@@ -50,7 +50,6 @@ resource-types:
     - ElasticTranscoderPipeline # Deprecated service
     - ConfigServiceConfigurationRecorder # Control Tower managed/Protected by SCPs
     - ConfigServiceDeliveryChannel # Control Tower managed/Protected by SCPs
-    - BatchComputeEnvironment
 
 presets:
   organization:
