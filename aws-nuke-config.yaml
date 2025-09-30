@@ -8,7 +8,7 @@ regions:
   - me-central-1
   - us-west-2
 
-account-blocklist:
+blocklist:
   - "337909764629" # Management Account
   - "246705294232" # Custom-Customer-Resources
   - "062484260092" # CleverTap SaaS Platform
@@ -50,9 +50,6 @@ resource-types:
     - ElasticTranscoderPipeline # Deprecated service
     - ConfigServiceConfigurationRecorder # Control Tower managed/Protected by SCPs
     - ConfigServiceDeliveryChannel # Control Tower managed/Protected by SCPs
-    - CloudWatchEventsTarget
-    - CloudWatchEventsRule
-    - CloudTrailTrail
     - BatchComputeEnvironment
 
 presets:
@@ -72,50 +69,76 @@ presets:
   
   controltower:
     filters:
-      __global__:
-        - property: Name
-          type: contains
-          value: "aws-controltower-"
-        - property: TopicARN
-          type: contains
-          value: ":aws-controltower-"
-        - property: RoleName
-          type: contains
-          value: "aws-controltower-"   
-        - type: glob
-          value: "*aws-controltower*"
-      SNSTopic:
-        - property: TopicARN
-          type: contains
-          value: ":aws-controltower-SecurityNotifications"
-        - property: Name
-          type: contains
-          value: "aws-controltower-"
-      CloudFormationStack:
-        - property: StackName
-          type: contains
-          value: "aws-controltower-"
-      CloudFormationStackSet:
-        - property: StackSetName
-          type: contains
-          value: "aws-controltower-"
-      IAMRole:
-        - property: RoleName
-          type: contains
-          value: "aws-controltower-"
-      IAMPolicy:
-        - property: PolicyName
-          type: contains
-          value: "aws-controltower-"
-      LambdaFunction:
-        - type: contains
+      CloudTrailTrail:
+        - type: "contains"
           value: "aws-controltower"
+      CloudWatchEventsRule:
+        - type: "contains"
+          value: "aws-controltower"
+        - property: "Name"
+          type: glob
+          value: "AWSControlTower*"
+      EC2VPCEndpoint:
+        - type: "contains"
+          value: "aws-controltower"
+      EC2VPC:
+        - type: "contains"
+          value: "aws-controltower"
+      OpsWorksUserProfile:
+        - type: "contains"
+          value: "AWSControlTowerExecution"
       CloudWatchLogsLogGroup:
-        - type: contains
+        - type: "contains"
           value: "aws-controltower"
-      SecretsManagerSecret:
-        - property: tag:aws:secretsmanager:owningService
-          value: "events"
+        - type: "contains"
+          value: "AWSControlTowerBP"
+      CloudWatchEventsTarget:
+        - type: "contains"
+          value: "aws-controltower"
+        - type: "glob"
+          value: "Rule: AWSControlTower*"
+      SNSSubscription:
+        - type: "contains"
+          value: "aws-controltower"
+      SNSTopic:
+        - type: "contains"
+          value: "aws-controltower"
+      EC2Subnet:
+        - type: "contains"
+          value: "aws-controltower"
+      ConfigServiceDeliveryChannel:
+        - type: "contains"
+          value: "aws-controltower"
+      ConfigServiceConfigurationRecorder:
+        - type: "contains"
+          value: "aws-controltower"
+      CloudFormationStack:
+        - type: "contains"
+          value: "AWSControlTower"
+      EC2RouteTable:
+        - type: "contains"
+          value: "aws-controltower"
+      LambdaFunction:
+        - type: "contains"
+          value: "aws-controltower"
+      EC2DHCPOption:
+        - type: "contains"
+          value: "aws-controltower"
+      IAMRole:
+        - type: "contains"
+          value: "aws-controltower"
+        - type: "contains"
+          value: "AWSControlTower"
+      IAMRolePolicyAttachment:
+        - type: "contains"
+          value: "aws-controltower"
+        - type: "contains"
+          value: "AWSControlTower"
+      IAMRolePolicy:
+        - type: "contains"
+          value: "aws-controltower"
+        - type: glob
+          value: "AWSReservedSSO_*"
 
   defaults:
     filters:
