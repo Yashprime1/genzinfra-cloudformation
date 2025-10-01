@@ -114,6 +114,20 @@ jobs:
           yq eval "with(.accounts; .[\"$ACCOUNT_ID\"] = .[\"AWS_ACCOUNT_ID_PLACEHOLDER\"] | del(.[\"AWS_ACCOUNT_ID_PLACEHOLDER\"]))" aws-nuke-config.yaml -i
           echo "Config file updated for account ${{ inputs.AWS_ACCOUNT_ID }}"
         
+      - name: Nuke BatchComputeEnvironment first
+        run: |
+          echo "Nuking BatchComputeEnvironment resources first..."
+          echo "AWS Account: ${{ inputs.AWS_ACCOUNT_ID }}"
+          echo "Timestamp: $(date)"
+          
+          aws-nuke nuke \
+            --config aws-nuke-config.yaml \
+            --access-key-id ${AWS_ACCESS_KEY_ID} --secret-access-key ${AWS_SECRET_ACCESS_KEY} \
+            --session-token ${AWS_SESSION_TOKEN} \
+            --target BatchComputeEnvironment \
+            --no-dry-run \
+            --force || echo "BatchComputeEnvironment nuke completed"
+
       - name: Execute AWS Nuke
         run: |
           echo "Fire in the hole!"
