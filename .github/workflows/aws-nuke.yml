@@ -19,7 +19,7 @@ on:
         required: true
       AWS_SESSION_TOKEN:
         type: string
-        description: AWS Session Token (will be masked) - Required for temporary credentials
+        description: AWS Session Token (will be masked)
         required: false
 
 env:
@@ -75,7 +75,7 @@ jobs:
          
   execute:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 360
     needs: [validate, approval]
     steps:
       - name: Checkout Repository
@@ -127,10 +127,9 @@ jobs:
             --target BatchComputeEnvironment \
             --no-dry-run \
             --force || echo "BatchComputeEnvironment nuke completed"
-
+      
       - name: Execute AWS Nuke
         run: |
-          echo "Fire in the hole!"
           echo "AWS Account: ${{ inputs.AWS_ACCOUNT_ID }}"
           echo "AWS User: ${{ needs.validate.outputs.caller-user }}"
           echo "Timestamp: $(date)"
@@ -157,3 +156,7 @@ jobs:
               fi
             fi
           done
+          
+          echo "ERROR: AWS Nuke failed after $MAX_RETRIES attempts. All retries exhausted."
+          echo "Final exit code: $EXIT_CODE"
+          exit 1
