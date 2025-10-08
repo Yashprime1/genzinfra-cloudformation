@@ -134,7 +134,7 @@ jobs:
           echo "AWS User: ${{ needs.validate.outputs.caller-user }}"
           echo "Timestamp: $(date)"
           
-          MAX_RETRIES=5
+          MAX_RETRIES=3
           RETRY_COUNT=0
           
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
